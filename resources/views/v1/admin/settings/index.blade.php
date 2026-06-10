@@ -113,44 +113,78 @@
 
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
-                        <h2 class="h6 text-uppercase text-muted mb-3">{{ __('messages.Reports') }}</h2>
+                        <h2 class="h6 text-uppercase text-muted mb-3">{{ __('messages.Checkout and shipping') }}</h2>
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="report_hero_order_amount" class="form-label">{{ __('messages.Hero order amount') }}</label>
-                                <div class="input-group">
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        class="form-control @error('report_hero_order_amount') is-invalid @enderror"
-                                        id="report_hero_order_amount"
-                                        name="report_hero_order_amount"
-                                        value="{{ old('report_hero_order_amount', setting('report_hero_order_amount', 100)) }}"
-                                    >
-                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
-                                </div>
-                                <small class="text-muted">{{ __('messages.Hero order amount hint') }}</small>
-                                @error('report_hero_order_amount')
+                                <label for="cart_min_line_count" class="form-label">{{ __('messages.Minimum cart lines') }}</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    class="form-control @error('cart_min_line_count') is-invalid @enderror"
+                                    id="cart_min_line_count"
+                                    name="cart_min_line_count"
+                                    value="{{ old('cart_min_line_count', setting('cart_min_line_count', 0)) }}"
+                                >
+                                <small class="text-muted">{{ __('messages.Minimum cart lines hint') }}</small>
+                                @error('cart_min_line_count')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="report_lower_value_order_amount" class="form-label">{{ __('messages.Lower value order amount') }}</label>
+                                <label for="cart_min_subtotal" class="form-label">{{ __('messages.Minimum order subtotal') }}</label>
                                 <div class="input-group">
                                     <input
                                         type="number"
                                         step="0.01"
                                         min="0"
-                                        class="form-control @error('report_lower_value_order_amount') is-invalid @enderror"
-                                        id="report_lower_value_order_amount"
-                                        name="report_lower_value_order_amount"
-                                        value="{{ old('report_lower_value_order_amount', setting('report_lower_value_order_amount', 20)) }}"
+                                        class="form-control @error('cart_min_subtotal') is-invalid @enderror"
+                                        id="cart_min_subtotal"
+                                        name="cart_min_subtotal"
+                                        value="{{ old('cart_min_subtotal', setting('cart_min_subtotal', 0)) }}"
                                     >
                                     <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
                                 </div>
-                                <small class="text-muted">{{ __('messages.Lower value order amount hint') }}</small>
-                                @error('report_lower_value_order_amount')
+                                <small class="text-muted">{{ __('messages.Minimum order subtotal hint') }}</small>
+                                @error('cart_min_subtotal')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_price_per_km" class="form-label">{{ __('messages.Standard shipping fee') }}</label>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control @error('shipping_price_per_km') is-invalid @enderror"
+                                        id="shipping_price_per_km"
+                                        name="shipping_price_per_km"
+                                        value="{{ old('shipping_price_per_km', setting('shipping_price_per_km', 0)) }}"
+                                    >
+                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                </div>
+                                @error('shipping_price_per_km')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fast_shipping_fee" class="form-label">{{ __('messages.Fast shipping extra fee') }}</label>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control @error('fast_shipping_fee') is-invalid @enderror"
+                                        id="fast_shipping_fee"
+                                        name="fast_shipping_fee"
+                                        value="{{ old('fast_shipping_fee', setting('fast_shipping_fee', 0)) }}"
+                                    >
+                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                </div>
+                                <small class="text-muted">{{ __('messages.Fast shipping extra fee hint') }}</small>
+                                @error('fast_shipping_fee')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>

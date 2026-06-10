@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderLog;
 use App\Models\Product;
+use App\Models\ProductUnit;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -30,6 +31,8 @@ class OrderService
         protected CartItemService $cartItems,
         protected OfferService $offers,
         protected PointService $points,
+        protected CheckoutSettingsService $checkoutSettings,
+        protected GoalService $goals,
     ) {}
 
     public function getPaginatedOrders(int $perPage = 15, array $filters = []): LengthAwarePaginator
@@ -113,12 +116,20 @@ class OrderService
                 $pricing = $linePricings[$item->id];
 
                 $originalTotal += $pricing['original_subtotal'];
-                $this->assertStockAvailable($product, $variant, $quantity, $variant?->id ?? $item->variant_id);
+                $this->assertStockAvailable(
+                    $product,
+                    $variant,
+                    $quantity,
+                    $variant?->id ?? $item->variant_id,
+                    $item->product_unit_id,
+                );
                 $subTotal += $pricing['line_subtotal'];
             }
 
             $subTotal = round($subTotal, 2);
             $orderDiscount = round(max(0, $originalTotal - $subTotal), 2);
+
+            $this->checkoutSettings->assertCartLimits($validItems->count(), $subTotal);
 
             $this->offers->validateGiftSelection(
                 isset($data['gift_offer_id']) ? (int) $data['gift_offer_id'] : null,
@@ -132,12 +143,12 @@ class OrderService
             $coupon = $this->resolveCheckoutCoupon($user, $data, $subTotal);
             $couponDiscount = $this->calculateCouponDiscount($coupon, $subTotal);
 
-            $totalShipping = $this->resolveDefaultShippingFee();
-
-            if ($this->offers->qualifiesForFreeDelivery($subTotal)
-                || ($coupon && $coupon->grantsFreeDelivery())) {
-                $totalShipping = 0.0;
-            }
+            $freeDelivery = $this->offers->qualifiesForFreeDelivery($subTotal)
+                || ($coupon && $coupon->grantsFreeDelivery());
+            $isFastShipping = filter_var($data['is_fast_shipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $shippingDay = $this->checkoutSettings->assertValidShippingDay($data['shipping_day'] ?? '');
+            $shippingBreakdown = $this->checkoutSettings->computeShipping($isFastShipping, $freeDelivery);
+            $totalShipping = $shippingBreakdown['total_shipping'];
 
             $totalBeforeWallet = round(max(0, $subTotal - $couponDiscount + $totalShipping), 2);
 
@@ -173,6 +184,9 @@ class OrderService
                 'notes' => $data['notes'] ?? null,
                 'address_id' => $address->id,
                 'shipping_address_snapshot' => $this->buildAddressSnapshot($address),
+                'shipping_day' => $shippingDay,
+                'is_fast_shipping' => $shippingBreakdown['is_fast_shipping'],
+                'fast_shipping_fee' => $shippingBreakdown['fast_shipping_fee'],
                 'total_commission' => 0,
                 'refund_status' => 'none',
                 'gift_offer_id' => $giftOfferId,
@@ -196,11 +210,18 @@ class OrderService
                 $productNameAr = $product->getTranslation('name', 'ar', false);
                 $variantNameEn = $variant?->getTranslation('name', 'en', false);
                 $variantNameAr = $variant?->getTranslation('name', 'ar', false);
+                $productUnit = $item->product_unit_id
+                    ? ProductUnit::with('unit')->find($item->product_unit_id)
+                    : null;
 
                 OrderItem::query()->create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'variant_id' => $variant?->id,
+                    'product_unit_id' => $productUnit?->id,
+                    'unit_name' => $productUnit?->displayUnitName('en'),
+                    'unit_name_ar' => $productUnit?->displayUnitName('ar'),
+                    'unit_factor' => $productUnit ? max(1, (int) $productUnit->factor) : null,
                     'product_name' => $productNameEn ?: ($productNameAr ?: $product->sku),
                     'product_name_ar' => $productNameAr ?: null,
                     'product_slug' => (string) $product->slug,
@@ -509,9 +530,12 @@ class OrderService
         return $coupon->calculateDiscount($subTotal);
     }
 
-    protected function calculateUnitPrice(Product $product, ?ProductVariant $variant = null): float
-    {
-        $unitPrice = (float) ($variant?->price ?? $product->price);
+    protected function calculateUnitPrice(
+        Product $product,
+        ?ProductVariant $variant = null,
+        ?ProductUnit $productUnit = null,
+    ): float {
+        $unitPrice = (float) ($variant?->price ?? $productUnit?->price ?? $product->price);
         $discount = (float) ($product->discount ?? 0);
         $discountType = $product->discount_type;
 
@@ -526,15 +550,20 @@ class OrderService
         return round($unitPrice, 2);
     }
 
-    protected function assertStockAvailable(Product $product, ?ProductVariant $variant, int $quantity, ?int $variantId = null): void
-    {
+    protected function assertStockAvailable(
+        Product $product,
+        ?ProductVariant $variant,
+        int $quantity,
+        ?int $variantId = null,
+        ?int $productUnitId = null,
+    ): void {
         if (! $product->isPurchasable()) {
             throw ValidationException::withMessages([
                 'cart' => ['This product is not available for purchase.'],
             ]);
         }
 
-        $stockTarget = $this->resolveStockTarget($product, $variant, $variantId);
+        $stockTarget = $this->resolveStockTarget($product, $variant, $variantId, $productUnitId);
 
         if (! $stockTarget) {
             throw ValidationException::withMessages([
@@ -563,13 +592,41 @@ class OrderService
         }
     }
 
-    protected function resolveStockTarget(Product $product, ?ProductVariant $variant, ?int $variantId = null): Product|ProductVariant|null
-    {
+    protected function resolveStockTarget(
+        Product $product,
+        ?ProductVariant $variant,
+        ?int $variantId = null,
+        ?int $productUnitId = null,
+    ): Product|ProductVariant|ProductUnit|null {
         if ($product->isVariable()) {
+            if ($productUnitId) {
+                $productUnit = ProductUnit::query()
+                    ->where('product_id', $product->id)
+                    ->whereKey($productUnitId)
+                    ->first();
+
+                if ($productUnit) {
+                    return $productUnit;
+                }
+            }
+
             return $this->resolveProductVariant($product, $variant, $variantId);
         }
 
-        return $product;
+        if ($productUnitId) {
+            return ProductUnit::query()
+                ->where('product_id', $product->id)
+                ->whereKey($productUnitId)
+                ->first();
+        }
+
+        return ProductUnit::query()
+            ->where('product_id', $product->id)
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
     }
 
     protected function stockItemName(Product $product, ?ProductVariant $variant = null): string
@@ -600,7 +657,13 @@ class OrderService
                 continue;
             }
 
-            if ($this->deductStock($product, $item->variant, (int) $item->quantity, $item->variant_id)) {
+            if ($this->deductStock(
+                $product,
+                $item->variant,
+                (int) $item->quantity,
+                $item->variant_id,
+                $item->product_unit_id,
+            )) {
                 $deducted = true;
             }
         }
@@ -621,17 +684,50 @@ class OrderService
                 continue;
             }
 
-            $this->restoreStock($product, $item->variant, (int) $item->quantity, $item->variant_id);
+            $this->restoreStock(
+                $product,
+                $item->variant,
+                (int) $item->quantity,
+                $item->variant_id,
+                $item->product_unit_id,
+            );
         }
     }
 
-    protected function deductStock(Product $product, ?ProductVariant $variant, int $quantity, ?int $variantId = null): bool
-    {
+    protected function deductStock(
+        Product $product,
+        ?ProductVariant $variant,
+        int $quantity,
+        ?int $variantId = null,
+        ?int $productUnitId = null,
+    ): bool {
         if ($quantity <= 0) {
             return false;
         }
 
         if ($product->isVariable()) {
+            if ($productUnitId) {
+                $productUnit = ProductUnit::query()
+                    ->where('product_id', $product->id)
+                    ->whereKey($productUnitId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $productUnit) {
+                    throw ValidationException::withMessages([
+                        'order' => ["Missing product unit for order item (product #{$product->id})."],
+                    ]);
+                }
+
+                if (! $productUnit->tracksStock()) {
+                    return false;
+                }
+
+                $productUnit->decrement('stock', $quantity);
+
+                return true;
+            }
+
             $variant = $this->resolveProductVariant($product, $variant, $variantId, lock: true);
 
             if (! $variant) {
@@ -645,28 +741,55 @@ class OrderService
             }
 
             $variant->decrement('stock', $quantity);
-            $this->syncVariableProductStock($product);
 
             return true;
         }
 
-        if (! $product->tracksStock()) {
+        $productUnit = $productUnitId
+            ? ProductUnit::query()->where('product_id', $product->id)->whereKey($productUnitId)->lockForUpdate()->first()
+            : null;
+
+        if (! $productUnit) {
+            throw ValidationException::withMessages([
+                'order' => ["Missing product unit for order item (product #{$product->id})."],
+            ]);
+        }
+
+        if (! $productUnit->tracksStock()) {
             return false;
         }
 
-        Product::query()->whereKey($product->id)->lockForUpdate()->first();
-        $product->decrement('stock', $quantity);
+        $productUnit->decrement('stock', $quantity);
 
         return true;
     }
 
-    protected function restoreStock(Product $product, ?ProductVariant $variant, int $quantity, ?int $variantId = null): void
-    {
+    protected function restoreStock(
+        Product $product,
+        ?ProductVariant $variant,
+        int $quantity,
+        ?int $variantId = null,
+        ?int $productUnitId = null,
+    ): void {
         if ($quantity <= 0) {
             return;
         }
 
         if ($product->isVariable()) {
+            if ($productUnitId) {
+                $productUnit = ProductUnit::query()
+                    ->where('product_id', $product->id)
+                    ->whereKey($productUnitId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($productUnit && $productUnit->tracksStock()) {
+                    $productUnit->increment('stock', $quantity);
+                }
+
+                return;
+            }
+
             $variant = $this->resolveProductVariant($product, $variant, $variantId, lock: true);
 
             if (! $variant || ! $variant->tracksStock()) {
@@ -674,17 +797,17 @@ class OrderService
             }
 
             $variant->increment('stock', $quantity);
-            $this->syncVariableProductStock($product);
 
             return;
         }
 
-        if (! $product->tracksStock()) {
-            return;
-        }
+        $productUnit = $productUnitId
+            ? ProductUnit::query()->where('product_id', $product->id)->whereKey($productUnitId)->lockForUpdate()->first()
+            : null;
 
-        Product::query()->whereKey($product->id)->lockForUpdate()->first();
-        $product->increment('stock', $quantity);
+        if ($productUnit && $productUnit->tracksStock()) {
+            $productUnit->increment('stock', $quantity);
+        }
     }
 
     protected function resolveProductVariant(
@@ -717,19 +840,7 @@ class OrderService
 
     protected function syncVariableProductStock(Product $product): void
     {
-        if (! $product->isVariable()) {
-            return;
-        }
-
-        $trackedTotal = $product->variants()
-            ->whereNotNull('stock')
-            ->sum('stock');
-
-        $hasUntracked = $product->variants()->whereNull('stock')->exists();
-
-        Product::query()->whereKey($product->id)->update([
-            'stock' => $hasUntracked && $trackedTotal === 0 ? null : (int) $trackedTotal,
-        ]);
+        // Variant stock is stored on product_variants; product has no stock column.
     }
 
     public function update(Order $order, array $data): bool
@@ -841,6 +952,7 @@ class OrderService
 
             if ($status === 'delivered') {
                 $this->points->awardCashbackForDeliveredOrder($order);
+                $this->goals->evaluateGoalsForDeliveredOrder($order);
                 $this->notifications->notifyAdmins(new \App\Notifications\OrderDeliveredAdminNotification($order));
             }
 

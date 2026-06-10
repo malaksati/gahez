@@ -156,10 +156,10 @@ paths:
     get:
       tags: [Store]
       security: []
-      summary: Store config and theme
+      summary: Store config
       responses:
         '200':
-          description: App name, currency, logo, theme colors/layouts/font
+          description: App name, currency, logo URL
 
   /categories:
     get:

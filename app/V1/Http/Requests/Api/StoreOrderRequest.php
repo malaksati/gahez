@@ -2,6 +2,7 @@
 
 namespace App\V1\Http\Requests\Api;
 
+use App\V1\Services\CheckoutSettingsService;
 use App\V1\Services\OrderService;
 use Illuminate\Validation\Rule;
 
@@ -19,6 +20,8 @@ class StoreOrderRequest extends ApiFormRequest
     {
         return [
             'address_id' => ['required', 'integer', 'exists:addresses,id'],
+            'shipping_day' => ['required', 'string', Rule::in(CheckoutSettingsService::WEEKDAYS)],
+            'is_fast_shipping' => ['sometimes', 'boolean'],
             'coupon_code' => ['nullable', 'string', 'max:50'],
             'use_wallet' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],

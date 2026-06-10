@@ -26,8 +26,10 @@ class SettingsController extends AdminController
                 'currency' => $request->validated('currency'),
                 'cashback_percentage' => $request->validated('cashback_percentage') ?? 0,
                 'point_to_value' => $request->validated('point_to_value') ?? 0,
-                'report_hero_order_amount' => $request->validated('report_hero_order_amount') ?? setting('report_hero_order_amount', 100),
-                'report_lower_value_order_amount' => $request->validated('report_lower_value_order_amount') ?? setting('report_lower_value_order_amount', 20),
+                'shipping_price_per_km' => $request->validated('shipping_price_per_km') ?? setting('shipping_price_per_km', 0),
+                'cart_min_line_count' => $request->validated('cart_min_line_count') ?? setting('cart_min_line_count', 0),
+                'cart_min_subtotal' => $request->validated('cart_min_subtotal') ?? setting('cart_min_subtotal', 0),
+                'fast_shipping_fee' => $request->validated('fast_shipping_fee') ?? setting('fast_shipping_fee', 0),
                 'app_logo' => $request->hasFile('app_logo') ? $request->file('app_logo') : null,
             ]);
         } catch (\Throwable $exception) {

@@ -3,7 +3,9 @@
     $isEdit = $product !== null;
     $allProducts = $allProducts ?? collect();
     $catalogVariants = $catalogVariants ?? collect();
+    $catalogUnits = $catalogUnits ?? collect();
     $existingProductVariants = $existingProductVariants ?? [];
+    $existingProductUnits = $existingProductUnits ?? [];
     $selectedCategoryIds = array_map(
         'intval',
         old('category_ids', $isEdit ? $product->categories->pluck('id')->all() : []),
@@ -32,10 +34,19 @@
         'catalogVariants' => $catalogVariants->values()->all(),
         'quickCatalogVariantUrl' => route('v1.admin.products.quick-catalog-variant'),
         'quickVariantOptionUrl' => route('v1.admin.products.quick-variant-option'),
+        'quickCatalogUnitUrl' => route('v1.admin.products.quick-catalog-unit'),
         'nextSkuUrl' => route('v1.admin.products.next-sku'),
         'existingProductVariants' => old('product_variants')
             ? array_values(old('product_variants'))
             : $existingProductVariants,
+        'catalogUnits' => $catalogUnits->map(fn ($unit) => [
+            'id' => $unit->id,
+            'code' => $unit->code,
+            'name' => $unit->getTranslation('name', app()->getLocale()),
+        ])->values()->all(),
+        'existingProductUnits' => old('product_units')
+            ? array_values(old('product_units'))
+            : $existingProductUnits,
         'labels' => [
             'basic' => __('messages.Basic info'),
             'pricing' => __('messages.Pricing and stock'),
@@ -54,10 +65,7 @@
             'sku' => old('sku', $product?->sku ?? ''),
             'description_en' => old('description.en', $isEdit ? $product->getTranslation('description', 'en', false) : ''),
             'description_ar' => old('description.ar', $isEdit ? $product->getTranslation('description', 'ar', false) : ''),
-            'price' => old('price', $product?->price ?? '0'),
-            'stock' => old('stock', $product?->stock !== null ? (string) $product?->stock : ''),
             'is_in_stock' => (bool) old('is_in_stock', $product?->is_in_stock ?? true),
-            'sort_order' => old('sort_order', $product?->sort_order ?? ''),
             'discount' => old('discount', $product?->discount ?? '0'),
             'discount_type' => old('discount_type', $product?->discount_type ?? 'percentage'),
             'category_ids' => array_map(fn ($id) => (string) $id, $selectedCategoryIds),
@@ -227,52 +235,9 @@
                     </h5>
                     <p class="text-muted mb-4">{{ __('messages.Set product pricing and inventory') }}</p>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="price" class="form-label">{{ __('messages.Price') }} *</label>
-                            <input type="number" step="0.01" min="0" id="price" name="price"
-                                class="form-control @error('price') is-invalid @enderror"
-                                x-model="formData.price" required>
-                            @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    @include('v1.admin.products.partials.wizard-product-units')
 
-                        <div class="col-md-6 mb-3" x-show="!isVariable" x-cloak>
-                            <label for="stock" class="form-label">{{ __('messages.Stock quantity') }}</label>
-                            <input type="number" min="0" id="stock" name="stock"
-                                class="form-control @error('stock') is-invalid @enderror"
-                                x-model="formData.stock"
-                                placeholder="{{ __('messages.Leave blank if unknown') }}">
-                            @error('stock')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <p class="form-text mb-0">{{ __('messages.Product stock quantity hint') }}</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3" x-show="!isVariable" x-cloak>
-                            <input type="hidden" name="is_in_stock" :value="formData.is_in_stock ? 1 : 0">
-                            <div class="form-check form-switch mt-4 pt-2">
-                                <input type="checkbox" class="form-check-input" id="is_in_stock"
-                                    x-model="formData.is_in_stock">
-                                <label class="form-check-label" for="is_in_stock">{{ __('messages.Available for sale') }}</label>
-                            </div>
-                            <p class="form-text mb-0">{{ __('messages.Product available for sale hint') }}</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="sort_order" class="form-label">{{ __('messages.Sort order') }}</label>
-                            <input type="number" min="1" id="sort_order" name="sort_order"
-                                class="form-control @error('sort_order') is-invalid @enderror"
-                                x-model="formData.sort_order" placeholder="{{ __('messages.Leave blank for last position') }}">
-                            <p class="form-text mb-0">{{ __('messages.Sort order shift hint') }}</p>
-                            @error('sort_order')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="col-md-6 mb-3">
                             <label for="discount" class="form-label">{{ __('messages.Discount value') }}</label>
                             <input type="number" step="0.01" min="0" id="discount" name="discount"
@@ -281,6 +246,7 @@
                             @error('discount')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <p class="form-text mb-0">{{ __('messages.Product level discount hint') }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="discount_type" class="form-label">{{ __('messages.Discount type') }}</label>
@@ -293,6 +259,18 @@
                             @error('discount_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+                    </div>
+
+                    <div class="row" x-show="!isVariable" x-cloak>
+                        <div class="col-md-6 mb-3">
+                            <input type="hidden" name="is_in_stock" :value="formData.is_in_stock ? 1 : 0">
+                            <div class="form-check form-switch mt-2">
+                                <input type="checkbox" class="form-check-input" id="is_in_stock"
+                                    x-model="formData.is_in_stock">
+                                <label class="form-check-label" for="is_in_stock">{{ __('messages.Available for sale') }}</label>
+                            </div>
+                            <p class="form-text mb-0">{{ __('messages.Product available for sale hint') }}</p>
                         </div>
                     </div>
 

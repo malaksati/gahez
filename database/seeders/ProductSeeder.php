@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
 use App\Models\Setting;
+use App\Models\Unit;
+use App\Models\ProductUnit;
 use App\Models\VariantOption;
 use Illuminate\Database\Seeder;
 
@@ -52,15 +54,31 @@ class ProductSeeder extends Seeder
                 'categories' => [$bakery?->id],
             ],
             [
-                'sku' => 'WATER-6PK',
-                'slug' => 'mineral-water-6-pack',
-                'name' => ['en' => 'Mineral Water 6-Pack', 'ar' => 'مياه معدنية ٦ عبوات'],
-                'description' => ['en' => 'Still mineral water.', 'ar' => 'مياه معدنية غير غازية.'],
-                'price' => 1.20,
-                'stock' => 150,
-                'discount' => 10,
-                'discount_type' => 'percentage',
+                'sku' => 'WATER',
+                'slug' => 'mineral-water',
+                'name' => ['en' => 'Mineral Water', 'ar' => 'مياه معدنية'],
+                'description' => ['en' => 'Still mineral water in bottle or box.', 'ar' => 'مياه معدنية غير غازية بزجاجة أو صندوق.'],
+                'price' => 0.35,
+                'stock' => 500,
                 'categories' => [],
+                'product_units' => [
+                    [
+                        'unit_code' => 'bottle',
+                        'sku' => 'WATER-1B',
+                        'price' => 0.35,
+                        'stock' => 500,
+                        'factor' => 1,
+                        'is_default' => true,
+                    ],
+                    [
+                        'unit_code' => 'box',
+                        'sku' => 'WATER-12BOX',
+                        'price' => 3.60,
+                        'stock' => 80,
+                        'factor' => 12,
+                        'is_default' => false,
+                    ],
+                ],
             ],
             [
                 'sku' => 'GIFT-BOX',
@@ -75,7 +93,10 @@ class ProductSeeder extends Seeder
 
         foreach ($products as $data) {
             $categoryIds = array_filter($data['categories'] ?? []);
-            unset($data['categories']);
+            $unitRows = $data['product_units'] ?? null;
+            $defaultUnitPrice = $data['price'] ?? 0;
+            $defaultUnitStock = $data['stock'] ?? null;
+            unset($data['categories'], $data['product_units'], $data['price'], $data['stock']);
 
             $product = Product::query()->updateOrCreate(
                 ['sku' => $data['sku']],
@@ -94,6 +115,12 @@ class ProductSeeder extends Seeder
             if ($categoryIds) {
                 $product->categories()->syncWithoutDetaching($categoryIds);
             }
+
+            if ($unitRows !== null) {
+                $this->syncProductUnits($product, $unitRows);
+            } else {
+                $this->ensureDefaultProductUnit($product, $defaultUnitPrice, $defaultUnitStock);
+            }
         }
 
         $this->seedVariableTShirt($brand);
@@ -106,6 +133,60 @@ class ProductSeeder extends Seeder
             );
             setting_forget('birthday_gift_product_id');
         }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     */
+    protected function syncProductUnits(Product $product, array $rows): void
+    {
+        ProductUnit::query()->where('product_id', $product->id)->delete();
+
+        foreach ($rows as $index => $row) {
+            $unitId = Unit::query()->where('code', $row['unit_code'])->value('id');
+
+            if (! $unitId) {
+                continue;
+            }
+
+            ProductUnit::query()->create([
+                'product_id' => $product->id,
+                'unit_id' => $unitId,
+                'sku' => $row['sku'] ?? null,
+                'price' => $row['price'] ?? 0,
+                'stock' => $row['stock'] ?? null,
+                'is_in_stock' => true,
+                'factor' => max(1, (int) ($row['factor'] ?? 1)),
+                'is_default' => (bool) ($row['is_default'] ?? $index === 0),
+                'sort_order' => $index,
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    protected function ensureDefaultProductUnit(Product $product, float $price = 0, ?int $stock = null): void
+    {
+        if (ProductUnit::query()->where('product_id', $product->id)->exists()) {
+            return;
+        }
+
+        $pieceUnitId = Unit::query()->where('code', 'piece')->value('id');
+
+        if (! $pieceUnitId) {
+            return;
+        }
+
+        ProductUnit::query()->create([
+            'product_id' => $product->id,
+            'unit_id' => $pieceUnitId,
+            'price' => $price,
+            'stock' => $stock,
+            'is_in_stock' => $product->is_in_stock,
+            'factor' => 1,
+            'is_default' => true,
+            'sort_order' => 0,
+            'is_active' => true,
+        ]);
     }
 
     protected function seedVariableTShirt(?Brand $brand): void
@@ -125,14 +206,11 @@ class ProductSeeder extends Seeder
                 'slug' => 'cotton-t-shirt',
                 'name' => ['en' => 'Cotton T-Shirt', 'ar' => 'تيشيرت قطني'],
                 'description' => ['en' => 'Comfortable cotton tee.', 'ar' => 'تيشيرت قطني مريح.'],
-                'price' => 4.50,
-                'stock' => 0,
                 'brand_id' => $brand?->id,
                 'is_active' => true,
                 'is_approved' => true,
                 'is_bookable' => true,
                 'is_in_stock' => true,
-                'sort_order' => 10,
             ],
         );
 
@@ -186,8 +264,5 @@ class ProductSeeder extends Seeder
             }
         }
 
-        $product->update([
-            'stock' => (int) ProductVariant::query()->where('product_id', $product->id)->sum('stock'),
-        ]);
     }
 }

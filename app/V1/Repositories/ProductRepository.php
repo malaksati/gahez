@@ -25,7 +25,7 @@ class ProductRepository
     }
     public function getPaginatedProducts(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $with = ['brand', 'categories', 'images', 'variants', 'variantValues'];
+        $with = ['brand', 'categories', 'images', 'variants', 'variantValues', 'productUnits.unit'];
         $query = $this->model::with($with);
         $this->applyAdminListFilters($query, $filters);
         $this->applyAdminListSort($query, (string) ($filters['sort'] ?? 'latest'));
@@ -72,21 +72,50 @@ class ProductRepository
         }
 
         if (isset($filters['min_price']) && $filters['min_price'] !== '') {
-            $query->where('price', '>=', $filters['min_price']);
+            $minPrice = (float) $filters['min_price'];
+            $query->where(function ($q) use ($minPrice) {
+                $q->where(function ($simple) use ($minPrice) {
+                    $simple->where('type', 'simple')
+                        ->whereHas('productUnits', fn ($units) => $units
+                            ->where('is_active', true)
+                            ->where('price', '>=', $minPrice));
+                })->orWhere(function ($variable) use ($minPrice) {
+                    $variable->where('type', 'variable')
+                        ->whereHas('variants', fn ($variants) => $variants
+                            ->where('is_active', true)
+                            ->where('price', '>=', $minPrice));
+                });
+            });
         }
 
         if (isset($filters['max_price']) && $filters['max_price'] !== '') {
-            $query->where('price', '<=', $filters['max_price']);
+            $maxPrice = (float) $filters['max_price'];
+            $query->where(function ($q) use ($maxPrice) {
+                $q->where(function ($simple) use ($maxPrice) {
+                    $simple->where('type', 'simple')
+                        ->whereHas('productUnits', fn ($units) => $units
+                            ->where('is_active', true)
+                            ->where('price', '<=', $maxPrice));
+                })->orWhere(function ($variable) use ($maxPrice) {
+                    $variable->where('type', 'variable')
+                        ->whereHas('variants', fn ($variants) => $variants
+                            ->where('is_active', true)
+                            ->where('price', '<=', $maxPrice));
+                });
+            });
         }
 
         if (isset($filters['stock']) && $filters['stock'] !== '') {
             $query->where(function ($q) {
                 $q->where(function ($simple) {
                     $simple->where('type', 'simple')
-                        ->where(function ($stock) {
-                            $stock->where('stock', '>', 0)
-                                ->orWhere(function ($untracked) {
-                                    $untracked->whereNull('stock')->where('is_in_stock', true);
+                        ->whereHas('productUnits', function ($units) {
+                            $units->where('is_active', true)
+                                ->where(function ($stock) {
+                                    $stock->where('stock', '>', 0)
+                                        ->orWhere(function ($untracked) {
+                                            $untracked->whereNull('stock')->where('is_in_stock', true);
+                                        });
                                 });
                         });
                 })->orWhere(function ($variable) {
@@ -119,8 +148,8 @@ class ProductRepository
     {
         match ($sort) {
             'oldest' => $query->oldest(),
-            'price_asc' => $query->orderBy('price', 'asc'),
-            'price_desc' => $query->orderBy('price', 'desc'),
+            'price_asc' => $query->latest(),
+            'price_desc' => $query->latest(),
             default => $query->latest(),
         };
     }
@@ -129,6 +158,7 @@ class ProductRepository
         return $this->model::with([
             'categories',
             'images',
+            'productUnits.unit',
             'variants.values.variantOption.variant',
             'relatedProducts',
             'ratings.user',
@@ -139,6 +169,7 @@ class ProductRepository
         return $this->model::with([
             'categories',
             'images',
+            'productUnits.unit',
             'variants.values.variantOption.variant',
             'relatedProducts',
             'ratings.user',

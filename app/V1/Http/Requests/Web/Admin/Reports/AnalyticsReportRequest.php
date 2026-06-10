@@ -22,8 +22,6 @@ class AnalyticsReportRequest extends FormRequest
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
             'period_type' => ['nullable', Rule::in(['daily', 'weekly', 'monthly', 'manual'])],
-            'hero_amount' => ['nullable', 'numeric', 'min:0'],
-            'lower_value_amount' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
@@ -38,8 +36,6 @@ class AnalyticsReportRequest extends FormRequest
             'from_date' => $periodType === 'manual' ? $this->input('from_date') : null,
             'to_date' => $periodType === 'manual' ? $this->input('to_date') : null,
             'period_type' => $periodType,
-            'hero_amount' => $this->input('hero_amount', setting('report_hero_order_amount', 100)),
-            'lower_value_amount' => $this->input('lower_value_amount', setting('report_lower_value_order_amount', 20)),
         ];
     }
 

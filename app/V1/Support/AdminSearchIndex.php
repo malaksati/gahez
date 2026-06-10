@@ -18,7 +18,7 @@ class AdminSearchIndex
             ['title' => __('messages.Import categories'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.categories.import'), 'icon' => 'upload', 'keywords' => 'import categories excel spreadsheet sort_order'],
             ['title' => __('messages.Export').' · '.__('messages.Categories'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.categories.export'), 'icon' => 'download', 'keywords' => 'export categories excel download'],
             ['title' => __('messages.Products'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.products.index'), 'icon' => 'box-seam', 'keywords' => 'products catalog items stock sort'],
-            ['title' => __('messages.Import products'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.products.import'), 'icon' => 'upload', 'keywords' => 'import products excel spreadsheet sort_order is_in_stock'],
+            ['title' => __('messages.Import products'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.products.import'), 'icon' => 'upload', 'keywords' => 'import products excel spreadsheet unit_quantity is_in_stock'],
             ['title' => __('messages.Export').' · '.__('messages.Products'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.products.export'), 'icon' => 'download', 'keywords' => 'export products excel download'],
             ['title' => __('messages.Brands'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.brands.index'), 'icon' => 'award', 'keywords' => 'brands vendors'],
             ['title' => __('messages.Branches'), 'group' => __('messages.Catalog'), 'url' => route('v1.admin.branches.index'), 'icon' => 'shop', 'keywords' => 'branches stores'],
@@ -30,6 +30,7 @@ class AdminSearchIndex
             // Marketing
             ['title' => __('messages.Coupons'), 'group' => __('messages.Marketing'), 'url' => route('v1.admin.coupons.index'), 'icon' => 'ticket-perforated', 'keywords' => 'coupons discount codes promo'],
             ['title' => __('messages.Offers'), 'group' => __('messages.Marketing'), 'url' => route('v1.admin.offers.index'), 'icon' => 'gift', 'keywords' => 'offers promotions deals gifts'],
+            ['title' => __('messages.Goals'), 'group' => __('messages.Marketing'), 'url' => route('v1.admin.goals.index'), 'icon' => 'gift', 'keywords' => 'goals cashback weekly monthly daily targets'],
             ['title' => __('messages.Sliders'), 'group' => __('messages.Marketing'), 'url' => route('v1.admin.sliders.index'), 'icon' => 'images', 'keywords' => 'sliders banners homepage carousel'],
 
             // Sales
@@ -54,7 +55,6 @@ class AdminSearchIndex
             // System
             ['title' => __('messages.Notifications'), 'group' => __('messages.System'), 'url' => route('v1.admin.notifications.index'), 'icon' => 'bell', 'keywords' => 'notifications alerts inbox'],
             ['title' => __('messages.Settings'), 'group' => __('messages.System'), 'url' => route('v1.admin.settings.index'), 'icon' => 'gear', 'keywords' => 'settings configuration app store currency'],
-            ['title' => __('messages.Store theme'), 'group' => __('messages.System'), 'url' => route('v1.admin.theme.index'), 'icon' => 'palette', 'keywords' => 'theme colors branding mobile app appearance'],
             ['title' => __('messages.Security'), 'group' => __('messages.System'), 'url' => route('v1.admin.security.index'), 'icon' => 'shield-lock', 'keywords' => 'security password account'],
             ['title' => __('messages.Help'), 'group' => __('messages.System'), 'url' => route('v1.admin.help.index'), 'icon' => 'question-circle', 'keywords' => 'help guide catalog orders payments deliveries marketing refunds support how to'],
             ['title' => __('messages.Profile'), 'group' => __('messages.System'), 'url' => route('v1.admin.profile.edit'), 'icon' => 'person', 'keywords' => 'profile account my user'],

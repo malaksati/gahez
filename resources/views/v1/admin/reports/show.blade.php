@@ -11,7 +11,6 @@
         'zones-demand',
         'zones-activity',
     ], true);
-    $needsSegmentThresholds = $type === 'customer-segments';
     $isManualPeriod = ($filters['period_type'] ?? 'monthly') === 'manual';
 @endphp
 
@@ -52,25 +51,7 @@
 
     @if (! empty($report['summary']))
         <div class="row g-3 mb-4">
-            @if ($type === 'customer-segments')
-                @foreach ([
-                    ['label' => __('messages.Active customers'), 'value' => $report['summary']['active'] ?? 0, 'class' => 'text-success'],
-                    ['label' => __('messages.Inactive customers'), 'value' => $report['summary']['inactive'] ?? 0, 'class' => 'text-secondary'],
-                    ['label' => __('messages.segment_heroes'), 'value' => $report['summary']['heroes'] ?? 0, 'class' => 'text-primary'],
-                    ['label' => __('messages.segment_loyal'), 'value' => $report['summary']['loyal'] ?? 0, 'class' => 'text-info'],
-                    ['label' => __('messages.segment_attention'), 'value' => $report['summary']['attention'] ?? 0, 'class' => 'text-warning'],
-                    ['label' => __('messages.segment_lower_value'), 'value' => $report['summary']['lower_value'] ?? 0, 'class' => 'text-danger'],
-                ] as $kpi)
-                    <div class="col-md-6 col-xl-4 col-xxl">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="text-muted small">{{ $kpi['label'] }}</div>
-                                <div class="fs-4 fw-semibold {{ $kpi['class'] }}">{{ $kpi['value'] }}</div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @elseif ($type === 'customers')
+            @if ($type === 'customers')
                 @foreach ([
                     ['label' => __('messages.Total customers'), 'value' => $report['summary']['total'] ?? 0],
                     ['label' => __('messages.Active customers'), 'value' => $report['summary']['active'] ?? 0],
@@ -179,19 +160,6 @@
                             'to_date' => $filters['to_date'] ?? '',
                         ],
                     ])
-                @endif
-
-                @if ($needsSegmentThresholds)
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('messages.Hero order amount') }}</label>
-                        <input type="number" step="0.01" min="0" name="hero_amount" class="form-control" value="{{ $filters['hero_amount'] ?? setting('report_hero_order_amount', 100) }}">
-                        <small class="text-muted">{{ __('messages.Hero order amount hint') }}</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('messages.Lower value order amount') }}</label>
-                        <input type="number" step="0.01" min="0" name="lower_value_amount" class="form-control" value="{{ $filters['lower_value_amount'] ?? setting('report_lower_value_order_amount', 20) }}">
-                        <small class="text-muted">{{ __('messages.Lower value order amount hint') }}</small>
-                    </div>
                 @endif
 
                 <div class="d-flex gap-2">

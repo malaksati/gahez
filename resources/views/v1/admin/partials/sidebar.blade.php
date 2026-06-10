@@ -26,6 +26,7 @@
             'items' => [
                 ['route' => 'v1.admin.coupons.index', 'pattern' => 'v1.admin.coupons.*', 'label' => __('messages.Coupons'), 'icon' => 'ticket'],
                 ['route' => 'v1.admin.offers.index', 'pattern' => 'v1.admin.offers.*', 'label' => __('messages.Offers'), 'icon' => 'gift'],
+                ['route' => 'v1.admin.goals.index', 'pattern' => 'v1.admin.goals.*', 'label' => __('messages.Goals'), 'icon' => 'target'],
                 ['route' => 'v1.admin.sliders.index', 'pattern' => 'v1.admin.sliders.*', 'label' => __('messages.Sliders'), 'icon' => 'photo'],
             ],
         ],

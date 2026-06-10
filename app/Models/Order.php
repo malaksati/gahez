@@ -30,6 +30,9 @@ class Order extends Model
         'notes',
         'address_id',
         'shipping_address_snapshot',
+        'shipping_day',
+        'is_fast_shipping',
+        'fast_shipping_fee',
         'total_commission',
         'refund_status',
         'refunded_total',
@@ -55,6 +58,8 @@ class Order extends Model
         'stock_deducted_at' => 'datetime',
         'cashback_awarded_at' => 'datetime',
         'shipping_address_snapshot' => 'array',
+        'is_fast_shipping' => 'boolean',
+        'fast_shipping_fee' => 'decimal:2',
     ];
 
     public function user()

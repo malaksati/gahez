@@ -68,7 +68,7 @@
                     </li>
                 @endcan
 
-                @canany(['manage coupons', 'manage offers', 'manage sliders'])
+                @canany(['manage coupons', 'manage offers', 'manage goals', 'manage sliders'])
                     <li class="nav-item mt-3">
                         <small class="text-muted px-3 text-uppercase fw-bold">{{ __('messages.Marketing') }}</small>
                     </li>
@@ -88,6 +88,15 @@
                             href="{{ route('v1.admin.offers.index') }}">
                             <i class="bi bi-gift"></i>
                             <span>{{ __('messages.Offers') }}</span>
+                        </a>
+                    </li>
+                @endcan
+                @can('manage goals')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('v1.admin.goals.*') ? 'active' : '' }}"
+                            href="{{ route('v1.admin.goals.index') }}">
+                            <i class="bi bi-bullseye"></i>
+                            <span>{{ __('messages.Goals') }}</span>
                         </a>
                     </li>
                 @endcan
@@ -205,13 +214,6 @@
                             href="{{ route('v1.admin.settings.index') }}">
                             <i class="bi bi-gear"></i>
                             <span>{{ __('messages.Settings') }}</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('v1.admin.theme.*') ? 'active' : '' }}"
-                            href="{{ route('v1.admin.theme.index') }}">
-                            <i class="bi bi-palette"></i>
-                            <span>{{ __('messages.Store theme') }}</span>
                         </a>
                     </li>
                     <li class="nav-item">

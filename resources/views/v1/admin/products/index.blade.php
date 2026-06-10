@@ -24,11 +24,8 @@
         @include('v1.admin.products.partials.filters')
         <div data-admin-list-results>
             @include('v1.admin.products.partials.results', [
-                'categories' => $categories ?? null,
-                'allProducts' => $allProducts ?? null,
-                'uncategorizedProducts' => $uncategorizedProducts ?? collect(),
+                'products' => $products,
                 'uncategorizedCount' => $uncategorizedCount ?? 0,
-                'showAllProducts' => $showAllProducts ?? false,
             ])
         </div>
     </x-import-export-layout>

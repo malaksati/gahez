@@ -25,7 +25,7 @@ return [
     |
     */
 
-    'currency' => env('APP_CURRENCY', 'KWD'),
+    'currency' => env('APP_CURRENCY', 'EGP'),
 
     /*
     |--------------------------------------------------------------------------

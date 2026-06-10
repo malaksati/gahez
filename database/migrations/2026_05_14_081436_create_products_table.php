@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->decimal('price', 10, 2);
             $table->integer('stock')->default(0);
+            $table->json('unit')->nullable();
+            $table->unsignedInteger('unit_quantity')->default(1);
             $table->decimal('discount', 10, 2)->nullable();
             $table->enum('discount_type', ['percentage', 'fixed'])->nullable();
             $table->boolean('is_active')->default(true);

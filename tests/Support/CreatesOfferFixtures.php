@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Offer;
 use App\Models\OfferRewardProduct;
 use App\Models\Product;
+use App\Models\ProductUnit;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 
@@ -32,22 +34,55 @@ trait CreatesOfferFixtures
     {
         $id = $this->nextFixtureId();
         $brand ??= $this->createBrand();
+        $unitPrice = (float) ($attributes['price'] ?? 10.00);
+        $unitStock = array_key_exists('stock', $attributes) ? $attributes['stock'] : 100;
+        unset($attributes['price'], $attributes['stock']);
 
-        return Product::query()->create(array_merge([
+        $product = Product::query()->create(array_merge([
             'type' => 'simple',
             'sku' => "SKU-{$id}",
             'slug' => "product-{$id}",
             'name' => ['en' => "Product {$id}", 'ar' => "منتج {$id}"],
             'description' => ['en' => 'Description', 'ar' => 'وصف'],
-            'price' => 10.00,
-            'stock' => 100,
             'discount' => 0,
             'discount_type' => null,
             'is_active' => true,
             'is_approved' => true,
             'is_bookable' => true,
+            'is_in_stock' => true,
             'brand_id' => $brand->id,
         ], $attributes));
+
+        if (($product->type ?? 'simple') === 'simple') {
+            $this->createDefaultProductUnit($product, $unitPrice, $unitStock);
+        }
+
+        return $product;
+    }
+
+    protected function createDefaultProductUnit(Product $product, float $price = 10.00, ?int $stock = 100): ProductUnit
+    {
+        $unitId = Unit::query()->where('code', 'piece')->value('id');
+
+        if (! $unitId) {
+            $unitId = Unit::query()->create([
+                'code' => 'piece',
+                'name' => ['en' => 'piece', 'ar' => 'قطعة'],
+                'is_active' => true,
+            ])->id;
+        }
+
+        return ProductUnit::query()->create([
+            'product_id' => $product->id,
+            'unit_id' => $unitId,
+            'price' => $price,
+            'stock' => $stock,
+            'is_in_stock' => (bool) ($product->is_in_stock ?? true),
+            'factor' => 1,
+            'is_default' => true,
+            'sort_order' => 0,
+            'is_active' => true,
+        ]);
     }
 
     protected function createCategory(array $attributes = []): Category

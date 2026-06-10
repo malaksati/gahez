@@ -3,6 +3,7 @@
 namespace App\V1\Http\Controllers\Web\Admin;
 
 use App\Models\Product;
+use App\Models\Unit;
 use App\V1\Http\Controllers\Web\Admin\Concerns\PreparesProductFormData;
 use App\V1\Http\Requests\Web\Admin\StoreProductRequest;
 use App\V1\Http\Requests\Web\Admin\UpdateProductRequest;
@@ -15,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class ProductController extends AdminController
 {
@@ -30,29 +32,14 @@ class ProductController extends AdminController
     public function index(Request $request): View|Response
     {
         $filters = $this->listFilters($request, [
-            'search', 'status', 'type', 'category_id', 'featured', 'sort', 'view',
+            'search', 'status', 'type', 'category_id', 'featured', 'sort',
         ]);
 
-        $showAllProducts = ($filters['view'] ?? null) === 'all';
         $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
 
-        if ($showAllProducts) {
-            $allProducts = $this->products->getPaginatedProducts($perPage, $filters);
-            $categories = null;
-            $uncategorizedCount = $this->products->countAdminIndexUncategorizedProducts($filters);
-        } else {
-            $allProducts = null;
-            $categories = $this->products->getAdminIndexCategories(15, $filters);
-            $uncategorizedProducts = $this->products->listAdminIndexUncategorizedProducts($filters);
-            $uncategorizedCount = $uncategorizedProducts->count();
-        }
-
         $viewData = [
-            'categories' => $categories,
-            'allProducts' => $allProducts,
-            'uncategorizedProducts' => $uncategorizedProducts ?? collect(),
-            'uncategorizedCount' => $uncategorizedCount,
-            'showAllProducts' => $showAllProducts,
+            'products' => $this->products->getPaginatedProducts($perPage, $filters),
+            'uncategorizedCount' => $this->products->countAdminIndexUncategorizedProducts($filters),
             'filterCategories' => $this->categories->getAllCategories(),
         ];
 
@@ -106,6 +93,11 @@ class ProductController extends AdminController
             $data['type'] ?? 'simple',
             $request,
         );
+        $this->products->syncProductUnits(
+            $product,
+            $request->input('product_units', []),
+            $data['type'] ?? 'simple',
+        );
 
         return $this->redirectWithSuccess('v1.admin.products.index', 'Product created successfully.');
     }
@@ -116,6 +108,9 @@ class ProductController extends AdminController
             'brand',
             'categories',
             'images',
+            'productUnits.unit',
+            'productUnits.productVariant.values',
+            'variants.productUnits.unit',
             'variants.values.variantOption.variant',
             'relatedProducts.relatedProduct.brand',
         ]);
@@ -157,6 +152,11 @@ class ProductController extends AdminController
             $request->input('product_variants', []),
             $data['type'] ?? $product->type,
             $request,
+        );
+        $this->products->syncProductUnits(
+            $product,
+            $request->input('product_units', []),
+            $data['type'] ?? $product->type,
         );
 
         return $this->redirectWithSuccess('v1.admin.products.index', 'Product updated successfully.');
@@ -224,6 +224,43 @@ class ProductController extends AdminController
 
         return response()->json([
             'variant' => $this->serializeCatalogVariant($variant->load('options')),
+        ]);
+    }
+
+    public function quickStoreCatalogUnit(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/i'],
+        ]);
+
+        $nameEn = trim($validated['name']['en']);
+        $nameAr = trim($validated['name']['ar']);
+        $code = trim((string) ($validated['code'] ?? ''));
+
+        if ($code === '') {
+            $code = Str::slug($nameEn !== '' ? $nameEn : $nameAr) ?: 'unit-'.uniqid();
+        }
+
+        $code = Str::lower($code);
+        $baseCode = $code;
+
+        while (Unit::query()->where('code', $code)->exists()) {
+            $code = $baseCode.'-'.substr(uniqid(), -4);
+        }
+
+        $unit = Unit::query()->create([
+            'name' => [
+                'en' => $nameEn,
+                'ar' => $nameAr,
+            ],
+            'code' => $code,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'unit' => $this->serializeCatalogUnit($unit),
         ]);
     }
 

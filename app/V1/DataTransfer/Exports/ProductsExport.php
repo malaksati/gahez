@@ -34,7 +34,7 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping
      */
     public function map($product): array
     {
-        $product->loadMissing('categories');
+        $product->loadMissing(['categories', 'productUnits.unit']);
         $categoryNames = $product->categories->isNotEmpty()
             ? $product->categories
                 ->map(fn ($category) => $category->getTranslation('name', 'en', false) ?: $category->getTranslation('name', 'ar', false))
@@ -59,7 +59,8 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping
             $product->price,
             $product->stock,
             $product->is_in_stock ? 1 : 0,
-            $product->sort_order,
+            optional($product->defaultProductUnit()?->unit)->code,
+            $product->defaultProductUnit()?->factor ?? 1,
             $product->discount,
             $product->discount_type,
             $product->getRawOriginal('thumbnail'),

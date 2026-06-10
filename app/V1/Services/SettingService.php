@@ -3,7 +3,6 @@
 namespace App\V1\Services;
 
 use App\Models\Setting;
-use App\V1\Support\StoreTheme;
 use App\V1\Support\UploadStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +10,17 @@ use Illuminate\Support\Facades\Storage;
 class SettingService
 {
     /**
-     * @param  array{app_name: string, currency: string, cashback_percentage?: float|int|string, point_to_value?: float|int|string, report_hero_order_amount?: float|int|string, report_lower_value_order_amount?: float|int|string, app_logo?: UploadedFile|null}  $data
+     * @param  array{
+     *     app_name: string,
+     *     currency: string,
+     *     cashback_percentage?: float|int|string,
+     *     point_to_value?: float|int|string,
+     *     shipping_price_per_km?: float|int|string,
+     *     cart_min_line_count?: int|string,
+     *     cart_min_subtotal?: float|int|string,
+     *     fast_shipping_fee?: float|int|string,
+     *     app_logo?: UploadedFile|null
+     * }  $data
      */
     public function update(array $data): void
     {
@@ -31,14 +40,24 @@ class SettingService
             setting_forget('point_to_value');
         }
 
-        if (array_key_exists('report_hero_order_amount', $data)) {
-            $this->persist('report_hero_order_amount', max(0, (float) $data['report_hero_order_amount']), 'number');
-            setting_forget('report_hero_order_amount');
+        if (array_key_exists('shipping_price_per_km', $data)) {
+            $this->persist('shipping_price_per_km', max(0, (float) $data['shipping_price_per_km']), 'number');
+            setting_forget('shipping_price_per_km');
         }
 
-        if (array_key_exists('report_lower_value_order_amount', $data)) {
-            $this->persist('report_lower_value_order_amount', max(0, (float) $data['report_lower_value_order_amount']), 'number');
-            setting_forget('report_lower_value_order_amount');
+        if (array_key_exists('cart_min_line_count', $data)) {
+            $this->persist('cart_min_line_count', max(0, (int) $data['cart_min_line_count']), 'number');
+            setting_forget('cart_min_line_count');
+        }
+
+        if (array_key_exists('cart_min_subtotal', $data)) {
+            $this->persist('cart_min_subtotal', max(0, (float) $data['cart_min_subtotal']), 'number');
+            setting_forget('cart_min_subtotal');
+        }
+
+        if (array_key_exists('fast_shipping_fee', $data)) {
+            $this->persist('fast_shipping_fee', max(0, (float) $data['fast_shipping_fee']), 'number');
+            setting_forget('fast_shipping_fee');
         }
 
         if (
@@ -48,35 +67,6 @@ class SettingService
         ) {
             $this->storeImage('app_logo', $data['app_logo']);
         }
-    }
-
-    /**
-     * @param  array<string, string>  $data
-     */
-    public function updateStoreTheme(array $data): void
-    {
-        $theme = StoreTheme::sanitizeInput([
-            'primary_color' => $data['store_primary_color'] ?? null,
-            'secondary_color' => $data['store_secondary_color'] ?? null,
-            'category_layout' => $data['store_category_layout'] ?? null,
-            'product_layout' => $data['store_product_layout'] ?? null,
-            'font_family' => $data['store_font_family'] ?? null,
-        ]);
-
-        $this->persist('store_primary_color', $theme['primary_color'], 'string');
-        setting_forget('store_primary_color');
-
-        $this->persist('store_secondary_color', $theme['secondary_color'], 'string');
-        setting_forget('store_secondary_color');
-
-        $this->persist('store_category_layout', $theme['category_layout'], 'string');
-        setting_forget('store_category_layout');
-
-        $this->persist('store_product_layout', $theme['product_layout'], 'string');
-        setting_forget('store_product_layout');
-
-        $this->persist('store_font_family', $theme['font_family'], 'string');
-        setting_forget('store_font_family');
     }
 
     private function persist(string $key, mixed $value, string $type): void

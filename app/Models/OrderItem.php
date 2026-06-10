@@ -11,6 +11,10 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'variant_id',
+        'product_unit_id',
+        'unit_name',
+        'unit_name_ar',
+        'unit_factor',
         'product_name',
         'product_name_ar',
         'product_slug',
@@ -66,6 +70,19 @@ class OrderItem extends Model
             $this->variant_name_ar = $this->variant_name_ar ?: ($variantNameAr ?: null);
             $this->variant_sku = $this->variant_sku ?: ($variant->sku ?: null);
         }
+
+        if ($this->product_unit_id) {
+            $productUnit = ProductUnit::with('unit')->find($this->product_unit_id);
+
+            if ($productUnit) {
+                $unitNameEn = $productUnit->displayUnitName('en');
+                $unitNameAr = $productUnit->displayUnitName('ar');
+
+                $this->unit_name = $this->unit_name ?: ($unitNameEn ?: $unitNameAr);
+                $this->unit_name_ar = $this->unit_name_ar ?: ($unitNameAr ?: $unitNameEn);
+                $this->unit_factor = $this->unit_factor ?: max(1, (int) $productUnit->factor);
+            }
+        }
     }
 
     public function order(): BelongsTo
@@ -81,5 +98,10 @@ class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'variant_id');
+    }
+
+    public function productUnit(): BelongsTo
+    {
+        return $this->belongsTo(ProductUnit::class);
     }
 }

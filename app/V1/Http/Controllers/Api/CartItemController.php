@@ -51,6 +51,7 @@ class CartItemController extends Controller
             $product,
             $validated['variant_id'] ?? null,
             (int) ($validated['quantity'] ?? 1),
+            isset($validated['product_unit_id']) ? (int) $validated['product_unit_id'] : null,
         );
 
         return $this->cartItemResponse($cartItem);
@@ -90,6 +91,7 @@ class CartItemController extends Controller
             $product,
             (int) $validated['quantity'],
             $validated['variant_id'] ?? null,
+            isset($validated['product_unit_id']) ? (int) $validated['product_unit_id'] : null,
         );
 
         return $this->cartItemResponse($cartItem);
@@ -97,7 +99,7 @@ class CartItemController extends Controller
 
     protected function cartItemResponse(CartItem $cartItem): JsonResponse
     {
-        return (new CartItemResource($cartItem->load(['product.categories', 'product', 'variant'])))
+        return (new CartItemResource($cartItem->load(['product.categories', 'product.productUnits.unit', 'product', 'variant', 'productUnit.unit'])))
             ->response()
             ->setStatusCode(200);
     }
@@ -148,6 +150,7 @@ class CartItemController extends Controller
             $request->user()->id,
             $product,
             $validated['variant_id'] ?? null,
+            isset($validated['product_unit_id']) ? (int) $validated['product_unit_id'] : null,
         );
 
         return response()->json(['message' => 'Product removed from cart.']);

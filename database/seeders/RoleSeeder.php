@@ -24,6 +24,7 @@ class RoleSeeder extends Seeder
             'manage variants',
             'manage coupons',
             'manage offers',
+            'manage goals',
             'manage sliders',
             'manage orders',
             'manage refunds',

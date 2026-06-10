@@ -5,6 +5,20 @@
     $locale = app()->getLocale();
     $currency = app_currency();
     $productName = $product->getTranslation('name', $locale, false) ?: $product->getTranslation('name', 'en');
+    $sellableUnits = $product->productUnits->where('is_active', true)->values();
+    $hasUnitPricing = $sellableUnits->isNotEmpty();
+    $defaultProductUnit = $hasUnitPricing ? $product->defaultProductUnit() : null;
+    $displayPrice = $hasUnitPricing && $defaultProductUnit
+        ? (float) $defaultProductUnit->price
+        : (float) $product->price;
+    $unitFinal = $hasUnitPricing && $defaultProductUnit
+        ? (float) $defaultProductUnit->final_price
+        : (float) $product->price;
+    $displayFinalPrice = $product->hasDiscount()
+        ? (float) $product->final_price
+        : $unitFinal;
+    $displayHasDiscount = ($hasUnitPricing && $defaultProductUnit && $defaultProductUnit->discount > 0)
+        || $product->hasDiscount();
 @endphp
 
 @section('title', $productName)
@@ -70,29 +84,50 @@
                 <div class="col-md-9">
                     <div class="row g-3">
                         <div class="col-sm-6 col-lg-3">
-                            <small class="text-muted d-block">{{ __('messages.Price') }}</small>
-                            <strong class="fs-5">{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
-                            @if ($product->hasDiscount())
+                            <small class="text-muted d-block">
+                                {{ $hasUnitPricing ? __('messages.Default unit price') : __('messages.Price') }}
+                            </small>
+                            <strong class="fs-5">{{ number_format($displayPrice, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                            @if ($hasUnitPricing && $defaultProductUnit)
+                                <div class="small text-muted">{{ $defaultProductUnit->displayUnitName($locale) }}</div>
+                            @endif
+                            @if ($displayHasDiscount)
                                 <div class="small text-success">
                                     {{ __('messages.Final price') }}:
-                                    {{ number_format($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                    {{ number_format($displayFinalPrice, 2) }}{{ $currency ? ' '.$currency : '' }}
                                 </div>
                             @endif
                         </div>
                         <div class="col-sm-6 col-lg-3">
                             <small class="text-muted d-block">{{ __('messages.Stock') }}</small>
-                            <strong class="d-block {{ $product->isInStock() ? 'text-success' : 'text-danger' }}">
-                                @if ($product->tracksStock())
-                                    {{ $product->stock > 0 ? $product->stock.' '.__('messages.In stock') : __('messages.Out of stock') }}
-                                @else
-                                    {{ $product->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
-                                    <span class="text-muted small">({{ __('messages.Untracked quantity') }})</span>
+                            @if ($hasUnitPricing)
+                                <strong class="d-block text-body">
+                                    {{ $sellableUnits->count() }} {{ __('messages.Sellable units') }}
+                                </strong>
+                                @if ($defaultProductUnit)
+                                    <div class="small {{ $defaultProductUnit->isInStock() ? 'text-success' : 'text-danger' }}">
+                                        {{ __('messages.Default') }}:
+                                        @if ($defaultProductUnit->tracksStock())
+                                            {{ $defaultProductUnit->stock > 0 ? $defaultProductUnit->stock.' '.__('messages.In stock') : __('messages.Out of stock') }}
+                                        @else
+                                            {{ $defaultProductUnit->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
+                                        @endif
+                                    </div>
                                 @endif
-                            </strong>
+                            @else
+                                <strong class="d-block {{ $product->isInStock() ? 'text-success' : 'text-danger' }}">
+                                    @if ($product->tracksStock())
+                                        {{ $product->stock > 0 ? $product->stock.' '.__('messages.In stock') : __('messages.Out of stock') }}
+                                    @else
+                                        {{ $product->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
+                                        <span class="text-muted small">({{ __('messages.Untracked quantity') }})</span>
+                                    @endif
+                                </strong>
+                            @endif
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <small class="text-muted d-block">{{ __('messages.Sort order') }}</small>
-                            <strong>{{ $product->sort_order ?: '—' }}</strong>
+                            <small class="text-muted d-block">{{ __('messages.Product units') }}</small>
+                            <strong>{{ $product->formattedUnitsSummary($locale) ?: '—' }}</strong>
                         </div>
                         <div class="col-sm-6 col-lg-3">
                             <small class="text-muted d-block">{{ __('messages.Type') }}</small>
@@ -187,28 +222,72 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-3">{{ __('messages.Pricing information') }}</h5>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <small class="text-muted d-block">{{ __('messages.Base price') }}</small>
-                                    <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
-                                </div>
-                                @if ($product->hasDiscount())
-                                    <div class="col-md-4">
-                                        <small class="text-muted d-block">{{ __('messages.Discount value') }}</small>
-                                        <strong class="text-success">
-                                            @if ($product->discount_type === 'percentage')
-                                                {{ $product->discount }}%
-                                            @else
-                                                {{ number_format((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
-                                            @endif
-                                        </strong>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <small class="text-muted d-block">{{ __('messages.Final price') }}</small>
-                                        <strong class="text-success">{{ number_format($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+
+                            @if ($hasUnitPricing)
+                                <p class="text-muted small mb-3">{{ __('messages.Product pricing units show hint') }}</p>
+                                @if ((float) $product->price > 0)
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">{{ __('messages.Base price') }}</small>
+                                            <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                            <div class="form-text mb-0">{{ __('messages.Product base price reference hint') }}</div>
+                                        </div>
+                                        @if ($product->hasDiscount())
+                                            <div class="col-md-4">
+                                                <small class="text-muted d-block">{{ __('messages.Product level discount') }}</small>
+                                                <strong class="text-success">
+                                                    @if ($product->discount_type === 'percentage')
+                                                        {{ $product->discount }}%
+                                                    @else
+                                                        {{ number_format((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                                    @endif
+                                                </strong>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
-                            </div>
+
+                                @include('v1.admin.products.partials.show-pricing-units', [
+                                    'product' => $product,
+                                    'locale' => $locale,
+                                    'currency' => $currency,
+                                ])
+                            @else
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">{{ __('messages.Base price') }}</small>
+                                        <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                    </div>
+                                    @if ($product->hasDiscount())
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">{{ __('messages.Discount value') }}</small>
+                                            <strong class="text-success">
+                                                @if ($product->discount_type === 'percentage')
+                                                    {{ $product->discount }}%
+                                                @else
+                                                    {{ number_format((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                                @endif
+                                            </strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">{{ __('messages.Final price') }}</small>
+                                            <strong class="text-success">{{ number_format($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                        </div>
+                                    @endif
+                                    @if ($product->isSimple())
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">{{ __('messages.Stock') }}</small>
+                                            <strong class="{{ $product->isInStock() ? 'text-success' : 'text-danger' }}">
+                                                @if ($product->tracksStock())
+                                                    {{ $product->stock ?? 0 }}
+                                                @else
+                                                    {{ $product->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
+                                                @endif
+                                            </strong>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -237,82 +316,11 @@
                         <div class="card border-0 shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title mb-3">{{ __('messages.Product variants') }}</h5>
-                                @if ($product->variants->isEmpty())
-                                    <p class="text-muted mb-0">{{ __('messages.No variant rows yet. Add at least one.') }}</p>
-                                @else
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>{{ __('messages.Options') }}</th>
-                                                <th>{{ __('messages.Thumbnail') }}</th>
-                                                <th>{{ __('messages.Name') }}</th>
-                                                <th>{{ __('messages.SKU') }}</th>
-                                                <th>{{ __('messages.Price') }}</th>
-                                                <th>{{ __('messages.Stock') }}</th>
-                                                <th>{{ __('messages.Status') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($product->variants as $variant)
-                                                @php
-                                                    $optionSummary = $variant->values
-                                                        ->sortBy(fn ($value) => $value->variantOption?->variant_id ?? 0)
-                                                        ->map(function ($value) use ($locale) {
-                                                            $attribute = $value->variantOption?->variant?->getTranslation('name', $locale, false)
-                                                                ?: $value->variantOption?->variant?->getTranslation('name', 'en');
-                                                            $optionName = $value->getTranslation('value', $locale, false)
-                                                                ?: $value->getTranslation('value', 'en');
-
-                                                            return trim(($attribute ? $attribute.': ' : '').$optionName);
-                                                        })
-                                                        ->filter()
-                                                        ->implode(' · ');
-                                                    $variantThumbnail = $variant->values
-                                                        ->map(fn ($value) => $value->getRawOriginal('thumbnail'))
-                                                        ->filter()
-                                                        ->first()
-                                                        ?? $variant->getRawOriginal('thumbnail');
-                                                    $variantThumbnailUrl = $variantThumbnail
-                                                        ? asset('storage/'.$variantThumbnail)
-                                                        : null;
-                                                @endphp
-                                                <tr>
-                                                    <td>
-                                                        @if ($optionSummary !== '')
-                                                            <span class="small">{{ $optionSummary }}</span>
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if ($variantThumbnailUrl)
-                                                            <img src="{{ $variantThumbnailUrl }}" alt=""
-                                                                class="img-thumbnail"
-                                                                style="width: 48px; height: 48px; object-fit: cover;">
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $variant->getTranslation('name', $locale, false) ?: $variant->getTranslation('name', 'en') ?: '—' }}</td>
-                                                    <td><code class="small">{{ $variant->sku ?: '—' }}</code></td>
-                                                    <td>{{ number_format((float) $variant->price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
-                                                    <td>
-                                                        <span class="badge {{ $variant->isInStock() ? 'bg-success' : 'bg-danger' }}">
-                                                            @if ($variant->tracksStock())
-                                                                {{ $variant->stock }}
-                                                            @else
-                                                                {{ $variant->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
-                                                            @endif
-                                                        </span>
-                                                    </td>
-                                                    <td>@include('v1.admin.partials.active-badge', ['active' => $variant->is_active])</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                                @endif
+                                @include('v1.admin.products.partials.show-variants-tab', [
+                                    'product' => $product,
+                                    'locale' => $locale,
+                                    'currency' => $currency,
+                                ])
                             </div>
                         </div>
                     </div>

@@ -2,7 +2,6 @@
 
 namespace App\V1\Services;
 
-use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderLog;
@@ -25,6 +24,7 @@ class ProductService
     public function __construct(
         protected ProductRepository $products,
         protected ProductVariantService $productVariants,
+        protected ProductUnitService $productUnits,
     ) {}
 
     public function getAllProducts(): Collection
@@ -35,67 +35,6 @@ class ProductService
     public function getPaginatedProducts(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return $this->products->getPaginatedProducts($perPage, $filters);
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     */
-    public function getAdminIndexCategories(int $perPage, array $filters): LengthAwarePaginator
-    {
-        $query = Category::query();
-
-        $productConstraint = function ($productQuery) use ($filters) {
-            $productQuery->with(['brand', 'variants'])
-                ->orderBy('sort_order')
-                ->orderBy('id');
-            $this->products->applyAdminListFilters($productQuery, $filters);
-        };
-
-        $query->with(['products' => $productConstraint]);
-
-        if ($filters !== []) {
-            $query->whereHas('products', function ($productQuery) use ($filters) {
-                $this->products->applyAdminListFilters($productQuery, $filters);
-            });
-        }
-
-        if (! empty($filters['category_id'])) {
-            $query->where('id', $filters['category_id']);
-        }
-
-        return $query->orderBy('sort_order')->orderBy('id')->paginate($perPage);
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     */
-    public function getAdminIndexUncategorizedProducts(int $perPage, array $filters): LengthAwarePaginator
-    {
-        return $this->uncategorizedProductsQuery($filters)->paginate($perPage);
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     */
-    public function listAdminIndexUncategorizedProducts(array $filters): Collection
-    {
-        return $this->uncategorizedProductsQuery($filters)->get();
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     * @return \Illuminate\Database\Eloquent\Builder<Product>
-     */
-    protected function uncategorizedProductsQuery(array $filters)
-    {
-        $query = Product::query()
-            ->doesntHave('categories')
-            ->with(['brand', 'variants']);
-
-        $this->products->applyAdminListFilters($query, $filters);
-        $this->products->applyAdminListSort($query, (string) ($filters['sort'] ?? 'latest'));
-
-        return $query->orderBy('sort_order')->orderBy('id');
     }
 
     /**
@@ -112,7 +51,7 @@ class ProductService
 
     public function generateNextSimpleSku(): string
     {
-        $maxNumber = Product::query()
+        $maxNumber = Product::withTrashed()
             ->where('sku', 'like', 'PRD-%')
             ->pluck('sku')
             ->map(static function (string $sku): ?int {
@@ -121,7 +60,15 @@ class ProductService
             ->filter()
             ->max();
 
-        return sprintf('PRD-%04d', ((int) $maxNumber) + 1);
+        $nextNumber = max(1, ((int) $maxNumber) + 1);
+        $candidate = sprintf('PRD-%04d', $nextNumber);
+
+        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
+            $nextNumber++;
+            $candidate = sprintf('PRD-%04d', $nextNumber);
+        }
+
+        return $candidate;
     }
 
     public function getProductById(int $id): Product
@@ -161,8 +108,9 @@ class ProductService
                 $data['sku'] = $this->generateNextSimpleSku();
             }
 
-            $sortOrder = isset($data['sort_order']) ? max(1, (int) $data['sort_order']) : null;
-            $data['sort_order'] = $this->resolveSortOrderForCreate($sortOrder);
+            if (! empty($data['slug'])) {
+                $data['slug'] = Product::ensureUniqueSlug((string) $data['slug']);
+            }
 
             return $this->products->create($data);
         });
@@ -170,61 +118,11 @@ class ProductService
 
     public function update(Product $product, array $data): bool
     {
-        return DB::transaction(function () use ($product, $data) {
-            if (array_key_exists('sort_order', $data)) {
-                $data['sort_order'] = $this->reassignSortOrder($product, (int) $data['sort_order']);
-            }
-
-            return $this->products->update($product, $data);
-        });
-    }
-
-    protected function resolveSortOrderForCreate(?int $sortOrder): int
-    {
-        if ($sortOrder === null || $sortOrder < 1) {
-            return ((int) Product::query()->max('sort_order')) + 1;
+        if (isset($data['slug']) && trim((string) $data['slug']) !== '') {
+            $data['slug'] = Product::ensureUniqueSlug((string) $data['slug'], $product->id);
         }
 
-        Product::query()
-            ->where('sort_order', '>=', $sortOrder)
-            ->increment('sort_order');
-
-        return $sortOrder;
-    }
-
-    protected function reassignSortOrder(Product $product, int $newOrder): int
-    {
-        $newOrder = max(1, $newOrder);
-        $oldOrder = (int) ($product->sort_order ?? 0);
-
-        if ($oldOrder < 1) {
-            Product::query()
-                ->where('id', '!=', $product->id)
-                ->where('sort_order', '>=', $newOrder)
-                ->increment('sort_order');
-
-            return $newOrder;
-        }
-
-        if ($oldOrder === $newOrder) {
-            return $newOrder;
-        }
-
-        if ($newOrder < $oldOrder) {
-            Product::query()
-                ->where('id', '!=', $product->id)
-                ->where('sort_order', '>=', $newOrder)
-                ->where('sort_order', '<', $oldOrder)
-                ->increment('sort_order');
-        } else {
-            Product::query()
-                ->where('id', '!=', $product->id)
-                ->where('sort_order', '>', $oldOrder)
-                ->where('sort_order', '<=', $newOrder)
-                ->decrement('sort_order');
-        }
-
-        return $newOrder;
+        return $this->products->update($product, $data);
     }
 
     public function toggleActive(Product $product): Product
@@ -391,6 +289,22 @@ class ProductService
         return $this->productVariants->serializeForWizard($product);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     */
+    public function syncProductUnits(Product $product, array $rows, string $productType): void
+    {
+        $this->productUnits->syncForProduct($product, $rows);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function serializeProductUnitsForWizard(Product $product): array
+    {
+        return $this->productUnits->serializeForWizard($product);
+    }
+
     public function extractPersistableData(array $validated): array
     {
         unset(
@@ -400,15 +314,8 @@ class ProductService
             $validated['images'],
             $validated['thumbnail'],
             $validated['product_variants'],
+            $validated['product_units'],
         );
-
-        if (array_key_exists('sort_order', $validated) && ($validated['sort_order'] === '' || $validated['sort_order'] === null)) {
-            unset($validated['sort_order']);
-        }
-
-        if (array_key_exists('stock', $validated) && ($validated['stock'] === '' || $validated['stock'] === null)) {
-            $validated['stock'] = null;
-        }
 
         return $validated;
     }

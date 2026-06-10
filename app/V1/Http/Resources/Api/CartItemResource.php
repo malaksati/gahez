@@ -20,6 +20,7 @@ class CartItemResource extends JsonResource
             'id' => $this->id,
             'product' => new ProductResource($product),
             'variant' => $variant ? new ProductVariantResource($variant) : null,
+            'product_unit' => $this->productUnit ? new ProductUnitResource($this->productUnit) : null,
             'quantity' => $quantity,
             'billable_quantity' => $pricing['billable_quantity'],
             'bonus_quantity' => max(0, $quantity - $pricing['billable_quantity']),

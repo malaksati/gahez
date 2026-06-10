@@ -11,6 +11,7 @@ final class CartItemValidation
     {
         return [
             'variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
+            'product_unit_id' => ['nullable', 'integer', 'exists:product_units,id'],
             'quantity' => ['sometimes', 'integer', 'min:1'],
         ];
     }
@@ -54,6 +55,7 @@ final class CartItemValidation
         return [
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'variant_id' => ['nullable', 'integer', 'exists:product_variants,id'],
+            'product_unit_id' => ['nullable', 'integer', 'exists:product_units,id'],
             'quantity' => ['sometimes', 'integer', 'min:1'],
         ];
     }

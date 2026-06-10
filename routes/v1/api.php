@@ -8,6 +8,7 @@ use App\V1\Http\Controllers\Api\BrandController;
 use App\V1\Http\Controllers\Api\CartItemController;
 use App\V1\Http\Controllers\Api\CategoryController;
 use App\V1\Http\Controllers\Api\NotificationController;
+use App\V1\Http\Controllers\Api\GoalController;
 use App\V1\Http\Controllers\Api\OfferController;
 use App\V1\Http\Controllers\Api\OrderController;
 use App\V1\Http\Controllers\Api\ProfileController;
@@ -107,6 +108,7 @@ Route::middleware('throttle:30,1')->group(function () {
         Route::post('wishlist/{product}', [WishlistController::class, 'toggle']);
 
         Route::get('wallet/history', [WalletTransactionController::class, 'index']);
+        Route::get('goals', [GoalController::class, 'index']);
 
         Route::get('orders', [OrderController::class, 'index']);
         Route::post('orders', [OrderController::class, 'store']);

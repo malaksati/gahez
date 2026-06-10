@@ -10,6 +10,7 @@ use App\V1\DataTransfer\Support\ImportDuplicateGuard;
 use App\V1\DataTransfer\Support\ImportRelationResolver;
 use App\V1\DataTransfer\Support\ProductSpreadsheetColumns;
 use App\V1\Http\Requests\Rules\ProductValidation;
+use App\V1\Services\ProductUnitService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -38,6 +39,7 @@ class ProductImporter
 
         $buffer = [];
         $categoryMap = [];
+        $unitMap = [];
         $duplicateGuard = new ImportDuplicateGuard;
         $processed = 0;
         $success = 0;
@@ -81,6 +83,16 @@ class ProductImporter
                             'ids' => $categoryIds,
                             'sync' => $syncCategories,
                         ];
+                        $unitMap[$sku] = array_merge(
+                            $mapped['import_unit'] ?? [
+                                'unit_code' => 'piece',
+                                'factor' => 1,
+                            ],
+                            [
+                                'price' => $product['price'] ?? 0,
+                                'stock' => $product['stock'] ?? null,
+                            ],
+                        );
                         $success++;
                     }
                 }
@@ -92,11 +104,12 @@ class ProductImporter
             $processed++;
 
             if (count($buffer) >= $this->chunkSize()) {
-                [$chunkFailed, $chunkSuccess] = $this->flushBuffer($buffer, $categoryMap);
+                [$chunkFailed, $chunkSuccess] = $this->flushBuffer($buffer, $categoryMap, $unitMap);
                 $failed += $chunkFailed;
                 $success -= $chunkSuccess;
                 $buffer = [];
                 $categoryMap = [];
+                $unitMap = [];
             }
 
             if ($processed % 50 === 0) {
@@ -110,7 +123,7 @@ class ProductImporter
         }
 
         if ($buffer !== []) {
-            [$chunkFailed, $chunkSuccess] = $this->flushBuffer($buffer, $categoryMap);
+            [$chunkFailed, $chunkSuccess] = $this->flushBuffer($buffer, $categoryMap, $unitMap);
             $failed += $chunkFailed;
             $success -= $chunkSuccess;
         }
@@ -141,10 +154,7 @@ class ProductImporter
             'thumbnail' => $product['thumbnail'],
             'sku' => $product['sku'],
             'slug' => $product['slug'],
-            'price' => $product['price'],
-            'stock' => $product['stock'],
             'is_in_stock' => ($product['is_in_stock'] ?? true) ? 1 : 0,
-            'sort_order' => $product['sort_order'] ?? null,
             'discount' => $product['discount'],
             'discount_type' => $product['discount_type'],
             'is_active' => $product['is_active'] ? 1 : 0,
@@ -163,28 +173,51 @@ class ProductImporter
      * @param  array<string, list<int>>  $categoryMap
      * @return array{0: int, 1: int}
      */
-    private function flushBuffer(array $buffer, array $categoryMap): array
+    private function flushBuffer(array $buffer, array $categoryMap, array $unitMap): array
     {
         try {
-            DB::transaction(function () use ($buffer, $categoryMap) {
+            DB::transaction(function () use ($buffer, $categoryMap, $unitMap) {
                 Product::query()->insert($buffer);
 
                 $skus = array_column($buffer, 'sku');
 
                 if ($skus !== []) {
                     $products = Product::query()
-                        ->select(['id', 'sku'])
+                        ->select(['id', 'sku', 'is_in_stock'])
                         ->whereIn('sku', $skus, 'and', false)
                         ->get();
+
+                    $unitService = app(ProductUnitService::class);
 
                     foreach ($products as $product) {
                         $categoryEntry = $categoryMap[$product->sku] ?? null;
 
-                        if (! is_array($categoryEntry) || ! ($categoryEntry['sync'] ?? false)) {
-                            continue;
+                        if (is_array($categoryEntry) && ($categoryEntry['sync'] ?? false)) {
+                            $product->categories()->sync($categoryEntry['ids'] ?? []);
                         }
 
-                        $product->categories()->sync($categoryEntry['ids'] ?? []);
+                        $unitEntry = $unitMap[$product->sku] ?? [
+                            'unit_code' => 'piece',
+                            'factor' => 1,
+                            'price' => 0,
+                            'stock' => null,
+                        ];
+                        $unitId = DB::table('units')->where('code', $unitEntry['unit_code'] ?? 'piece')->value('id');
+
+                        if ($unitId) {
+                            $unitService->syncForProduct($product, [[
+                                'unit_id' => $unitId,
+                                'price' => $unitEntry['price'] ?? 0,
+                                'stock' => $unitEntry['stock'] ?? null,
+                                'is_in_stock' => (bool) $product->is_in_stock,
+                                'factor' => max(1, (int) ($unitEntry['factor'] ?? 1)),
+                                'is_default' => true,
+                                'sort_order' => 0,
+                                'is_active' => true,
+                            ]]);
+                        } else {
+                            $unitService->syncForProduct($product, []);
+                        }
                     }
 
                     $productsWithRelations = Product::query()

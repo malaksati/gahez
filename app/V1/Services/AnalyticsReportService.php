@@ -3,7 +3,6 @@
 namespace App\V1\Services;
 
 use App\Models\Category;
-use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -28,7 +27,6 @@ class AnalyticsReportService
 
         return match ($type) {
             'customers' => $this->customersReport(),
-            'customer-segments' => $this->customerSegmentsReport($filters),
             'sales-period' => $this->salesPeriodReport($from, $to, $filters),
             'sales-payment-methods' => $this->salesPaymentMethodsReport($from, $to),
             'top-products-categories' => $this->topProductsCategoriesReport($from, $to),
@@ -129,7 +127,6 @@ class AnalyticsReportService
     {
         return [
             ['key' => 'customers', 'title' => __('messages.Customers report'), 'description' => __('messages.Customers report description'), 'icon' => 'bi-people'],
-            ['key' => 'customer-segments', 'title' => __('messages.Customer segments report'), 'description' => __('messages.Customer segments report description'), 'icon' => 'bi-diagram-3'],
             ['key' => 'sales-period', 'title' => __('messages.Sales period report'), 'description' => __('messages.Sales period report description'), 'icon' => 'bi-graph-up'],
             ['key' => 'sales-payment-methods', 'title' => __('messages.Sales by payment method'), 'description' => __('messages.Sales payment methods report description'), 'icon' => 'bi-credit-card'],
             ['key' => 'top-products-categories', 'title' => __('messages.Top products and categories'), 'description' => __('messages.Top products categories report description'), 'icon' => 'bi-trophy'],
@@ -167,119 +164,6 @@ class AnalyticsReportService
             ],
             'meta' => [],
         ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     */
-    protected function customerSegmentsReport(array $filters): array
-    {
-        $heroThreshold = (float) ($filters['hero_amount'] ?? setting('report_hero_order_amount', 100));
-        $lowerThreshold = (float) ($filters['lower_value_amount'] ?? setting('report_lower_value_order_amount', 20));
-        $now = CarbonImmutable::now();
-
-        $customers = User::query()->where('role', 'user')->get();
-        $counts = [
-            'heroes' => 0,
-            'loyal' => 0,
-            'attention' => 0,
-            'lower_value' => 0,
-            'other' => 0,
-        ];
-
-        $rows = [];
-
-        foreach ($customers as $customer) {
-            $orders = Order::query()
-                ->where('user_id', $customer->id)
-                ->whereNotIn('status', ['cancelled', 'refunded'])
-                ->where('payment_status', 'paid')
-                ->orderByDesc('created_at')
-                ->get(['id', 'total', 'created_at']);
-
-            $segment = $this->classifyCustomerSegment($orders, $heroThreshold, $lowerThreshold, $now);
-            $counts[$segment]++;
-
-            $rows[] = [
-                $customer->name,
-                $customer->email ?? '—',
-                $customer->phone ?? '—',
-                $customer->is_active ? __('messages.Active') : __('messages.Inactive'),
-                __('messages.segment_'.$segment),
-                $orders->count(),
-                $orders->count() > 0 ? round((float) $orders->avg('total'), 2) : 0,
-                $orders->first()?->created_at?->format('Y-m-d') ?? '—',
-            ];
-        }
-
-        return [
-            'title' => __('messages.Customer segments report'),
-            'headings' => [
-                __('messages.Name'),
-                __('messages.Email'),
-                __('messages.Phone'),
-                __('messages.Status'),
-                __('messages.Segment'),
-                __('messages.Orders'),
-                __('messages.Average order'),
-                __('messages.Last order'),
-            ],
-            'rows' => $rows,
-            'summary' => [
-                'active' => $customers->where('is_active', true)->count(),
-                'inactive' => $customers->where('is_active', false)->count(),
-                'heroes' => $counts['heroes'],
-                'loyal' => $counts['loyal'],
-                'attention' => $counts['attention'],
-                'lower_value' => $counts['lower_value'],
-                'other' => $counts['other'],
-                'hero_threshold' => $heroThreshold,
-                'lower_value_threshold' => $lowerThreshold,
-            ],
-            'meta' => ['hero_amount' => $heroThreshold, 'lower_value_amount' => $lowerThreshold],
-        ];
-    }
-
-    /**
-     * @param  Collection<int, Order>  $orders
-     */
-    protected function classifyCustomerSegment(Collection $orders, float $heroThreshold, float $lowerThreshold, CarbonImmutable $now): string
-    {
-        if ($orders->isEmpty()) {
-            return 'other';
-        }
-
-        $avgOrder = (float) $orders->avg('total');
-        $lastOrder = CarbonImmutable::parse($orders->first()->created_at);
-        $daysSinceLast = (int) $lastOrder->diffInDays($now);
-
-        $recentMonths = collect(range(0, 2))->map(fn (int $i) => $now->subMonths($i)->format('Y-m'));
-        $monthsWithOrders = $orders
-            ->groupBy(fn (Order $order) => CarbonImmutable::parse($order->created_at)->format('Y-m'))
-            ->keys();
-        $ordersEveryMonth = $recentMonths->every(fn (string $month) => $monthsWithOrders->contains($month));
-
-        if ($ordersEveryMonth && $avgOrder >= $heroThreshold) {
-            return 'heroes';
-        }
-
-        if ($ordersEveryMonth) {
-            return 'loyal';
-        }
-
-        if ($daysSinceLast >= 60 && $daysSinceLast <= 120) {
-            return 'attention';
-        }
-
-        if ($avgOrder < $lowerThreshold) {
-            return 'lower_value';
-        }
-
-        if ($daysSinceLast > 30 && $daysSinceLast < 180) {
-            return 'attention';
-        }
-
-        return 'other';
     }
 
     /**

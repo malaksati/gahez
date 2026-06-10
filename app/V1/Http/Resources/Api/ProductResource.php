@@ -57,6 +57,9 @@ class ProductResource extends JsonResource
             'discount' => $this->discount,
             'discount_type' => $this->discount_type,
             'stock' => $this->stock,
+            'units' => ProductUnitResource::collection(
+                $this->whenLoaded('productUnits', fn () => $this->productUnits->where('is_active', true)->values()),
+            ),
             'is_active' => $this->is_active,
             'is_wishlisted' => $this->when($user = $request->user(), function () use ($user) {
                 return $this->wishlistedBy()->where('user_id', $user->id)->exists();

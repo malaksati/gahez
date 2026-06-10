@@ -82,7 +82,17 @@
                         @endif
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Shipping') }}</dt>
-                        <dd class="col-sm-8 mt-3">{{ number_format((float) $order->total_shipping, 2) }}{{ $currency ? ' '.$currency : '' }}</dd>
+                        <dd class="col-sm-8 mt-3">
+                            {{ number_format((float) $order->total_shipping, 2) }}{{ $currency ? ' '.$currency : '' }}
+                            @if ($order->is_fast_shipping)
+                                <span class="badge bg-info text-dark ms-1">{{ __('messages.Fast shipping') }}</span>
+                            @endif
+                        </dd>
+
+                        @if ($order->shipping_day)
+                            <dt class="col-sm-4 mt-3">{{ __('messages.Shipping day') }}</dt>
+                            <dd class="col-sm-8 mt-3">{{ __('messages.weekday_'.$order->shipping_day) }}</dd>
+                        @endif
 
                         @if ((float) $order->wallet_used > 0)
                             <dt class="col-sm-4 mt-3">{{ __('messages.Wallet used') }}</dt>

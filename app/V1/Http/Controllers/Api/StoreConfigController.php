@@ -3,7 +3,6 @@
 namespace App\V1\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\V1\Support\StoreTheme;
 use Illuminate\Http\JsonResponse;
 
 class StoreConfigController extends Controller
@@ -16,7 +15,6 @@ class StoreConfigController extends Controller
                 'app_name' => setting('app_name', config('app.name')),
                 'currency' => app_currency(),
                 'logo_url' => brand_logo_url(),
-                'theme' => StoreTheme::fromSettings(),
             ],
         ]);
     }

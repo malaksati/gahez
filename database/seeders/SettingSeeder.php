@@ -11,17 +11,13 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             ['key' => 'app_name', 'value' => 'Gahez', 'type' => 'string'],
-            ['key' => 'currency', 'value' => 'KWD', 'type' => 'string'],
+            ['key' => 'currency', 'value' => 'EGP', 'type' => 'string'],
             ['key' => 'cashback_percentage', 'value' => '5', 'type' => 'number'],
             ['key' => 'point_to_value', 'value' => '0.01', 'type' => 'number'],
             ['key' => 'shipping_price_per_km', 'value' => '0.5', 'type' => 'number'],
-            ['key' => 'report_hero_order_amount', 'value' => '100', 'type' => 'number'],
-            ['key' => 'report_lower_value_order_amount', 'value' => '20', 'type' => 'number'],
-            ['key' => 'store_primary_color', 'value' => '#faad28', 'type' => 'string'],
-            ['key' => 'store_secondary_color', 'value' => '#f8a713', 'type' => 'string'],
-            ['key' => 'store_category_layout', 'value' => 'horizontal', 'type' => 'string'],
-            ['key' => 'store_product_layout', 'value' => 'vertical', 'type' => 'string'],
-            ['key' => 'store_font_family', 'value' => 'Cairo', 'type' => 'string'],
+            ['key' => 'cart_min_line_count', 'value' => '0', 'type' => 'number'],
+            ['key' => 'cart_min_subtotal', 'value' => '0', 'type' => 'number'],
+            ['key' => 'fast_shipping_fee', 'value' => '0', 'type' => 'number'],
         ];
 
         foreach ($settings as $setting) {

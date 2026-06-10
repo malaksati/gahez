@@ -15,9 +15,11 @@ import { productWizard } from './admin/product-wizard';
 import { initOrderConfirmActions } from './admin/order-actions';
 import { initCategoriesIndexTable } from './admin/categories-index';
 import { initProductsIndexTable } from './admin/products-index';
+import { initGoalsIndexTable } from './admin/goals-index';
 import { initVariantFormOptions } from './admin/variant-form-options';
 import { initOrderCreate } from './admin/order-create';
 import { initLiveNotifications } from './admin/live-notifications';
+import { initAddressMapPickers } from './admin/address-map-picker';
 
 window.Alpine = Alpine;
 
@@ -337,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initOrderConfirmActions();
     initProductsIndexTable();
+    initGoalsIndexTable();
     initCategoriesIndexTable();
     initAdminListFilters();
     initAjaxForms();
@@ -347,6 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (document.getElementById('createOrderForm')) {
         initOrderCreate(window.__orderCreate ?? {});
+    }
+
+    if (document.querySelector('[data-map-picker]')) {
+        initAddressMapPickers(window.__addressMapPickerLabels ?? {});
     }
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new Tooltip(el));

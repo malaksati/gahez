@@ -4,7 +4,7 @@
 @section('subtitle', __('messages.Create a new customer account'))
 
 @section('content')
-    <form action="{{ route('v1.admin.customers.store') }}" method="POST">
+    <form action="{{ route('v1.admin.customers.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @include('v1.admin.customers._form')
         

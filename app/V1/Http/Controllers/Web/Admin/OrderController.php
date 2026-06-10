@@ -320,11 +320,8 @@ class OrderController extends AdminController
 
         abort_if($order === null, 404);
 
-        $logo = setting('app_logo');
-        $logoPath = is_string($logo) && $logo !== ''
-            ? public_path('storage/'.$logo)
-            : null;
-        $hasWatermarkLogo = $logoPath !== null && is_file($logoPath);
+        $logoPath = storage_public_path(setting('app_logo'));
+        $hasWatermarkLogo = $logoPath !== null;
 
         $pdfConfig = array_merge(config('pdf'), [
             'margin_left' => 8,

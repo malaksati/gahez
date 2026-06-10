@@ -47,14 +47,15 @@ final class ProductRowMapper
             ],
             'thumbnail' => $this->nullableString($row['thumbnail'] ?? $row['thumbnail_url'] ?? null),
             'sku' => $this->resolveSku($row, $nameEn),
-            'slug' => ImportSlugNormalizer::fromNameSource(
-                $this->nullableString($row['slug'] ?? null),
-                $nameEn ?: $nameAr ?: 'product',
+            'slug' => Product::ensureUniqueSlug(
+                ImportSlugNormalizer::fromNameSource(
+                    $this->nullableString($row['slug'] ?? null),
+                    $nameEn ?: $nameAr ?: 'product',
+                ),
             ),
             'price' => (float) ($row['price'] ?? 0),
             'stock' => $this->nullableInt($row['stock'] ?? null),
             'is_in_stock' => ImportBooleanParser::parse($row['is_in_stock'] ?? null, true),
-            'sort_order' => $this->nullableInt($row['sort_order'] ?? null),
             'discount' => isset($row['discount']) && $row['discount'] !== null && $row['discount'] !== '' ? (float) $row['discount'] : null,
             'discount_type' => $this->nullableString($row['discount_type'] ?? null),
             'is_active' => ImportBooleanParser::parse($row['is_active'] ?? null, true),
@@ -68,10 +69,19 @@ final class ProductRowMapper
         $categoriesValue = $row['category_ids'] ?? $row['categories'] ?? null;
         $syncCategories = ProductSpreadsheetColumns::categoriesColumnProvided($row);
 
+        $unitCode = strtolower(trim((string) ($row['unit_code'] ?? 'piece')));
+        if ($unitCode === '') {
+            $unitCode = 'piece';
+        }
+
         return [
             'product' => $product,
             'category_ids' => ImportRelationResolver::resolveCategoryIds($categoriesValue),
             'sync_categories' => $syncCategories,
+            'import_unit' => [
+                'unit_code' => $unitCode,
+                'factor' => max(1, (int) ($row['unit_factor'] ?? 1)),
+            ],
         ];
     }
 
@@ -94,7 +104,7 @@ final class ProductRowMapper
         $sku = 'PRD-'.strtoupper(Str::random(8));
         $counter = 1;
 
-        while (Product::query()->where('sku', $sku)->exists()) {
+        while (Product::withTrashed()->where('sku', $sku)->exists()) {
             $sku = 'PRD-'.strtoupper(Str::random(8)).'-'.$counter;
             $counter++;
         }

@@ -25,7 +25,10 @@
                             <div>{{ $customer->phone ?: '-' }}</div>
                         </td>
                         <td>
-                            @include('v1.admin.partials.active-badge', ['active' => $customer->is_active])
+                            <div class="d-flex flex-column align-items-start gap-1">
+                                @include('v1.admin.partials.active-badge', ['active' => $customer->is_active])
+                                @include('v1.admin.partials.verified-badge', ['verified' => $customer->is_verified])
+                            </div>
                         </td>
                         <td>
                             <span class="badge bg-info bg-opacity-10 text-info">

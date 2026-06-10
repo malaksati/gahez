@@ -175,8 +175,8 @@
                     <h1 class="report-title">{{ $report['title'] }}</h1>
                 </td>
                 <td class="report-header-logo">
-                    @if ($appLogo)
-                        <img src="{{ public_path('storage/' . $appLogo) }}" alt="" class="logo">
+                    @if ($appLogo && storage_public_path($appLogo))
+                        <img src="{{ storage_public_path($appLogo) }}" alt="" class="logo">
                     @endif
                 </td>
             </tr>
@@ -195,15 +195,6 @@
                     </td>
                 @endif
             </tr>
-            @if (! empty($report['summary']) && $type === 'customer-segments')
-                <tr>
-                    <td colspan="2">
-                        <strong>{{ __('messages.Active customers') }}:</strong> {{ $report['summary']['active'] ?? 0 }}
-                        &nbsp;|&nbsp;
-                        <strong>{{ __('messages.Inactive customers') }}:</strong> {{ $report['summary']['inactive'] ?? 0 }}
-                    </td>
-                </tr>
-            @endif
         </table>
 
         @if (! empty($report['summary']) && in_array($type, ['customers', 'sales-period', 'sales-payment-methods'], true))

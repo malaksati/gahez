@@ -20,15 +20,25 @@ class CartItemRepository
     public function getUserCartItems(int $userId): Collection
     {
         return $this->model::query()
-            ->with(['product.categories', 'product', 'variant'])
+            ->with(['product.categories', 'product.productUnits.unit', 'product', 'variant', 'productUnit.unit'])
             ->where('user_id', $userId)
             ->get();
     }
 
-    public function addOrIncrement(int $userId, Product $product, ?int $variantId = null, int $quantity = 1): CartItem
+    public function getCartLineCount(int $userId): int
     {
+        return $this->model::query()->where('user_id', $userId)->count();
+    }
+
+    public function addOrIncrement(
+        int $userId,
+        Product $product,
+        ?int $variantId = null,
+        int $quantity = 1,
+        ?int $productUnitId = null,
+    ): CartItem {
         $quantity = max(1, $quantity);
-        $cartItem = $this->findCartLine($userId, $product->id, $variantId);
+        $cartItem = $this->findCartLine($userId, $product->id, $variantId, $productUnitId);
 
         if ($cartItem) {
             $cartItem->increment('quantity', $quantity);
@@ -40,13 +50,19 @@ class CartItemRepository
             'user_id' => $userId,
             'product_id' => $product->id,
             'variant_id' => $variantId,
+            'product_unit_id' => $productUnitId,
             'quantity' => $quantity,
         ]);
     }
 
-    public function updateQuantity(int $userId, Product $product, int $quantity, ?int $variantId = null): CartItem
-    {
-        $cartItem = $this->findCartLine($userId, $product->id, $variantId);
+    public function updateQuantity(
+        int $userId,
+        Product $product,
+        int $quantity,
+        ?int $variantId = null,
+        ?int $productUnitId = null,
+    ): CartItem {
+        $cartItem = $this->findCartLine($userId, $product->id, $variantId, $productUnitId);
 
         if (! $cartItem) {
             throw ValidationException::withMessages([
@@ -74,32 +90,40 @@ class CartItemRepository
         return $cartItem->fresh();
     }
 
-    public function removeOrDecrement(int $userId, Product $product, ?int $variantId = null): CartItem
+    public function removeOrDecrement(int $userId, Product $product, ?int $variantId = null, ?int $productUnitId = null): CartItem
     {
-        $cartItem = $this->findCartLine($userId, $product->id, $variantId);
+        $cartItem = $this->findCartLine($userId, $product->id, $variantId, $productUnitId);
 
         if (! $cartItem) {
             return new CartItem([
                 'user_id' => $userId,
                 'product_id' => $product->id,
                 'variant_id' => $variantId,
+                'product_unit_id' => $productUnitId,
                 'quantity' => 0,
             ]);
         }
 
         if ($cartItem->quantity > 1) {
             $cartItem->decrement('quantity');
-        } else {
-            /** @var Model $cartItem */
-            $cartItem->delete();
+
+            return $cartItem->fresh();
         }
 
-        return $cartItem;
+        $cartItem->delete();
+
+        return new CartItem([
+            'user_id' => $userId,
+            'product_id' => $product->id,
+            'variant_id' => $variantId,
+            'product_unit_id' => $productUnitId,
+            'quantity' => 0,
+        ]);
     }
 
-    public function removeItem(int $userId, Product $product, ?int $variantId = null): bool
+    public function removeItem(int $userId, Product $product, ?int $variantId = null, ?int $productUnitId = null): bool
     {
-        $cartItem = $this->findCartLine($userId, $product->id, $variantId);
+        $cartItem = $this->findCartLine($userId, $product->id, $variantId, $productUnitId);
 
         if (! $cartItem) {
             return false;
@@ -108,8 +132,12 @@ class CartItemRepository
         return (bool) $cartItem->delete();
     }
 
-    protected function findCartLine(int $userId, int $productId, ?int $variantId): ?CartItem
-    {
+    protected function findCartLine(
+        int $userId,
+        int $productId,
+        ?int $variantId,
+        ?int $productUnitId = null,
+    ): ?CartItem {
         $query = $this->model::query()
             ->where('user_id', $userId)
             ->where('product_id', $productId);
@@ -118,6 +146,12 @@ class CartItemRepository
             $query->where('variant_id', $variantId);
         } else {
             $query->whereNull('variant_id');
+        }
+
+        if ($productUnitId) {
+            $query->where('product_unit_id', $productUnitId);
+        } else {
+            $query->whereNull('product_unit_id');
         }
 
         return $query->first();
@@ -132,9 +166,10 @@ class CartItemRepository
     {
         $cartItems = $this->model::query()->where('user_id', $userId)->with(['product'])->get();
         $totalQuantity = 0;
-        foreach($cartItems as $cartItem) {
+        foreach ($cartItems as $cartItem) {
             $totalQuantity += $cartItem->quantity;
         }
+
         return $totalQuantity;
     }
 
@@ -142,9 +177,10 @@ class CartItemRepository
     {
         $cartItems = $this->model::query()->where('user_id', $userId)->with(['product'])->get();
         $totalPrice = 0;
-        foreach($cartItems as $cartItem) {
+        foreach ($cartItems as $cartItem) {
             $totalPrice += $cartItem->quantity * $cartItem->product->price;
         }
+
         return $totalPrice;
     }
 
@@ -152,9 +188,10 @@ class CartItemRepository
     {
         $cartItems = $this->model::query()->where('user_id', $userId)->with(['product'])->get();
         $totalDiscount = 0;
-        foreach($cartItems as $cartItem) {
+        foreach ($cartItems as $cartItem) {
             $totalDiscount += $cartItem->quantity * $cartItem->product->discount;
         }
+
         return $totalDiscount;
     }
 }

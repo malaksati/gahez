@@ -36,6 +36,11 @@
             },
         };
         @endauth
+        window.__addressMapPickerLabels = {
+            empty: @json(__('messages.No location selected')),
+            selected: @json(__('messages.Location coordinates')),
+            modalHint: @json(__('messages.Map picker modal hint')),
+        };
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')

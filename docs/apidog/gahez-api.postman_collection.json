@@ -84,7 +84,7 @@
       "name": "Store",
       "item": [
         {
-          "name": "Store config & theme",
+          "name": "Store config",
           "request": {
             "auth": { "type": "noauth" },
             "method": "GET",

@@ -136,9 +136,9 @@ Laravel API resources may return `{ "data": [...] }` with pagination `links` / `
 
 # Public endpoints (no auth)
 
-## Store config & theme
+## Store config
 
-Load once on app startup. Theme is set by **admin only**.
+Load once on app startup for app name, currency, and logo.
 
 ```http
 GET /store/config
@@ -151,24 +151,11 @@ GET /store/config
   "success": true,
   "data": {
     "app_name": "Gahez",
-    "currency": "KWD",
-    "logo_url": "https://.../logo.png",
-    "theme": {
-      "primary_color": "#faad28",
-      "secondary_color": "#f8a713",
-      "category_layout": "horizontal",
-      "product_layout": "vertical",
-      "font_family": "Cairo"
-    }
+    "currency": "EGP",
+    "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }
 }
 ```
-
-| Theme field | Values |
-|-------------|--------|
-| `category_layout` | `horizontal`, `vertical` |
-| `product_layout` | `horizontal`, `vertical` |
-| `font_family` | `Cairo`, `Inter`, `Poppins`, `Roboto`, `Tajawal` |
 
 ---
 
@@ -605,7 +592,7 @@ GET /refund-requests
 GET /store/config
 ```
 
-Apply `theme` colors, `font_family`, and layout modes. Cache locally.
+Cache `app_name`, `currency`, and `logo_url` locally.
 
 ### 2. Register / login flow
 
@@ -640,19 +627,7 @@ const api = async (path, options = {}) => {
 5. `POST /orders`
 6. `GET /notifications` for status updates
 
-### 5. Theme usage
-
-| `category_layout` | UI suggestion |
-|-------------------|---------------|
-| `horizontal` | Horizontal scroll chips / carousel |
-| `vertical` | Vertical list |
-
-| `product_layout` | UI suggestion |
-|------------------|---------------|
-| `horizontal` | Row cards, image left |
-| `vertical` | Grid or stacked cards |
-
-### 6. Queue / email
+### 5. Queue / email
 
 Promotional and order notifications are stored in `notifications` table. Email is sent when the user has an email address. Run `php artisan queue:work` in production if notifications are queued.
 
@@ -675,7 +650,7 @@ Import the Apidog/Postman collection from `docs/apidog/gahez-api.postman_collect
 
 | Feature | Notes |
 |---------|-------|
-| Store theme (admin) | `GET /store/config` |
+| Store config | `GET /store/config` — app name, currency, logo |
 | Customer notifications | `GET /notifications` |
 | Offer/coupon promos | Admin bell button → customer inbox |
 | Birthdate on profile | `PATCH /profile` `birthdate` field |

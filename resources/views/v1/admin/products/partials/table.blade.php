@@ -8,7 +8,6 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 70px;">{{ __('messages.Sort order') }}</th>
                     <th>{{ __('messages.Image') }}</th>
                     <th>{{ __('messages.Name') }}</th>
                     @if (! empty($showCategoriesColumn))
@@ -16,6 +15,7 @@
                     @endif
                     <th>{{ __('messages.Brand') }}</th>
                     <th>{{ __('messages.SKU') }}</th>
+                    <th>{{ __('messages.Unit') }}</th>
                     <th>{{ __('messages.Price') }}</th>
                     <th>{{ __('messages.Stock') }}</th>
                     <th>{{ __('messages.Type') }}</th>
@@ -40,7 +40,6 @@
                         ])));
                     @endphp
                     <tr data-product-row="{{ $product->id }}" data-product-search="{{ $searchText }}">
-                        <td class="text-muted">{{ $product->sort_order ?: '—' }}</td>
                         <td>
                             <img
                                 src="{{ $product->thumbnail }}"
@@ -79,6 +78,13 @@
                         </td>
                         <td>
                             <code>{{ $product->sku }}</code>
+                        </td>
+                        <td>
+                            @if ($product->formattedUnitsSummary($locale))
+                                <span>{{ $product->formattedUnitsSummary($locale) }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
                         </td>
                         <td>
                             <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>

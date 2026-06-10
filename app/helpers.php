@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('setting_cache')) {
     /**
@@ -65,13 +66,63 @@ if (! function_exists('app_currency')) {
     }
 }
 
+if (! function_exists('storage_public_url')) {
+    /**
+     * Public URL for a file stored on the "public" disk (relative path, e.g. settings/foo.png).
+     */
+    function storage_public_url(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', trim($path));
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return Storage::disk('public')->url($path);
+    }
+}
+
+if (! function_exists('storage_public_path')) {
+    /**
+     * Absolute filesystem path for a public-disk file, or null when missing.
+     */
+    function storage_public_path(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', trim($path));
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, strlen('storage/'));
+        }
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->path($path);
+    }
+}
+
 if (! function_exists('brand_logo_url')) {
     function brand_logo_url(): string
     {
-        $logo = setting('app_logo');
+        $url = storage_public_url(setting('app_logo'));
 
-        if ($logo) {
-            return asset('storage/'.$logo);
+        if ($url !== null && storage_public_path(setting('app_logo')) !== null) {
+            return $url;
         }
 
         return asset('dashboard/assets/images/gahez-logo.png');

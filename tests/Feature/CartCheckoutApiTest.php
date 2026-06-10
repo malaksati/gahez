@@ -122,11 +122,9 @@ class CartCheckoutApiTest extends TestCase
 
         $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 2])->assertSuccessful();
 
-        $response = $this->postJson('/api/v1/orders', [
-            'address_id' => $address->id,
-            'payment_method' => 'cash_on_delivery',
+        $response = $this->postJson('/api/v1/orders', $this->orderPayload($address, [
             'notes' => 'Leave at door',
-        ]);
+        ]));
 
         $response->assertCreated()
             ->assertJsonPath('data.status', 'pending')
@@ -164,9 +162,7 @@ class CartCheckoutApiTest extends TestCase
 
         $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
 
-        $response = $this->postJson('/api/v1/orders', [
-            'address_id' => $address->id,
-            'payment_method' => 'cash_on_delivery',
+        $response = $this->postJson('/api/v1/orders', $this->orderPayload($address, [
             'item_notes' => [
                 [
                     'product_id' => $product->id,
@@ -174,7 +170,7 @@ class CartCheckoutApiTest extends TestCase
                     'note' => 'No onions please',
                 ],
             ],
-        ]);
+        ]));
 
         $response->assertCreated()
             ->assertJsonPath('data.items.0.note', 'No onions please');
@@ -186,6 +182,76 @@ class CartCheckoutApiTest extends TestCase
         ]);
     }
 
+    public function test_checkout_requires_shipping_day(): void
+    {
+        [$user, $product, $address] = $this->createCheckoutFixtures(productPrice: 10, quantity: 1);
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
+
+        $this->postJson('/api/v1/orders', [
+            'address_id' => $address->id,
+            'payment_method' => 'cash_on_delivery',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['shipping_day']);
+    }
+
+    public function test_fast_shipping_adds_extra_fee(): void
+    {
+        [$user, $product, $address] = $this->createCheckoutFixtures(productPrice: 20, quantity: 1);
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'fast_shipping_fee'],
+            ['value' => '10', 'type' => 'number'],
+        );
+        setting_forget('fast_shipping_fee');
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
+
+        $response = $this->postJson('/api/v1/orders', $this->orderPayload($address, [
+            'is_fast_shipping' => true,
+        ]));
+
+        $response->assertCreated()
+            ->assertJsonPath('data.total_shipping', '15.00')
+            ->assertJsonPath('data.is_fast_shipping', true)
+            ->assertJsonPath('data.fast_shipping_fee', 10);
+    }
+
+    public function test_cart_preview_includes_limits_and_shipping_options(): void
+    {
+        [$user, $product] = $this->createCustomerWithProduct(price: 10);
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'cart_min_line_count'],
+            ['value' => '3', 'type' => 'number'],
+        );
+        setting_forget('cart_min_line_count');
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'cart_min_subtotal'],
+            ['value' => '50', 'type' => 'number'],
+        );
+        setting_forget('cart_min_subtotal');
+
+        $this->setDefaultShippingFee(5);
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
+
+        $response = $this->getJson('/api/v1/cart');
+
+        $response->assertOk()
+            ->assertJsonPath('meta.cart_limits.min_line_count', 3)
+            ->assertJsonPath('meta.cart_limits.can_checkout', false)
+            ->assertJsonPath('meta.shipping.base_fee', 5)
+            ->assertJsonCount(7, 'meta.shipping.weekdays');
+    }
+
     public function test_checkout_fails_when_cart_is_empty(): void
     {
         $user = $this->createUser();
@@ -195,10 +261,7 @@ class CartCheckoutApiTest extends TestCase
 
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/v1/orders', [
-            'address_id' => $address->id,
-            'payment_method' => 'cash_on_delivery',
-        ]);
+        $response = $this->postJson('/api/v1/orders', $this->orderPayload($address));
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['cart']);
@@ -227,6 +290,19 @@ class CartCheckoutApiTest extends TestCase
         $address = $this->createAddressForUser($user);
 
         return [$user, $product, $address];
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    protected function orderPayload(Address $address, array $overrides = []): array
+    {
+        return array_merge([
+            'address_id' => $address->id,
+            'payment_method' => 'cash_on_delivery',
+            'shipping_day' => 'monday',
+        ], $overrides);
     }
 
     protected function setDefaultShippingFee(float $fee): void

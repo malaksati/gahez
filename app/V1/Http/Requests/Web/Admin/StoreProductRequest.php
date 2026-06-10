@@ -2,6 +2,7 @@
 
 namespace App\V1\Http\Requests\Web\Admin;
 
+use App\V1\Http\Requests\Concerns\ValidatesProductUnits;
 use App\V1\Http\Requests\Concerns\ValidatesProductVariants;
 use App\V1\Http\Requests\Rules\ProductValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
@@ -9,11 +10,12 @@ use Illuminate\Contracts\Validation\Validator;
 
 class StoreProductRequest extends AdminFormRequest
 {
-    use ValidatesProductVariants;
+    use ValidatesProductUnits, ValidatesProductVariants;
 
     protected function prepareForValidation(): void
     {
-        $this->merge(ProductValidation::normalizeOptionalFields($this->all()));
+        $this->prepareProductPricingFields();
+        $this->prepareProductSlugField();
     }
 
     /**
@@ -25,6 +27,7 @@ class StoreProductRequest extends AdminFormRequest
             ProductValidation::store(),
             ProductValidation::adminMediaAndRelations(),
             ProductValidation::adminProductVariants(),
+            ProductValidation::adminProductUnits(),
         );
     }
 
@@ -39,5 +42,6 @@ class StoreProductRequest extends AdminFormRequest
     public function withValidator(Validator $validator): void
     {
         $this->validateProductVariants($validator);
+        $this->validateProductUnits($validator);
     }
 }

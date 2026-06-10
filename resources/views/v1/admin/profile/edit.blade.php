@@ -51,7 +51,6 @@
                                 value="{{ old('birthdate', $user->birthdate?->format('Y-m-d')) }}"
                                 class="form-control @error('birthdate') is-invalid @enderror"
                                 max="{{ now()->subDay()->format('Y-m-d') }}">
-                            <small class="text-muted d-block">{{ __('messages.Birthdate hint') }}</small>
                             @error('birthdate')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
 

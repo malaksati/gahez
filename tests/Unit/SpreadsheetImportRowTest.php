@@ -48,7 +48,8 @@ class SpreadsheetImportRowTest extends TestCase
     {
         $headings = ProductSpreadsheetColumns::headings();
 
-        $this->assertContains('sort_order', $headings);
+        $this->assertContains('unit_code', $headings);
+        $this->assertContains('unit_factor', $headings);
         $this->assertContains('is_in_stock', $headings);
     }
 
@@ -57,14 +58,14 @@ class SpreadsheetImportRowTest extends TestCase
         $this->assertContains('sort_order', CategorySpreadsheetColumns::headings());
     }
 
-    public function test_product_canonicalize_maps_sort_and_stock_aliases(): void
+    public function test_product_canonicalize_maps_unit_and_stock_aliases(): void
     {
         $row = ProductSpreadsheetColumns::canonicalizeRow([
-            'sort' => 3,
+            'unit_qty' => 12,
             'in_stock' => 1,
         ]);
 
-        $this->assertSame(3, $row['sort_order']);
+        $this->assertSame(12, $row['unit_factor']);
         $this->assertSame(1, $row['is_in_stock']);
     }
 }

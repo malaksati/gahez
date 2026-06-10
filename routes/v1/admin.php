@@ -12,6 +12,7 @@ use App\V1\Http\Controllers\Web\Admin\DashboardController;
 use App\V1\Http\Controllers\Web\Admin\DataTransferBatchController;
 use App\V1\Http\Controllers\Web\Admin\HelpController;
 use App\V1\Http\Controllers\Web\Admin\NotificationController;
+use App\V1\Http\Controllers\Web\Admin\GoalController;
 use App\V1\Http\Controllers\Web\Admin\OfferController;
 use App\V1\Http\Controllers\Web\Admin\OrderController;
 use App\V1\Http\Controllers\Web\Admin\OrderRefundRequestController;
@@ -23,7 +24,6 @@ use App\V1\Http\Controllers\Web\Admin\ProfileController;
 use App\V1\Http\Controllers\Web\Admin\ReportController;
 use App\V1\Http\Controllers\Web\Admin\SecurityController;
 use App\V1\Http\Controllers\Web\Admin\SettingsController;
-use App\V1\Http\Controllers\Web\Admin\ThemeController;
 use App\V1\Http\Controllers\Web\Admin\SliderController;
 use App\V1\Http\Controllers\Web\Admin\TicketController;
 use App\V1\Http\Controllers\Web\Admin\VariantController;
@@ -71,6 +71,7 @@ Route::middleware('permission:manage products')->group(function () {
     Route::get('products/next-sku', [ProductController::class, 'nextSku'])->name('products.next-sku');
     Route::post('products/quick-catalog-variant', [ProductController::class, 'quickStoreCatalogVariant'])->name('products.quick-catalog-variant');
     Route::post('products/quick-variant-option', [ProductController::class, 'quickStoreVariantOption'])->name('products.quick-variant-option');
+    Route::post('products/quick-catalog-unit', [ProductController::class, 'quickStoreCatalogUnit'])->name('products.quick-catalog-unit');
     Route::post('products/{product}/toggle-active', [ProductController::class, 'toggleActive'])->name('products.toggle-active');
     Route::post('products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
     Route::post('products/{product}/toggle-approved', [ProductController::class, 'toggleApproved'])->name('products.toggle-approved');
@@ -118,6 +119,12 @@ Route::middleware('permission:manage offers')->group(function () {
     Route::resource('offers', OfferController::class);
 });
 
+// Goals
+Route::middleware('permission:manage goals')->group(function () {
+    Route::post('goals/{goal}/toggle-active', [GoalController::class, 'toggleActive'])->name('goals.toggle-active');
+    Route::resource('goals', GoalController::class);
+});
+
 // Sliders
 Route::middleware('permission:manage sliders')->group(function () {
     Route::resource('sliders', SliderController::class);
@@ -145,13 +152,13 @@ Route::middleware('permission:view reports')->group(function () {
     Route::get('reports/product-performance', [ReportController::class, 'productPerformance'])->name('reports.product-performance');
     Route::get('reports/{type}/export', [ReportController::class, 'export'])
         ->name('reports.export')
-        ->where('type', 'customers|customer-segments|sales-period|sales-payment-methods|top-products-categories|stock');
+        ->where('type', 'customers|sales-period|sales-payment-methods|top-products-categories|stock');
     Route::get('reports/{type}/export-pdf', [ReportController::class, 'exportPdf'])
         ->name('reports.export-pdf')
-        ->where('type', 'customers|customer-segments|sales-period|sales-payment-methods|top-products-categories|stock');
+        ->where('type', 'customers|sales-period|sales-payment-methods|top-products-categories|stock');
     Route::get('reports/{type}', [ReportController::class, 'show'])
         ->name('reports.show')
-        ->where('type', 'customers|customer-segments|sales-period|sales-payment-methods|top-products-categories|stock');
+        ->where('type', 'customers|sales-period|sales-payment-methods|top-products-categories|stock');
 });
 
 // Product Ratings
@@ -177,8 +184,6 @@ Route::middleware('permission:manage tickets')->group(function () {
 Route::middleware('permission:manage settings')->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::get('theme', [ThemeController::class, 'index'])->name('theme.index');
-    Route::post('theme', [ThemeController::class, 'update'])->name('theme.update');
     Route::get('security', [SecurityController::class, 'index'])->name('security.index');
     Route::get('help', [HelpController::class, 'index'])->name('help.index');
 });

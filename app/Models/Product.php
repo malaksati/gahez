@@ -6,6 +6,7 @@ use App\Models\Concerns\HasOptionalStock;
 use App\Factories\ProductPriceStockFactory;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,10 +24,7 @@ class Product extends Model
         'thumbnail',
         'sku',
         'slug',
-        'price',
-        'stock',
         'is_in_stock',
-        'sort_order',
         'discount',
         'discount_type',
         'is_active',
@@ -50,18 +48,50 @@ class Product extends Model
         return [
             'slug' => [
                 'source' => 'name.en',
+                'unique' => true,
             ],
         ];
+    }
+
+    /**
+     * Include soft-deleted rows when Sluggable checks slug uniqueness.
+     */
+    public function scopeWithUniqueSlugConstraints(
+        Builder $query,
+        string $attribute,
+        array $config,
+        string $slug,
+    ): Builder {
+        return $query->withTrashed();
+    }
+
+    public static function ensureUniqueSlug(string $slug, ?int $ignoreProductId = null): string
+    {
+        $base = Str::slug($slug);
+
+        if ($base === '') {
+            return $base;
+        }
+
+        $candidate = $base;
+        $suffix = 2;
+
+        while (static::withTrashed()
+            ->where('slug', $candidate)
+            ->when($ignoreProductId, fn (Builder $query) => $query->where('id', '!=', $ignoreProductId))
+            ->exists()) {
+            $candidate = $base.'-'.$suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 
     protected $casts = [
         'name' => 'array',
         'description' => 'array',
-        'price' => 'decimal:2',
         'discount' => 'decimal:2',
-        'stock' => 'integer',
         'is_in_stock' => 'boolean',
-        'sort_order' => 'integer',
         'discount_type' => 'string',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
@@ -136,21 +166,100 @@ class Product extends Model
         return $builder->where('type', 'variable');
     }
 
+    protected function price(): Attribute
+    {
+        return Attribute::get(function (): float {
+            if ($this->isVariable()) {
+                $units = $this->relationLoaded('productUnits')
+                    ? $this->productUnits->where('is_active', true)
+                    : $this->productUnits()->where('is_active', true)->get();
+
+                if ($units->isNotEmpty()) {
+                    return (float) ($units->min('price') ?? 0);
+                }
+
+                $variants = $this->relationLoaded('variants')
+                    ? $this->variants
+                    : $this->variants()->get();
+
+                return (float) ($variants->min('price') ?? 0);
+            }
+
+            return (float) ($this->defaultProductUnit()?->price ?? 0);
+        });
+    }
+
+    protected function stock(): Attribute
+    {
+        return Attribute::get(fn (): ?int => $this->isVariable()
+            ? $this->aggregateVariantStock()
+            : $this->aggregateUnitStock());
+    }
+
     /**
-     * Calculate the final price after discount
+     * Calculate the final price after product-level discount
      */
     public function getFinalPriceAttribute(): float
     {
+        $basePrice = (float) $this->price;
+
         if (! $this->discount || $this->discount <= 0) {
-            return (float) $this->price;
+            return $basePrice;
         }
 
         if ($this->discount_type == 'percentage') {
-            return (float) $this->price - (($this->price * $this->discount) / 100);
+            return (float) $basePrice - (($basePrice * $this->discount) / 100);
         }
 
-        // Fixed discount
-        return (float) max(0, $this->price - $this->discount);
+        return (float) max(0, $basePrice - $this->discount);
+    }
+
+    protected function aggregateVariantStock(): ?int
+    {
+        $units = $this->relationLoaded('productUnits')
+            ? $this->productUnits->where('is_active', true)
+            : $this->productUnits()->where('is_active', true)->get();
+
+        if ($units->isNotEmpty()) {
+            $trackedTotal = (int) $units->whereNotNull('stock')->sum('stock');
+            $hasUntracked = $units->contains(fn (ProductUnit $unit) => $unit->stock === null);
+
+            if ($hasUntracked && $trackedTotal === 0) {
+                return null;
+            }
+
+            return $trackedTotal;
+        }
+
+        $variants = $this->relationLoaded('variants')
+            ? $this->variants
+            : $this->variants()->get();
+
+        $trackedTotal = (int) $variants->whereNotNull('stock')->sum('stock');
+        $hasUntracked = $variants->contains(fn (ProductVariant $variant) => $variant->stock === null);
+
+        if ($hasUntracked && $trackedTotal === 0) {
+            return null;
+        }
+
+        return $trackedTotal;
+    }
+
+    protected function aggregateUnitStock(): ?int
+    {
+        $units = $this->relationLoaded('productUnits')
+            ? $this->productUnits
+            : $this->productUnits()->get();
+
+        $activeUnits = $units->where('is_active', true);
+        $trackedTotal = (int) $activeUnits->whereNotNull('stock')->sum('stock');
+        $hasUntracked = $activeUnits->contains(fn (ProductUnit $unit) => $unit->stock === null);
+
+        if ($hasUntracked && $trackedTotal === 0) {
+            return null;
+        }
+
+        return $trackedTotal;
     }
 
     /**
@@ -175,6 +284,40 @@ class Product extends Model
     public function isSimple(): bool
     {
         return $this->type == 'simple';
+    }
+
+    public function productUnits()
+    {
+        return $this->hasMany(ProductUnit::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function defaultProductUnit(): ?ProductUnit
+    {
+        $units = $this->relationLoaded('productUnits')
+            ? $this->productUnits
+            : $this->productUnits()->with('unit')->get();
+
+        if ($units->isEmpty()) {
+            return null;
+        }
+
+        return $units->firstWhere('is_default', true) ?? $units->first();
+    }
+
+    public function formattedUnitsSummary(?string $locale = null): ?string
+    {
+        $units = $this->relationLoaded('productUnits')
+            ? $this->productUnits
+            : $this->productUnits()->with('unit')->get();
+
+        if ($units->isEmpty()) {
+            return null;
+        }
+
+        return $units
+            ->map(fn (ProductUnit $row) => $row->displayUnitName($locale))
+            ->filter()
+            ->implode(' · ');
     }
 
     public function isPurchasable(): bool

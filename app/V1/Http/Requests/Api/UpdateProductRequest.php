@@ -2,6 +2,7 @@
 
 namespace App\V1\Http\Requests\Api;
 
+use App\Models\Product;
 use App\V1\Http\Requests\Rules\ProductValidation;
 
 class UpdateProductRequest extends ApiFormRequest
@@ -13,7 +14,17 @@ class UpdateProductRequest extends ApiFormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge(ProductValidation::normalizeOptionalFields($this->all()));
+        $normalized = ProductValidation::normalizeOptionalFields($this->all());
+        $productId = (int) $this->route('id');
+
+        if (isset($normalized['slug']) && trim((string) $normalized['slug']) !== '') {
+            $normalized['slug'] = Product::ensureUniqueSlug(
+                (string) $normalized['slug'],
+                $productId > 0 ? $productId : null,
+            );
+        }
+
+        $this->merge($normalized);
     }
     /**
      * @return array<string, list<mixed>>

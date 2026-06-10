@@ -310,7 +310,10 @@
 
             <div class="header">
                 @if ($appLogo)
-                    <img src="{{ public_path('storage/' . $appLogo) }}" alt="" class="logo">
+                    @php($logoSrc = empty($asPdf) ? storage_public_url($appLogo) : storage_public_path($appLogo))
+                    @if ($logoSrc)
+                        <img src="{{ $logoSrc }}" alt="" class="logo">
+                    @endif
                 @endif
                 <h1 class="title">{{ __('messages.Invoice') }}</h1>
             </div>

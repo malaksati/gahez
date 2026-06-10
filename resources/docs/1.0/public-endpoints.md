@@ -4,17 +4,17 @@ No authentication required.
 
 ---
 
-- [Store config & theme](#store-config-theme)
+- [Store config](#store-config)
 - [Register](#register)
 - [Verify account](#verify-account)
 - [Password reset](#password-reset)
 - [Catalog](#catalog)
 - [Plans](#plans)
 
-<a name="store-config-theme"></a>
-## Store config & theme
+<a name="store-config"></a>
+## Store config
 
-Load once on app startup. Theme is set by **admin only**.
+Load once on app startup for app name, currency, and logo.
 
 ```http
 GET /store/config
@@ -27,24 +27,11 @@ GET /store/config
   "success": true,
   "data": {
     "app_name": "Gahez",
-    "currency": "KWD",
-    "logo_url": "https://.../logo.png",
-    "theme": {
-      "primary_color": "#faad28",
-      "secondary_color": "#f8a713",
-      "category_layout": "horizontal",
-      "product_layout": "vertical",
-      "font_family": "Cairo"
-    }
+    "currency": "EGP",
+    "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }
 }
 ```
-
-| Theme field | Values |
-|-------------|--------|
-| `category_layout` | `horizontal`, `vertical` |
-| `product_layout` | `horizontal`, `vertical` |
-| `font_family` | `Cairo`, `Inter`, `Poppins`, `Roboto`, `Tajawal` |
 
 <a name="register"></a>
 ## Register

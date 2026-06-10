@@ -17,5 +17,5 @@
         @endif
     </div>
 @else
-    <span class="text-muted">—</span>
+    <span class="badge bg-secondary">{{ __('messages.Unlimited') }}</span>
 @endif

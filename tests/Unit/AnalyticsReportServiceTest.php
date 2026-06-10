@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Models\Setting;
 use App\Models\User;
 use App\V1\Http\Requests\Web\Admin\Reports\AnalyticsReportRequest;
 use App\V1\Services\AnalyticsReportService;
@@ -36,26 +35,9 @@ class AnalyticsReportServiceTest extends TestCase
         $this->assertSame(1, $report['summary']['total']);
     }
 
-    public function test_customer_segments_report_uses_threshold_settings(): void
+    public function test_available_reports_returns_five_entries(): void
     {
-        Setting::query()->updateOrCreate(['key' => 'report_hero_order_amount'], ['value' => '150', 'type' => 'number']);
-        Setting::query()->updateOrCreate(['key' => 'report_lower_value_order_amount'], ['value' => '15', 'type' => 'number']);
-
-        User::factory()->create(['role' => 'user']);
-
-        $report = $this->service->build('customer-segments', [
-            'hero_amount' => 150,
-            'lower_value_amount' => 15,
-        ]);
-
-        $this->assertSame(150.0, $report['summary']['hero_threshold']);
-        $this->assertSame(15.0, $report['summary']['lower_value_threshold']);
-        $this->assertCount(1, $report['rows']);
-    }
-
-    public function test_available_reports_returns_six_entries(): void
-    {
-        $this->assertCount(6, $this->service->availableReports());
+        $this->assertCount(5, $this->service->availableReports());
     }
 
     public function test_chart_overview_returns_thirty_day_series(): void

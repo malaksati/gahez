@@ -122,10 +122,9 @@
                             <th style="width: 15%;">{{ __('messages.Variation') }}</th>
                             <th style="width: 12%;">{{ __('messages.Name') }} ({{ __('messages.English') }})</th>
                             <th style="width: 12%;">{{ __('messages.Name') }} ({{ __('messages.Arabic') }})</th>
-                            <th style="width: 10%;">{{ __('messages.SKU') }}</th>
-                            <th style="width: 10%;">{{ __('messages.Price') }}</th>
-                            <th style="width: 10%;">{{ __('messages.Thumbnail') }}</th>
-                            <th style="width: 12%;">{{ __('messages.Availability') }}</th>
+                            <th style="width: 12%;">{{ __('messages.SKU') }}</th>
+                            <th style="width: 12%;">{{ __('messages.Thumbnail') }}</th>
+                            <th style="width: 10%;">{{ __('messages.Availability') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,10 +163,6 @@
                                         :placeholder="@js(__('messages.Auto'))">
                                 </td>
                                 <td>
-                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm"
-                                        :name="`product_variants[${index}][price]`" x-model="row.price" required>
-                                </td>
-                                <td>
                                     <div class="d-flex flex-column align-items-center">
                                         <button type="button" class="btn btn-sm btn-outline-secondary mb-2"
                                             @click="document.getElementById(`product_variant_thumbnail_${index}`)?.click()">
@@ -188,16 +183,13 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="form-check form-switch mb-2">
+                                    <div class="form-check form-switch">
                                         <input type="checkbox" class="form-check-input"
                                             :id="`variant_in_stock_${index}`" x-model="row.is_in_stock">
                                         <label class="form-check-label small" :for="`variant_in_stock_${index}`">
                                             {{ __('messages.Available') }}
                                         </label>
                                     </div>
-                                    <input type="number" min="0" class="form-control form-control-sm"
-                                        :name="`product_variants[${index}][stock]`" x-model="row.stock"
-                                        placeholder="{{ __('messages.Qty optional') }}">
                                 </td>
                             </tr>
                         </template>
@@ -216,6 +208,8 @@
             <i class="bi bi-info-circle me-2"></i>
             {{ __('messages.Toggle variant options above to generate the variations table.') }}
         </div>
+
+        @include('v1.admin.products.partials.wizard-variant-units')
     </div>
 
     @error('product_variants')

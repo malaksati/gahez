@@ -41,4 +41,22 @@ final class AddressValidation
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function nestedForCustomer(): array
+    {
+        return [
+            'address.id' => ['nullable', 'integer', 'exists:addresses,id'],
+            'address.name' => ['nullable', 'required_with:address.address', 'string', 'max:255'],
+            'address.address' => ['nullable', 'required_with:address.name', 'string', 'max:500'],
+            'address.latitude' => ['nullable', 'required_with:address.address', 'string', 'max:32'],
+            'address.longitude' => ['nullable', 'required_with:address.address', 'string', 'max:32'],
+            'address.phone' => ['nullable', 'string', 'max:50'],
+            'address.city' => ['nullable', 'string', 'max:120'],
+            'address.state' => ['nullable', 'string', 'max:120'],
+            'address.is_default' => ['nullable', 'boolean'],
+        ];
+    }
 }

@@ -91,3 +91,15 @@
 .auth-form-wrapper .brand-logo {
   height: 56px;
 }
+
+// Status badges — real blue (primary in this theme is Gahez orange)
+.badge.bg-status-blue {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.admin-map-picker-map {
+  height: 420px;
+  width: 100%;
+  z-index: 0;
+}

@@ -1,9 +1,6 @@
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body py-3">
         <form method="GET" action="{{ route('v1.admin.products.index') }}" class="row g-2 align-items-end" data-admin-list-filters>
-            @if (request('view') === 'all')
-                <input type="hidden" name="view" value="all">
-            @endif
             @include('v1.admin.partials.filter-search-input', ['col' => 'col-md-3', 'placeholder' => __('messages.Search products')])
             <div class="col-md-2">
                 <label class="form-label small mb-1">{{ __('messages.Status') }}</label>
@@ -49,15 +46,6 @@
             </div>
             <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
                 <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i>{{ __('messages.Apply filters') }}</button>
-                @if (request('view') === 'all')
-                    <a href="{{ route('v1.admin.products.index', request()->except('view', 'page')) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-grid me-1"></i>{{ __('messages.Show by category') }}
-                    </a>
-                @else
-                    <a href="{{ route('v1.admin.products.index', array_merge(request()->query(), ['view' => 'all', 'page' => null])) }}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-list-ul me-1"></i>{{ __('messages.Show all products') }}
-                    </a>
-                @endif
                 <a href="{{ route('v1.admin.products.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('messages.Reset') }}</a>
             </div>
         </form>

@@ -21,7 +21,8 @@ final class ProductSpreadsheetColumns
             'price',
             'stock',
             'is_in_stock',
-            'sort_order',
+            'unit_code',
+            'unit_factor',
             'discount',
             'discount_type',
             'thumbnail',
@@ -51,7 +52,8 @@ final class ProductSpreadsheetColumns
             'thumbnail' => ['thumbnail_url'],
             'thumbnail_url' => ['thumbnail_url'],
             'is_in_stock' => ['in_stock'],
-            'sort_order' => ['sort', 'display_order'],
+            'unit_code' => ['unit_code', 'unit'],
+            'unit_factor' => ['unit_factor', 'unit_qty', 'units_per_pack', 'unit_quantity'],
             'image_urls' => ['image_u_r_ls', 'image_urls'],
             'categories' => ['categories', 'category'],
             'category_ids' => ['category_ids'],
@@ -60,7 +62,6 @@ final class ProductSpreadsheetColumns
             'is_featured' => ['featured', 'is_featured'],
             'is_approved' => ['approved', 'is_approved'],
             'is_new' => ['is_new'],
-            'is_approved' => ['is_approved'],
             'is_bookable' => ['is_bookable'],
         ]);
 

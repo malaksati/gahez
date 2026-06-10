@@ -4,7 +4,7 @@
 @section('subtitle', $customer->name)
 
 @section('content')
-    <form action="{{ route('v1.admin.customers.update', $customer) }}" method="POST">
+    <form action="{{ route('v1.admin.customers.update', $customer) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         @include('v1.admin.customers._form', ['customer' => $customer])

@@ -230,6 +230,7 @@ class OfferService
             $product,
             $variant,
             (int) $item->quantity,
+            $item->productUnit ?? null,
         );
     }
 
@@ -243,7 +244,7 @@ class OfferService
         }
 
         $cartItems = CartItem::query()
-            ->with(['product.categories', 'product', 'variant'])
+            ->with(['product.categories', 'product', 'variant', 'productUnit'])
             ->where('user_id', $userId)
             ->get();
 
@@ -270,6 +271,7 @@ class OfferService
                 $item->product,
                 $item->variant,
                 (int) $item->quantity,
+                $item->productUnit ?? null,
             );
         }
 
@@ -314,10 +316,14 @@ class OfferService
      *     discounted_units: int,
      * }
      */
-    public function calculateLinePricing(Product $product, ?ProductVariant $variant, int $totalQuantity): array
-    {
+    public function calculateLinePricing(
+        Product $product,
+        ?ProductVariant $variant,
+        int $totalQuantity,
+        ?\App\Models\ProductUnit $productUnit = null,
+    ): array {
         $totalQuantity = max(0, $totalQuantity);
-        $basePrice = (float) ($variant?->price ?? $product->price);
+        $basePrice = (float) ($productUnit?->final_price ?? $variant?->price ?? $product->price);
         $productBogo = $this->resolveProductBogoOfferForProduct($product);
 
         if ($productBogo && $totalQuantity > 0) {
@@ -707,7 +713,20 @@ class OfferService
     {
         return match ($offer->type) {
             'threshold_gift' => $offer->rewardProducts()
-                ->whereHas('product', fn ($query) => $query->where('stock', '>', 0)->where('is_active', true))
+                ->whereHas('product', fn ($query) => $query->where('is_active', true)->where(function ($product) {
+                    $product->where('type', 'variable')
+                        ->whereHas('variants', fn ($variants) => $variants->where(function ($stock) {
+                            $stock->where('stock', '>', 0)
+                                ->orWhere(fn ($untracked) => $untracked->whereNull('stock')->where('is_in_stock', true));
+                        }))
+                        ->orWhere(function ($simple) {
+                            $simple->where('type', 'simple')
+                                ->whereHas('productUnits', fn ($units) => $units->where('is_active', true)->where(function ($stock) {
+                                    $stock->where('stock', '>', 0)
+                                        ->orWhere(fn ($untracked) => $untracked->whereNull('stock')->where('is_in_stock', true));
+                                }));
+                        });
+                }))
                 ->exists(),
             'bogo', 'fixed', 'percentage' => $this->offerableHasStock($offer),
             default => true,
@@ -726,7 +745,20 @@ class OfferService
             return Product::query()
                 ->whereHas('categories', fn ($query) => $query->where('categories.id', $offer->offerable_id))
                 ->where('is_active', true)
-                ->where('stock', '>', 0)
+                ->where(function ($query) {
+                    $query->where('type', 'variable')
+                        ->whereHas('variants', fn ($variants) => $variants->where(function ($stock) {
+                            $stock->where('stock', '>', 0)
+                                ->orWhere(fn ($untracked) => $untracked->whereNull('stock')->where('is_in_stock', true));
+                        }))
+                        ->orWhere(function ($simple) {
+                            $simple->where('type', 'simple')
+                                ->whereHas('productUnits', fn ($units) => $units->where('is_active', true)->where(function ($stock) {
+                                    $stock->where('stock', '>', 0)
+                                        ->orWhere(fn ($untracked) => $untracked->whereNull('stock')->where('is_in_stock', true));
+                                }));
+                        });
+                })
                 ->exists();
         }
 

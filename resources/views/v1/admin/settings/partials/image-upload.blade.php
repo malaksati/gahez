@@ -6,7 +6,7 @@
 ])
 
 @php
-    $existingUrl = $existingPath ? asset('storage/'.$existingPath) : '';
+    $existingUrl = storage_public_url($existingPath) ?? '';
 @endphp
 
 <div class="mb-4">

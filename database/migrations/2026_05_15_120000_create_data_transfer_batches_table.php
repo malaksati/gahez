@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedInteger('processed_rows')->default(0);
             $table->unsignedInteger('success_count')->default(0);
             $table->unsignedInteger('failed_count')->default(0);
+            $table->unsignedInteger('skipped_count')->default(0);
             $table->text('message')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();

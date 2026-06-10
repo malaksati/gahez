@@ -19,8 +19,6 @@ class ProductSkuGenerationTest extends TestCase
             'description' => ['en' => 'Desc', 'ar' => 'وصف'],
             'sku' => 'PRD-0007',
             'slug' => 'one',
-            'price' => 10,
-            'stock' => 1,
             'is_active' => true,
             'is_approved' => true,
             'is_bookable' => true,
@@ -28,6 +26,60 @@ class ProductSkuGenerationTest extends TestCase
         ]);
 
         $this->assertSame('PRD-0008', app(ProductService::class)->generateNextSimpleSku());
+    }
+
+    public function test_skips_skus_reserved_by_soft_deleted_products(): void
+    {
+        $brandId = $this->createBrandId();
+
+        $deleted = Product::query()->create([
+            'type' => 'simple',
+            'name' => ['en' => 'Deleted', 'ar' => 'محذوف'],
+            'description' => ['en' => 'Desc', 'ar' => 'وصف'],
+            'sku' => 'PRD-0008',
+            'slug' => 'deleted-product',
+            'is_active' => true,
+            'is_approved' => true,
+            'is_bookable' => true,
+            'brand_id' => $brandId,
+        ]);
+
+        $deleted->delete();
+
+        Product::query()->create([
+            'type' => 'simple',
+            'name' => ['en' => 'Active', 'ar' => 'نشط'],
+            'description' => ['en' => 'Desc', 'ar' => 'وصف'],
+            'sku' => 'PRD-0007',
+            'slug' => 'active-product',
+            'is_active' => true,
+            'is_approved' => true,
+            'is_bookable' => true,
+            'brand_id' => $brandId,
+        ]);
+
+        $this->assertSame('PRD-0009', app(ProductService::class)->generateNextSimpleSku());
+    }
+
+    public function test_ensure_unique_slug_avoids_soft_deleted_products(): void
+    {
+        $brandId = $this->createBrandId();
+
+        $deleted = Product::query()->create([
+            'type' => 'simple',
+            'name' => ['en' => 'Fresh Eggs', 'ar' => 'بيض'],
+            'description' => ['en' => 'Desc', 'ar' => 'وصف'],
+            'sku' => 'PRD-0101',
+            'slug' => 'fresh-eggs',
+            'is_active' => true,
+            'is_approved' => true,
+            'is_bookable' => true,
+            'brand_id' => $brandId,
+        ]);
+
+        $deleted->delete();
+
+        $this->assertSame('fresh-eggs-2', Product::ensureUniqueSlug('fresh-eggs'));
     }
 
     protected function createBrandId(): int

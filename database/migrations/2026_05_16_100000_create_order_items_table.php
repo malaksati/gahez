@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('variant_id')->nullable()->constrained('product_variants')->nullOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->decimal('unit_price', 12, 2)->default(0);
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

@@ -50,9 +50,7 @@ class ProductVariantService
 
         $hasUntracked = $product->variants()->whereNull('stock')->exists();
 
-        $product->update([
-            'stock' => $hasUntracked && $trackedTotal === 0 ? null : (int) $trackedTotal,
-        ]);
+        // Product stock is derived from variants; no parent column to sync.
     }
 
     /**

@@ -18,9 +18,12 @@
                     <h5 class="mb-1">{{ $customer->name }}</h5>
                     <p class="text-muted mb-3">{{ $customer->email ?: $customer->phone }}</p>
                     <div class="mb-3">
-                        @include('v1.admin.partials.active-badge', ['active' => $customer->is_active])
-
-                        <span class="badge bg-info bg-opacity-10 text-info ms-1">
+                        <div class="text-muted small mb-2">{{ __('messages.Status') }}</div>
+                        <div class="d-flex flex-column align-items-center gap-1 mb-2">
+                            @include('v1.admin.partials.active-badge', ['active' => $customer->is_active])
+                            @include('v1.admin.partials.verified-badge', ['verified' => $customer->is_verified])
+                        </div>
+                        <span class="badge bg-info bg-opacity-10 text-info">
                             <i class="bi bi-cart me-1"></i>{{ $customer->orders_count }} {{ __('messages.Orders') }}
                         </span>
                     </div>
@@ -38,10 +41,11 @@
                 <div class="card-footer bg-white border-top py-3">
                     <div class="d-flex justify-content-between text-muted small">
                         <span>{{ __('messages.Joined') }}</span>
-                        <strong>{{ $customer->created_at->format('M d, Y') }}</strong>
+                        <strong>{{ $customer->created_at->format('M d, Y H:i') }}</strong>
                     </div>
                 </div>
             </div>
+            @include('v1.admin.customers.partials.goals-progress', ['goalProgress' => $goalProgress])
         </div>
 
         <div class="col-lg-8">
@@ -49,27 +53,36 @@
                 <div class="card-header bg-transparent border-bottom">
                     <h6 class="mb-0">{{ __('messages.Basic Information') }}</h6>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="px-5 py-2 d-flex gap-2 flex-column">
-                            @include('v1.admin.partials.show-field', [
-                                'label' => __('messages.Name'),
-                                'value' => $customer->name,
-                            ])
-                            @include('v1.admin.partials.show-field', [
-                                'label' => __('messages.Email'),
-                                'value' => $customer->email ?: '-',
-                            ])
-                            @include('v1.admin.partials.show-field', [
-                                'label' => __('messages.Phone'),
-                                'value' => $customer->phone ?: '-',
-                            ])
-                            @include('v1.admin.partials.show-field', [
-                                'label' => __('messages.Birthdate'),
-                                'value' => $customer->birthdate?->format('d-m-Y') ?: '—',
-                            ])
-                        </div>
-                        @include('v1.admin.partials.show-timestamps', ['model' => $customer])
+                <div class="card-body">
+                    <div class="row g-3">
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Name'),
+                            'value' => $customer->name,
+                        ])
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Email'),
+                            'value' => $customer->email ?: '-',
+                        ])
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Phone'),
+                            'value' => $customer->phone ?: '-',
+                        ])
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Birthdate'),
+                            'value' => $customer->birthdate?->format('d-m-Y') ?: '—',
+                        ])
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Created at'),
+                            'value' => $customer->created_at
+                                ? e($customer->created_at->format('M d, Y H:i')).' <span class="text-muted">('.e($customer->created_at->diffForHumans()).')</span>'
+                                : '—',
+                        ])
+                        @include('v1.admin.partials.show-field', [
+                            'label' => __('messages.Updated at'),
+                            'value' => $customer->updated_at
+                                ? e($customer->updated_at->format('M d, Y H:i')).' <span class="text-muted">('.e($customer->updated_at->diffForHumans()).')</span>'
+                                : '—',
+                        ])
                     </div>
                 </div>
             </div>
@@ -88,8 +101,13 @@
                                         @endif
                                     </h6>
                                     <p class="mb-0 text-muted small">
-                                        {{ $address->street }}, {{ $address->building }}, {{ $address->apartment }}<br>
-                                        {{ $address->city }}, {{ $address->state }}, {{ $address->country }}
+                                        {{ $address->address }}<br>
+                                        @if ($address->city || $address->state)
+                                            {{ collect([$address->city, $address->state])->filter()->implode(', ') }}
+                                        @endif
+                                        @if ($address->phone)
+                                            <br>{{ $address->phone }}
+                                        @endif
                                     </p>
                                 </div>
                             @endforeach

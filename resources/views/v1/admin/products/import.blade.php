@@ -25,7 +25,8 @@
                     <li class="mb-2">
                         <code>name_en</code>, <code>name_ar</code>, <code>type</code>, <code>sku</code>, <code>price</code>,
                         <code>stock</code> (leave empty for unlimited stock), <code>is_in_stock</code> (1/0 when stock is empty),
-                        <code>sort_order</code>, <code>discount</code>, <code>discount_type</code>, <code>thumbnail</code>,
+                        <code>unit_code</code>, <code>unit_factor</code>,
+                        <code>discount</code>, <code>discount_type</code>, <code>thumbnail</code>,
                         <code>brand_id</code>, <code>category_ids</code> (names or IDs like <code>21|24</code>), flags <code>is_active</code>…
                     </li>
                     <li>{{ __('messages.Import products order note') }}</li>

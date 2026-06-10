@@ -157,6 +157,7 @@ class AdminUserService
             __('messages.Marketing') => [
                 'manage coupons' => __('messages.Manage coupons'),
                 'manage offers' => __('messages.Manage offers'),
+                'manage goals' => __('messages.Manage goals'),
                 'manage sliders' => __('messages.Manage sliders'),
             ],
             __('messages.Sales') => [

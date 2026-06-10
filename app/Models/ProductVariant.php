@@ -60,6 +60,11 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantValue::class);
     }
 
+    public function productUnits()
+    {
+        return $this->hasMany(ProductUnit::class);
+    }
+
     public function images()
     {
         return $this->morphMany(ProductImage::class, 'imageable');
