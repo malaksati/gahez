@@ -1,0 +1,773 @@
+openapi: 3.0.3
+info:
+  title: Gahez E-Commerce API
+  description: REST API v1 for customer mobile/web app. Sanctum bearer auth. Payment methods cash_on_delivery and wallet only.
+  version: 1.0.0
+  contact:
+    name: Gahez
+
+servers:
+  - url: http://gahez.test/api/v1
+    description: Local (Laragon)
+  - url: https://your-domain.com/api/v1
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Store
+  - name: Catalog
+  - name: Profile
+  - name: Notifications
+  - name: Addresses
+  - name: Cart
+  - name: Orders
+  - name: Wishlist
+  - name: Wallet
+  - name: Tickets
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Register customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                password: { type: string }
+                password_confirmation: { type: string }
+                birthdate: { type: string, format: date, nullable: true }
+      responses:
+        '201': { description: Registered; verify email or phone before login }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Login (email or phone)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login, password]
+              properties:
+                login: { type: string, example: customer1@gmail.com }
+                password: { type: string, example: "12345678" }
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      responses:
+        '200': { description: Logged out }
+
+  /auth/user:
+    get:
+      tags: [Auth]
+      summary: Current user
+      responses:
+        '200': { description: User object }
+
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Verify email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                code: { type: string }
+      responses:
+        '200': { description: Verified }
+
+  /auth/verify-phone:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Verify phone
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                code: { type: string }
+      responses:
+        '200': { description: Verified }
+
+  /auth/resend-verification-code:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Resend verification code
+      responses:
+        '200': { description: Code sent }
+
+  /auth/reset-password/send-code:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Send password reset code
+      responses:
+        '200': { description: Code sent }
+
+  /auth/reset-password/verify-code:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Verify reset code
+      responses:
+        '200': { description: Code valid }
+
+  /auth/reset-password/set-new-password:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Set new password
+      responses:
+        '200': { description: Password updated }
+
+  /store/config:
+    get:
+      tags: [Store]
+      security: []
+      summary: Store config and theme
+      responses:
+        '200':
+          description: App name, currency, logo, theme colors/layouts/font
+
+  /categories:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List categories
+      parameters:
+        - { name: paginate, in: query, schema: { type: integer } }
+        - { name: per_page, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: Category list }
+
+  /categories/tree:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: Category tree
+      responses:
+        '200': { description: Nested categories }
+
+  /categories/{id}:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: Show category
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Category detail }
+
+  /products:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List products
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: category_id, in: query, schema: { type: integer } }
+        - { name: featured, in: query, schema: { type: boolean } }
+        - { name: per_page, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: Product list }
+
+  /products/{id}:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: Show product by ID
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Product detail }
+
+  /products/slug/{slug}:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: Show product by slug
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Product detail }
+
+  /brands:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List brands
+      responses:
+        '200': { description: Brand list }
+
+  /brands/{id}:
+    get:
+      tags: [Catalog]
+      security: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Brand detail }
+
+  /branches:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List branches
+      responses:
+        '200': { description: Branch list }
+
+  /branches/{id}:
+    get:
+      tags: [Catalog]
+      security: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Branch detail }
+
+  /sliders:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List sliders
+      responses:
+        '200': { description: Slider list }
+
+  /offers:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List active offers
+      responses:
+        '200': { description: Offer list }
+
+  /profile:
+    get:
+      tags: [Profile]
+      summary: Get profile
+      responses:
+        '200': { description: Profile }
+    patch:
+      tags: [Profile]
+      summary: Update profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                birthdate: { type: string, format: date, nullable: true }
+                password: { type: string }
+                password_confirmation: { type: string }
+      responses:
+        '200': { description: Updated }
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications
+      parameters:
+        - { name: per_page, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        '200': { description: Paginated notifications with unread_count }
+
+  /notifications/mark-all-read:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications read
+      responses:
+        '200': { description: OK }
+
+  /notifications/{notification}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification read
+      parameters:
+        - { name: notification, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+
+  /addresses:
+    get:
+      tags: [Addresses]
+      summary: List addresses
+      responses:
+        '200': { description: Address list }
+    post:
+      tags: [Addresses]
+      summary: Create address
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '201': { description: Created }
+
+  /addresses/{id}:
+    get:
+      tags: [Addresses]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Address }
+    put:
+      tags: [Addresses]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '200': { description: Updated }
+    delete:
+      tags: [Addresses]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Deleted }
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get cart
+      responses:
+        '200': { description: Cart with meta totals }
+    delete:
+      tags: [Cart]
+      summary: Clear cart
+      responses:
+        '200': { description: Cleared }
+
+  /cart/checkout-preview:
+    get:
+      tags: [Cart]
+      summary: Checkout preview
+      responses:
+        '200': { description: Totals, gifts, free delivery eligibility }
+
+  /cart/apply-coupon:
+    post:
+      tags: [Cart]
+      summary: Apply coupon
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string, example: WELCOME10 }
+      responses:
+        '200': { description: Coupon applied }
+
+  /cart/items/{cartItem}:
+    put:
+      tags: [Cart]
+      summary: Update cart line quantity by cart item id
+      parameters:
+        - { name: cartItem, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 1, example: 7 }
+      responses:
+        '200': { description: Updated }
+    patch:
+      tags: [Cart]
+      summary: Update cart line quantity by cart item id
+      parameters:
+        - { name: cartItem, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 1, example: 7 }
+      responses:
+        '200': { description: Updated }
+
+  /cart/{product}:
+    post:
+      tags: [Cart]
+      summary: Add to cart
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity: { type: integer, default: 1, example: 4 }
+                variant_id: { type: integer, description: Required for variable products }
+      responses:
+        '200': { description: Added }
+    put:
+      tags: [Cart]
+      summary: Update cart item quantity
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 1, example: 7 }
+                variant_id: { type: integer, description: Required for variable products only }
+      responses:
+        '200': { description: Updated }
+    patch:
+      tags: [Cart]
+      summary: Update cart item quantity
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 1, example: 7 }
+                variant_id: { type: integer, description: Required for variable products only }
+      responses:
+        '200': { description: Updated }
+    delete:
+      tags: [Cart]
+      summary: Remove from cart
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Removed }
+
+  /wishlist:
+    get:
+      tags: [Wishlist]
+      summary: List wishlist
+      responses:
+        '200': { description: Wishlist products }
+
+  /wishlist/{product}:
+    post:
+      tags: [Wishlist]
+      summary: Toggle wishlist item
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Toggled }
+
+  /wallet/history:
+    get:
+      tags: [Wallet]
+      summary: Wallet transaction history
+      responses:
+        '200': { description: Transactions }
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List orders
+      parameters:
+        - { name: per_page, in: query, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Order list }
+    post:
+      tags: [Orders]
+      summary: Checkout (create order)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutInput'
+      responses:
+        '201': { description: Order created; cart cleared }
+
+  /orders/{order}:
+    get:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Order detail }
+
+  /orders/{order}/cancel:
+    post:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Cancelled }
+
+  /orders/{order}/pay:
+    post:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method: { type: string, example: wallet }
+      responses:
+        '200': { description: Paid }
+
+  /orders/{order}/reorder:
+    post:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Items added to cart }
+
+  /orders/{order}/refund-request:
+    post:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      responses:
+        '201': { description: Refund requested }
+
+  /orders/{order}/rate:
+    post:
+      tags: [Orders]
+      parameters:
+        - { name: order, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                comment: { type: string }
+      responses:
+        '200': { description: Rated }
+
+  /refund-requests:
+    get:
+      tags: [Orders]
+      summary: List refund requests
+      responses:
+        '200': { description: Refund requests }
+
+  /products/{product}/rate:
+    post:
+      tags: [Catalog]
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: { type: integer }
+                comment: { type: string }
+      responses:
+        '200': { description: Rated }
+
+  /products/{product}/report:
+    post:
+      tags: [Catalog]
+      parameters:
+        - { name: product, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+                description: { type: string }
+      responses:
+        '201': { description: Reported }
+
+  /tickets:
+    get:
+      tags: [Tickets]
+      summary: List tickets
+      responses:
+        '200': { description: Tickets }
+    post:
+      tags: [Tickets]
+      summary: Create ticket
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [subject, description]
+              properties:
+                subject: { type: string }
+                description: { type: string }
+                attachments:
+                  type: array
+                  items: { type: string, format: binary }
+                attachment:
+                  type: array
+                  items: { type: string, format: binary }
+                  description: Alias for attachments (e.g. attachment[0])
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject: { type: string }
+                description: { type: string }
+      responses:
+        '201': { description: Created }
+
+  /tickets/{id}:
+    get:
+      tags: [Tickets]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Ticket detail }
+    put:
+      tags: [Tickets]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Updated }
+
+  /tickets/{id}/messages:
+    post:
+      tags: [Tickets]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string }
+                attachments:
+                  type: array
+                  items: { type: string, format: binary }
+                attachment:
+                  type: array
+                  items: { type: string, format: binary }
+                  description: Alias for attachments (e.g. attachment[0])
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+      responses:
+        '201': { description: Message added }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+
+  schemas:
+    LoginResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data:
+          type: object
+          properties:
+            user: { type: object }
+            token: { type: string }
+            token_type: { type: string, example: Bearer }
+
+    AddressInput:
+      type: object
+      required: [name, address, latitude, longitude]
+      properties:
+        name: { type: string }
+        address: { type: string }
+        latitude: { type: string }
+        longitude: { type: string }
+        phone: { type: string }
+        city: { type: string }
+        state: { type: string }
+        is_default: { type: boolean }
+
+    CheckoutInput:
+      type: object
+      required: [address_id, payment_method]
+      properties:
+        address_id: { type: integer }
+        payment_method:
+          type: string
+          enum: [cash_on_delivery, wallet]
+          example: cash_on_delivery
+        coupon_code: { type: string }
+        use_wallet: { type: boolean }
+        notes: { type: string }
+        gift_offer_id: { type: integer, nullable: true }
+        gift_product_id: { type: integer, nullable: true }
+        item_notes:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id: { type: integer }
+              variant_id: { type: integer, nullable: true }
+              note: { type: string, maxLength: 500, nullable: true }
+
+    Error422:
+      type: object
+      properties:
+        message: { type: string }
+        errors: { type: object, additionalProperties: { type: array, items: { type: string } } }

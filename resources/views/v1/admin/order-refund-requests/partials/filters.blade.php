@@ -1,0 +1,35 @@
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-3">
+        <form method="GET" action="{{ route('v1.admin.order-refund-requests.index') }}" class="row g-2 align-items-end" data-admin-list-filters>
+            @include('v1.admin.partials.filter-search-input', ['col' => 'col-md-3', 'placeholder' => __('messages.Search refund requests')])
+            <div class="col-md-2">
+                <label class="form-label small mb-1">{{ __('messages.Status') }}</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{{ __('messages.All') }}</option>
+                    <option value="pending" @selected(request('status') === 'pending')>{{ __('messages.pending') }}</option>
+                    <option value="approved" @selected(request('status') === 'approved')>{{ __('messages.approved') }}</option>
+                    <option value="rejected" @selected(request('status') === 'rejected')>{{ __('messages.rejected') }}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">{{ __('messages.From') }}</label>
+                <input type="date" name="from_date" class="form-control form-control-sm" value="{{ request('from_date') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">{{ __('messages.To') }}</label>
+                <input type="date" name="to_date" class="form-control form-control-sm" value="{{ request('to_date') }}">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small mb-1">{{ __('messages.Sort') }}</label>
+                <select name="sort" class="form-select form-select-sm">
+                    <option value="latest" @selected(request('sort', 'latest') === 'latest')>{{ __('messages.Newest') }}</option>
+                    <option value="oldest" @selected(request('sort') === 'oldest')>{{ __('messages.Oldest') }}</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i>{{ __('messages.Apply filters') }}</button>
+                <a href="{{ route('v1.admin.order-refund-requests.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('messages.Reset') }}</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+/* === Hamburger Menu (header, beside logo) === */
+.admin-header .hamburger-menu {
+    position: relative;
+    top: auto;
+    inset-inline-start: auto;
+    z-index: 1;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--bs-secondary-color, #6c757d);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border-radius: var(--border-radius-sm, 6px);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        color: var(--bs-body-color, #495057);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    i {
+        font-size: 1.25rem;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    &.is-active i {
+        transform: rotate(180deg);
+    }
+}
+
+[data-bs-theme="dark"] .admin-header .hamburger-menu:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}

@@ -1,0 +1,49 @@
+// ==========================================================================
+// Header Layout Styles
+// ==========================================================================
+
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $zindex-fixed;
+  height: var(--header-height);
+  
+  .navbar {
+    height: 100%;
+    border-bottom: 1px solid var(--bs-border-color);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.admin-toast-container {
+  position: fixed;
+  top: calc(var(--header-height, 64px) + 1rem);
+  right: 1rem;
+  z-index: $zindex-toast;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(360px, calc(100vw - 2rem));
+  pointer-events: none;
+
+  .toast {
+    pointer-events: auto;
+  }
+}
+
+.admin-notification-toast {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color) !important;
+
+  &--clickable {
+    cursor: pointer;
+  }
+}
+
+[dir='rtl'] .admin-toast-container {
+  right: auto;
+  left: 1rem;
+} 

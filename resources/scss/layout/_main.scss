@@ -1,0 +1,16 @@
+// ==========================================================================
+// Main Content Layout Styles
+// ==========================================================================
+
+.admin-main {
+  margin-top: var(--header-height);
+  margin-inline-start: var(--sidebar-width);
+  min-height: calc(100vh - var(--header-height));
+  transition: var(--transition-base);
+}
+
+[data-admin-list-results].is-loading {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+} 

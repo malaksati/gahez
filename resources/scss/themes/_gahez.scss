@@ -1,0 +1,93 @@
+// ==========================================================================
+// Gahez brand overrides (admin)
+// ==========================================================================
+
+.brand-logo {
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+[data-bs-theme="light"] {
+  .admin-header {
+    .navbar {
+      background-color: rgba($gahez-50, 0.98) !important;
+      border-bottom-color: $gahez-200 !important;
+    }
+
+    .navbar-brand .brand-logo {
+      height: 48px;
+    }
+  }
+
+  .admin-sidebar {
+    background-color: var(--bs-body-bg);
+    border-inline-end-color: $gahez-200;
+
+    .sidebar-nav {
+      .nav .nav-link {
+        color: $gahez-900;
+
+        i {
+          color: $gahez-600;
+        }
+
+        &:hover {
+          background-color: $gahez-100;
+          color: $gahez-700;
+
+          i {
+            color: $gahez-700;
+          }
+        }
+
+        &.active {
+          background-color: $gahez-600;
+          color: #fff;
+          box-shadow: 0 2px 8px rgba($gahez-900, 0.12);
+
+          i {
+            color: #fff;
+          }
+
+          &:hover {
+            background-color: $gahez-700;
+            color: #fff;
+
+            i {
+              color: #fff;
+            }
+          }
+        }
+      }
+
+      .text-muted {
+        color: $gahez-500 !important;
+      }
+    }
+  }
+
+  .admin-main {
+    background-color: $gahez-50;
+  }
+
+  .stats-card .stats-icon.bg-primary {
+    background-color: rgba($gahez-600, 0.12) !important;
+    color: $gahez-700 !important;
+  }
+}
+
+.auth-branding {
+  background: var(--brand-auth-gradient) !important;
+}
+
+.auth-logo .brand-logo {
+  height: 120px;
+  width: auto;
+  max-width: 220px;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.2));
+}
+
+.auth-form-wrapper .brand-logo {
+  height: 56px;
+}

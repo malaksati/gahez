@@ -1,0 +1,14 @@
+- ## Gahez API
+    - [Overview](/{{route}}/{{version}}/overview)
+    - [Authentication](/{{route}}/{{version}}/authentication)
+    - [Public endpoints](/{{route}}/{{version}}/public-endpoints)
+    - [Customer API](/{{route}}/{{version}}/customer-api)
+    - [Delivery driver API](/{{route}}/{{version}}/delivery-api)
+    - [Frontend integration](/{{route}}/{{version}}/integration)
+    - [Testing & changelog](/{{route}}/{{version}}/testing)
+- ## Developer guides
+    - [Running tests](/{{route}}/{{version}}/running-tests)
+    - [Translation](/{{route}}/{{version}}/translation)
+    - [Permissions](/{{route}}/{{version}}/permissions)
+    - [Queue & import setup](/{{route}}/{{version}}/queue-import-setup)
+    - [Project progress](/{{route}}/{{version}}/project-progress)
