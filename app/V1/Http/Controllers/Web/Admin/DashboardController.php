@@ -8,11 +8,16 @@ use App\Models\Product;
 use App\Models\ProductReport;
 use App\Models\Ticket;
 use App\Models\User;
+use App\V1\Services\AnalyticsReportService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends AdminController
 {
+    public function __construct(
+        protected AnalyticsReportService $analytics,
+    ) {}
+
     public function index(): View
     {
         $revenue = Order::query()->where('payment_status', 'paid')->sum('total');
@@ -85,20 +90,26 @@ class DashboardController extends AdminController
             || ($canManageTickets && $openTickets > 0)
             || ($canManageProductReports && $pendingProductReports > 0);
 
-        return view('v1.admin.dashboard', compact(
-            'stats',
-            'recentOrders',
-            'pendingOrders',
-            'processingOrders',
-            'ordersReadyForDelivery',
-            'pendingRefundRequests',
-            'openTickets',
-            'pendingProductReports',
-            'canManageOrders',
-            'canManageRefunds',
-            'canManageTickets',
-            'canManageProductReports',
-            'hasPendingActions',
-        ));
+        $charts = $this->analytics->chartOverview();
+        $charts['orders_trend'] = $this->analytics->dailyOrdersTrend(30);
+
+        return view('v1.admin.dashboard', [
+            'stats' => $stats,
+            'charts' => $charts,
+            'currency' => display_currency(),
+            'isRtl' => app()->getLocale() === 'ar',
+            'recentOrders' => $recentOrders,
+            'pendingOrders' => $pendingOrders,
+            'processingOrders' => $processingOrders,
+            'ordersReadyForDelivery' => $ordersReadyForDelivery,
+            'pendingRefundRequests' => $pendingRefundRequests,
+            'openTickets' => $openTickets,
+            'pendingProductReports' => $pendingProductReports,
+            'canManageOrders' => $canManageOrders,
+            'canManageRefunds' => $canManageRefunds,
+            'canManageTickets' => $canManageTickets,
+            'canManageProductReports' => $canManageProductReports,
+            'hasPendingActions' => $hasPendingActions,
+        ]);
     }
 }

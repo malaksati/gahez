@@ -99,15 +99,19 @@ class AnalyticsReportService
             ->orderByDesc('revenue')
             ->get();
 
+        $periodLabel = $from->translatedFormat('d M Y').' — '.$to->translatedFormat('d M Y');
+
         return [
-            'period_label' => $from->translatedFormat('d M Y').' — '.$to->translatedFormat('d M Y'),
+            'period_label' => $periodLabel,
             'revenue_trend' => [
                 'labels' => $labels,
                 'values' => $dateKeys->map(fn (string $date) => round((float) ($revenueRows[$date] ?? 0), 2))->all(),
+                'period_label' => $periodLabel,
             ],
             'orders_trend' => [
                 'labels' => $labels,
                 'values' => $dateKeys->map(fn (string $date) => (int) ($orderRows[$date] ?? 0))->all(),
+                'period_label' => $periodLabel,
             ],
             'payment_methods' => [
                 'labels' => $paymentRows->map(fn ($row) => $this->formatPaymentMethod((string) $row->payment_method))->all(),
@@ -117,6 +121,51 @@ class AnalyticsReportService
                 'labels' => $topProducts->map(fn ($row) => (string) ($row->product_name ?: '—'))->all(),
                 'values' => $topProducts->map(fn ($row) => (int) $row->quantity)->all(),
             ],
+        ];
+    }
+
+    /**
+     * Daily paid-order counts for dashboard charts (longer range than chart overview).
+     *
+     * @return array{
+     *   labels: list<string>,
+     *   values: list<int>,
+     *   period_label: string,
+     * }
+     */
+    public function dailyOrdersTrend(int $days = 90): array
+    {
+        $days = max(7, $days);
+        $to = CarbonImmutable::today()->endOfDay();
+        $from = $to->copy()->subDays($days - 1)->startOfDay();
+
+        return $this->buildPaidOrdersDailyTrend($from, $to);
+    }
+
+    /**
+     * @return array{labels: list<string>, values: list<int>, period_label: string}
+     */
+    protected function buildPaidOrdersDailyTrend(CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $dateKeys = $this->chartDateKeys($from, $to);
+        $labels = $dateKeys->map(
+            fn (string $date) => CarbonImmutable::parse($date)
+                ->locale(app()->getLocale())
+                ->translatedFormat('d M')
+        )->all();
+
+        $orderRows = DB::table('orders')
+            ->where('payment_status', 'paid')
+            ->whereBetween('created_at', [$from, $to])
+            ->selectRaw('DATE(created_at) as date')
+            ->selectRaw('COUNT(*) as count')
+            ->groupByRaw('DATE(created_at)')
+            ->pluck('count', 'date');
+
+        return [
+            'labels' => $labels,
+            'values' => $dateKeys->map(fn (string $date) => (int) ($orderRows[$date] ?? 0))->all(),
+            'period_label' => $from->translatedFormat('d M Y').' — '.$to->translatedFormat('d M Y'),
         ];
     }
 

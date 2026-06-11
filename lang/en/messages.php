@@ -997,6 +997,7 @@ return [
     'Today' => 'Today',
     'Last 7 days' => 'Last 7 days',
     'Last 30 days' => 'Last 30 days',
+    'Last 90 days' => 'Last 90 days',
     'Manual range hint' => 'Choose a custom date range below, then click Apply.',
     'Quantity sold' => 'Quantity sold',
     'Untracked' => 'Untracked',

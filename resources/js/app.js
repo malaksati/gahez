@@ -125,6 +125,9 @@ document.addEventListener('alpine:init', () => {
             this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
             localStorage.setItem('theme', this.currentTheme);
+            window.dispatchEvent(
+                new CustomEvent('gahez-theme-changed', { detail: { theme: this.currentTheme } }),
+            );
         },
     }));
 

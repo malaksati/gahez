@@ -997,6 +997,7 @@ return array (
   'Today' => 'اليوم',
   'Last 7 days' => 'آخر 7 أيام',
   'Last 30 days' => 'آخر 30 يوماً',
+  'Last 90 days' => 'آخر 90 يوماً',
   'Manual range hint' => 'اختر نطاقاً زمنياً مخصصاً أدناه، ثم اضغط تطبيق.',
   'Quantity sold' => 'الكمية المباعة',
   'Untracked' => 'غير متتبع',

@@ -1,0 +1,65 @@
+// ==========================================================================
+// Gahez analytics charts (dashboard + reports)
+// ==========================================================================
+
+.dashboard-page,
+.reports-page {
+  --gahez-chart-bg: #{$gahez-50};
+  --gahez-chart-text: #{$gahez-950};
+  --gahez-chart-text-muted: #{$gahez-800};
+  --gahez-chart-grid: #{$gahez-200};
+}
+
+[data-bs-theme="dark"] {
+  .dashboard-page,
+  .reports-page {
+    --gahez-chart-bg: #{$gahez-950};
+    --gahez-chart-text: #{$gahez-50};
+    --gahez-chart-text-muted: #{$gahez-200};
+    --gahez-chart-grid: rgba(254, 246, 231, 0.12);
+  }
+}
+
+.gahez-chart-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  height: 100%;
+
+  .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 0.875rem 1.25rem;
+  }
+
+  .card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  .card-body {
+    padding: 1rem 1.25rem 1.25rem;
+    background: var(--gahez-chart-bg);
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+  }
+}
+
+.gahez-chart {
+  min-height: 260px;
+  border-radius: var(--bs-border-radius-sm);
+}
+
+.gahez-chart--orders {
+  min-height: 300px;
+}
+
+.gahez-chart--sm {
+  min-height: 240px;
+}
+
+.gahez-chart-subtitle {
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  margin-top: 0.125rem;
+}

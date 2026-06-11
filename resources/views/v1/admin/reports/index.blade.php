@@ -33,42 +33,50 @@
 
             <div class="row g-3">
                 <div class="col-md-8">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="card-title mb-0">{{ __('messages.Revenue trend') }}</h5>
+                    <div class="card gahez-chart-card border-0 shadow-sm h-100">
+                        <div class="card-header border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-graph-up-arrow me-2 text-primary"></i>{{ __('messages.Revenue trend') }}
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div id="revenueTrendChart" style="min-height: 280px;"></div>
+                            <div id="revenueTrendChart" class="gahez-chart"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="card-title mb-0">{{ __('messages.Sales by payment method') }}</h5>
+                    <div class="card gahez-chart-card border-0 shadow-sm h-100">
+                        <div class="card-header border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-credit-card me-2 text-info"></i>{{ __('messages.Sales by payment method') }}
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div id="paymentMethodsChart" style="min-height: 280px;"></div>
+                            <div id="paymentMethodsChart" class="gahez-chart"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="card-title mb-0">{{ __('messages.Orders trend') }}</h5>
+                    <div class="card gahez-chart-card border-0 shadow-sm h-100">
+                        <div class="card-header border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-bag-check me-2 text-success"></i>{{ __('messages.Orders trend') }}
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div id="ordersTrendChart" style="min-height: 260px;"></div>
+                            <div id="ordersTrendChart" class="gahez-chart gahez-chart--sm"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="card-title mb-0">{{ __('messages.Top products') }}</h5>
+                    <div class="card gahez-chart-card border-0 shadow-sm h-100">
+                        <div class="card-header border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-trophy me-2 text-warning"></i>{{ __('messages.Top products') }}
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div id="topProductsChart" style="min-height: 260px;"></div>
+                            <div id="topProductsChart" class="gahez-chart gahez-chart--sm"></div>
                         </div>
                     </div>
                 </div>
@@ -106,141 +114,11 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof ApexCharts === 'undefined') {
-                return;
-            }
-
-            const isRtl = @json($isRtl);
-            const currency = @json($currency);
-            const charts = @json($charts);
-
-            const baseChartOptions = {
-                chart: {
-                    fontFamily: 'Inter, Noto Sans Arabic, sans-serif',
-                    toolbar: { show: false },
-                    zoom: { enabled: false },
-                },
-                dataLabels: { enabled: false },
-                grid: {
-                    borderColor: '#e5e7eb',
-                    strokeDashArray: 4,
-                },
-                tooltip: {
-                    theme: 'light',
-                },
-            };
-
-            const lineOptions = (color, yPrefix = '') => ({
-                ...baseChartOptions,
-                chart: {
-                    ...baseChartOptions.chart,
-                    type: 'line',
-                    height: 280,
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3,
-                },
-                colors: [color],
-                xaxis: {
-                    categories: charts.revenue_trend.labels,
-                    labels: {
-                        rotate: isRtl ? 45 : -45,
-                    },
-                },
-                yaxis: {
-                    labels: {
-                        formatter: (value) => yPrefix + Number(value).toLocaleString(),
-                    },
-                },
-            });
-
-            if (document.getElementById('revenueTrendChart')) {
-                new ApexCharts(document.getElementById('revenueTrendChart'), {
-                    ...lineOptions('#2563eb'),
-                    series: [{
-                        name: @json(__('messages.Revenue')),
-                        data: charts.revenue_trend.values,
-                    }],
-                    yaxis: {
-                        labels: {
-                            formatter: (value) => Number(value).toLocaleString() + ' ' + currency,
-                        },
-                    },
-                }).render();
-            }
-
-            if (document.getElementById('ordersTrendChart')) {
-                new ApexCharts(document.getElementById('ordersTrendChart'), {
-                    ...lineOptions('#059669'),
-                    chart: {
-                        ...baseChartOptions.chart,
-                        type: 'line',
-                        height: 260,
-                    },
-                    series: [{
-                        name: @json(__('messages.Orders')),
-                        data: charts.orders_trend.values,
-                    }],
-                    xaxis: {
-                        categories: charts.orders_trend.labels,
-                        labels: {
-                            rotate: isRtl ? 45 : -45,
-                        },
-                    },
-                }).render();
-            }
-
-            if (document.getElementById('paymentMethodsChart')) {
-                new ApexCharts(document.getElementById('paymentMethodsChart'), {
-                    ...baseChartOptions,
-                    chart: {
-                        ...baseChartOptions.chart,
-                        type: 'donut',
-                        height: 280,
-                    },
-                    series: charts.payment_methods.values,
-                    labels: charts.payment_methods.labels,
-                    colors: ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#64748b'],
-                    legend: {
-                        position: 'bottom',
-                    },
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: '62%',
-                            },
-                        },
-                    },
-                }).render();
-            }
-
-            if (document.getElementById('topProductsChart')) {
-                new ApexCharts(document.getElementById('topProductsChart'), {
-                    ...baseChartOptions,
-                    chart: {
-                        ...baseChartOptions.chart,
-                        type: 'bar',
-                        height: 260,
-                    },
-                    series: [{
-                        name: @json(__('messages.Quantity sold')),
-                        data: charts.top_products.values,
-                    }],
-                    colors: ['#1e3a5f'],
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                        },
-                    },
-                    xaxis: {
-                        categories: charts.top_products.labels,
-                    },
-                }).render();
-            }
-        });
-    </script>
+    @include('v1.admin.partials.analytics-charts-script', [
+        'charts' => $charts,
+        'currency' => $currency,
+        'isRtl' => $isRtl,
+        'rootSelector' => '.reports-page',
+        'ordersEnhancedGrid' => true,
+    ])
 @endpush
