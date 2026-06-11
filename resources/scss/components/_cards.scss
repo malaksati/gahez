@@ -10,7 +10,13 @@
   transition: all 0.3s ease;
 
   .card-header {
-    background-color: transparent;
+    background-color: $gahez-50;
+    border-bottom-color: $gahez-100;
+  }
+
+  .card-header.bg-white,
+  .card-header.bg-transparent {
+    background-color: $gahez-50;
   }
 
   &:hover {
