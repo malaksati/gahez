@@ -2,7 +2,7 @@
 
 @php
     $page = 'reports';
-    $currency = app_currency();
+    $currency = display_currency();
     $isRtl = app()->getLocale() === 'ar';
 @endphp
 

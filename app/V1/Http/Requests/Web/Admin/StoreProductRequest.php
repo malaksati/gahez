@@ -15,6 +15,7 @@ class StoreProductRequest extends AdminFormRequest
     protected function prepareForValidation(): void
     {
         $this->prepareProductPricingFields();
+        $this->prepareProductUnitsInput();
         $this->prepareProductSlugField();
     }
 
@@ -27,7 +28,6 @@ class StoreProductRequest extends AdminFormRequest
             ProductValidation::store(),
             ProductValidation::adminMediaAndRelations(),
             ProductValidation::adminProductVariants(),
-            ProductValidation::adminProductUnits(),
         );
     }
 

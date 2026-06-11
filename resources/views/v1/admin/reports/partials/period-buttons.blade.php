@@ -15,7 +15,7 @@
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <span class="text-muted small">{{ __('messages.Period') }}:</span>
-    <div class="btn-group flex-wrap" role="group" aria-label="{{ __('messages.Period type') }}">
+    <div class="reports-period-buttons" role="group" aria-label="{{ __('messages.Period type') }}">
         @foreach ($periodPresets as $key => $label)
             @php
                 $query = array_filter(array_merge(

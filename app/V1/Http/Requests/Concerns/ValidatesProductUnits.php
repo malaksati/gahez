@@ -8,6 +8,16 @@ use Illuminate\Validation\Validator;
 
 trait ValidatesProductUnits
 {
+    protected function prepareProductUnitsInput(): void
+    {
+        $rows = collect($this->input('product_units', []))
+            ->filter(fn ($row) => is_array($row) && (int) ($row['unit_id'] ?? 0) > 0)
+            ->values()
+            ->all();
+
+        $this->merge(['product_units' => $rows]);
+    }
+
     protected function validateProductUnits(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {

@@ -40,7 +40,7 @@ class ProductController extends AdminController
         $viewData = [
             'products' => $this->products->getPaginatedProducts($perPage, $filters),
             'uncategorizedCount' => $this->products->countAdminIndexUncategorizedProducts($filters),
-            'filterCategories' => $this->categories->getAllCategories(),
+            'filterCategories' => $this->categories->getRootCategories(),
         ];
 
         return $this->adminListResponse(

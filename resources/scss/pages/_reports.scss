@@ -25,7 +25,7 @@
     &:hover {
       border-color: var(--bs-primary);
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 8px 25px rgba($gahez-600, 0.15);
     }
 
     &.selected {
@@ -130,7 +130,7 @@
 
       &:focus {
         border-color: var(--bs-primary);
-        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+        box-shadow: 0 0 0 0.25rem rgba($gahez-600, 0.25);
       }
     }
   }
@@ -187,16 +187,24 @@
   &:focus-visible {
     background: var(--bs-primary);
     border-color: var(--bs-primary);
-    color: #fff;
+    color: $gahez-950;
 
     .reports-sidebar-link__desc {
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba($gahez-950, 0.75);
     }
 
     .reports-sidebar-link__icon {
       color: inherit;
     }
   }
+}
+
+// Period presets — separate pills (btn-group + flex-wrap breaks borders in EN/AR)
+.reports-period-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 .reports-sidebar-link__icon {

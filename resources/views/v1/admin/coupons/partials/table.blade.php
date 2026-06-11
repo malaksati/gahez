@@ -1,5 +1,5 @@
 @php
-    $currency = app_currency();
+    $currency = display_currency();
 @endphp
 
 @if ($coupons->count() > 0)
@@ -26,7 +26,7 @@
                         <td>@include('v1.admin.partials.discount-value', ['type' => $coupon->type, 'amount' => $coupon->discount_value])</td>
                         <td>
                             @if ($coupon->min_cart_amount > 0)
-                                {{ number_format((float) $coupon->min_cart_amount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                {{ format_local_number((float) $coupon->min_cart_amount, 2) }}{{ $currency ? ' '.$currency : '' }}
                             @else
                                 <span class="text-muted">—</span>
                             @endif

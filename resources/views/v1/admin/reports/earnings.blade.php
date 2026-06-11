@@ -2,7 +2,7 @@
 
 @php
     $page = 'reports';
-    $currency = app_currency();
+    $currency = display_currency();
     $paidTotal = $report['kpis']['paid_orders_total'] ?? 0;
     $totalCommission = $report['kpis']['total_commission'] ?? 0;
     $refundedTotal = $report['kpis']['refunded_total'] ?? 0;
@@ -26,8 +26,8 @@
                 <div class="card-body d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">{{ __('messages.Paid revenue') }}</div>
-                        <div class="fs-4 fw-semibold">{{ number_format($paidTotal, 2) }} {{ $currency }}</div>
-                        <small class="text-muted">{{ __('messages.Paid orders') }}: {{ $report['kpis']['paid_orders_count'] ?? 0 }}</small>
+                        <div class="fs-4 fw-semibold">{{ format_local_number($paidTotal, 2) }} {{ $currency }}</div>
+                        <small class="text-muted">{{ __('messages.Paid orders') }}: @num($report['kpis']['paid_orders_count'] ?? 0)</small>
                     </div>
                     <i class="bi bi-cash-stack text-success fs-4"></i>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="card-body d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">{{ __('messages.Platform commission') }}</div>
-                        <div class="fs-4 fw-semibold">{{ number_format($totalCommission, 2) }} {{ $currency }}</div>
+                        <div class="fs-4 fw-semibold">{{ format_local_number($totalCommission, 2) }} {{ $currency }}</div>
                     </div>
                     <i class="bi bi-percent text-warning fs-4"></i>
                 </div>
@@ -49,8 +49,8 @@
                 <div class="card-body d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">{{ __('messages.Net revenue (after refunds)') }}</div>
-                        <div class="fs-4 fw-semibold">{{ number_format($netRevenue, 2) }} {{ $currency }}</div>
-                        <small class="text-muted">{{ __('messages.Refunded total') }}: {{ number_format($refundedTotal, 2) }} {{ $currency }}</small>
+                        <div class="fs-4 fw-semibold">{{ format_local_number($netRevenue, 2) }} {{ $currency }}</div>
+                        <small class="text-muted">{{ __('messages.Refunded total') }}: {{ format_local_number($refundedTotal, 2) }} {{ $currency }}</small>
                     </div>
                     <i class="bi bi-graph-up text-info fs-4"></i>
                 </div>
@@ -61,7 +61,7 @@
                 <div class="card-body d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">{{ __('messages.Pending refund requests') }}</div>
-                        <div class="fs-4 fw-semibold">{{ $report['kpis']['pending_refund_requests'] ?? 0 }}</div>
+                        <div class="fs-4 fw-semibold">@num($report['kpis']['pending_refund_requests'] ?? 0)</div>
                     </div>
                     <i class="bi bi-inbox text-primary fs-4"></i>
                 </div>
@@ -84,8 +84,8 @@
                 <tbody>
                     @forelse ($report['daily_sales'] as $row)
                         <tr>
-                            <td>{{ $row['date'] }}</td>
-                            <td class="text-end">{{ number_format($row['total'], 2) }} {{ $currency }}</td>
+                            <td>@digits($row['date'])</td>
+                            <td class="text-end">{{ format_local_number($row['total'], 2) }} {{ $currency }}</td>
                         </tr>
                     @empty
                         <tr>

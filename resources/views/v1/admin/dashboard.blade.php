@@ -126,7 +126,7 @@
                                                 <small class="text-muted">{{ $order->user->email }}</small>
                                             @endif
                                         </td>
-                                        <td><strong>{{ number_format((float) $order->total, 2) }}</strong></td>
+                                        <td><strong>{{ format_local_number((float) $order->total, 2) }}</strong></td>
                                         <td>
                                             @include('v1.admin.orders.partials.order-status-badge', ['status' => $order->status])
                                         </td>

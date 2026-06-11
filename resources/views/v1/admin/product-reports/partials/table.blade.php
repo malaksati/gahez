@@ -61,11 +61,10 @@
                                     <small class="text-muted">{{ $report->created_at?->format('Y-m-d H:i') ?? '—' }}</small>
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group" role="group">
+                                    <div class="d-flex flex-wrap gap-1 justify-content-end">
                                         @if ($status !== 'reviewed')
                                             <form action="{{ route('v1.admin.product-reports.update-status', [$report, 'reviewed']) }}"
                                                   method="POST"
-                                                  class="d-inline"
                                                   onsubmit="return confirm(@json(__('messages.Confirm mark report as reviewed?')))">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-success">
@@ -76,7 +75,6 @@
                                         @if ($status !== 'ignored')
                                             <form action="{{ route('v1.admin.product-reports.update-status', [$report, 'ignored']) }}"
                                                   method="POST"
-                                                  class="d-inline ms-1"
                                                   onsubmit="return confirm(@json(__('messages.Confirm ignore this report?')))">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-outline-secondary">

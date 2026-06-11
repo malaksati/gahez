@@ -30,14 +30,6 @@
         <div class="col-md-4 col-lg-2">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center py-3">
-                    <i class="bi bi-truck fs-4 text-primary d-block mb-2"></i>
-                    <span class="small fw-semibold">{{ __('messages.Deliveries') }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-2">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center py-3">
                     <i class="bi bi-gift fs-4 text-primary d-block mb-2"></i>
                     <span class="small fw-semibold">{{ __('messages.Marketing') }}</span>
                 </div>
@@ -59,6 +51,14 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-3">
+                    <i class="bi bi-bell fs-4 text-primary d-block mb-2"></i>
+                    <span class="small fw-semibold">{{ __('messages.Notifications') }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="accordion" id="helpAccordion">
@@ -75,6 +75,7 @@
                         <li>{{ __('messages.Help catalog tip categories') }}</li>
                         <li>{{ __('messages.Help catalog tip products') }}</li>
                         <li>{{ __('messages.Help catalog tip brands') }}</li>
+                        <li>{{ __('messages.Help catalog tip sort') }}</li>
                     </ul>
                 </div>
             </div>
@@ -119,24 +120,6 @@
 
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpDeliveries">
-                    <i class="bi bi-truck me-2"></i>{{ __('messages.Help deliveries title') }}
-                </button>
-            </h2>
-            <div id="helpDeliveries" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
-                <div class="accordion-body text-muted">
-                    <p class="mb-2">{{ __('messages.Help deliveries body') }}</p>
-                    <ul class="mb-0">
-                        <li>{{ __('messages.Help deliveries tip zones') }}</li>
-                        <li>{{ __('messages.Help deliveries tip drivers') }}</li>
-                        <li>{{ __('messages.Help deliveries tip shifts') }}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <h2 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpMarketing">
                     <i class="bi bi-gift me-2"></i>{{ __('messages.Help marketing title') }}
                 </button>
@@ -163,6 +146,7 @@
                 <div class="accordion-body text-muted">
                     <p class="mb-2">{{ __('messages.Help support body') }}</p>
                     <ul class="mb-0">
+                        <li>{{ __('messages.Help support tip chats') }}</li>
                         <li>{{ __('messages.Help support tip tickets') }}</li>
                         <li>{{ __('messages.Help ratings') }}</li>
                         <li>{{ __('messages.Help support tip reports') }}</li>
@@ -180,6 +164,24 @@
             <div id="helpRefunds" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
                 <div class="accordion-body text-muted">
                     <p class="mb-0">{{ __('messages.Help refunds body') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpAdminUi">
+                    <i class="bi bi-palette me-2"></i>{{ __('messages.Help admin ui title') }}
+                </button>
+            </h2>
+            <div id="helpAdminUi" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body text-muted">
+                    <p class="mb-2">{{ __('messages.Help admin ui body') }}</p>
+                    <ul class="mb-0">
+                        <li>{{ __('messages.Help admin ui tip theme') }}</li>
+                        <li>{{ __('messages.Help admin ui tip locale') }}</li>
+                        <li>{{ __('messages.Help admin ui tip digits') }}</li>
+                    </ul>
                 </div>
             </div>
         </div>

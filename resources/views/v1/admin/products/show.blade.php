@@ -3,7 +3,7 @@
 @php
     $page = 'products';
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
     $productName = $product->getTranslation('name', $locale, false) ?: $product->getTranslation('name', 'en');
     $sellableUnits = $product->productUnits->where('is_active', true)->values();
     $hasUnitPricing = $sellableUnits->isNotEmpty();
@@ -87,14 +87,14 @@
                             <small class="text-muted d-block">
                                 {{ $hasUnitPricing ? __('messages.Default unit price') : __('messages.Price') }}
                             </small>
-                            <strong class="fs-5">{{ number_format($displayPrice, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                            <strong class="fs-5">{{ format_local_number($displayPrice, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
                             @if ($hasUnitPricing && $defaultProductUnit)
                                 <div class="small text-muted">{{ $defaultProductUnit->displayUnitName($locale) }}</div>
                             @endif
                             @if ($displayHasDiscount)
                                 <div class="small text-success">
                                     {{ __('messages.Final price') }}:
-                                    {{ number_format($displayFinalPrice, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                    {{ format_local_number($displayFinalPrice, 2) }}{{ $currency ? ' '.$currency : '' }}
                                 </div>
                             @endif
                         </div>
@@ -102,13 +102,13 @@
                             <small class="text-muted d-block">{{ __('messages.Stock') }}</small>
                             @if ($hasUnitPricing)
                                 <strong class="d-block text-body">
-                                    {{ $sellableUnits->count() }} {{ __('messages.Sellable units') }}
+                                    @num($sellableUnits->count()) {{ __('messages.Sellable units') }}
                                 </strong>
                                 @if ($defaultProductUnit)
                                     <div class="small {{ $defaultProductUnit->isInStock() ? 'text-success' : 'text-danger' }}">
                                         {{ __('messages.Default') }}:
                                         @if ($defaultProductUnit->tracksStock())
-                                            {{ $defaultProductUnit->stock > 0 ? $defaultProductUnit->stock.' '.__('messages.In stock') : __('messages.Out of stock') }}
+                                            {{ $defaultProductUnit->stock > 0 ? local_num($defaultProductUnit->stock).' '.__('messages.In stock') : __('messages.Out of stock') }}
                                         @else
                                             {{ $defaultProductUnit->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
                                         @endif
@@ -117,7 +117,7 @@
                             @else
                                 <strong class="d-block {{ $product->isInStock() ? 'text-success' : 'text-danger' }}">
                                     @if ($product->tracksStock())
-                                        {{ $product->stock > 0 ? $product->stock.' '.__('messages.In stock') : __('messages.Out of stock') }}
+                                        {{ $product->stock > 0 ? local_num($product->stock).' '.__('messages.In stock') : __('messages.Out of stock') }}
                                     @else
                                         {{ $product->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
                                         <span class="text-muted small">({{ __('messages.Untracked quantity') }})</span>
@@ -229,7 +229,7 @@
                                     <div class="row g-3 mb-3">
                                         <div class="col-md-4">
                                             <small class="text-muted d-block">{{ __('messages.Base price') }}</small>
-                                            <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                            <strong>{{ format_local_number((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
                                             <div class="form-text mb-0">{{ __('messages.Product base price reference hint') }}</div>
                                         </div>
                                         @if ($product->hasDiscount())
@@ -237,9 +237,9 @@
                                                 <small class="text-muted d-block">{{ __('messages.Product level discount') }}</small>
                                                 <strong class="text-success">
                                                     @if ($product->discount_type === 'percentage')
-                                                        {{ $product->discount }}%
+                                                        @num($product->discount)%
                                                     @else
-                                                        {{ number_format((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                                        {{ format_local_number((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
                                                     @endif
                                                 </strong>
                                             </div>
@@ -256,22 +256,22 @@
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <small class="text-muted d-block">{{ __('messages.Base price') }}</small>
-                                        <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                        <strong>{{ format_local_number((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
                                     </div>
                                     @if ($product->hasDiscount())
                                         <div class="col-md-4">
                                             <small class="text-muted d-block">{{ __('messages.Discount value') }}</small>
                                             <strong class="text-success">
                                                 @if ($product->discount_type === 'percentage')
-                                                    {{ $product->discount }}%
+                                                    @num($product->discount)%
                                                 @else
-                                                    {{ number_format((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                                    {{ format_local_number((float) $product->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
                                                 @endif
                                             </strong>
                                         </div>
                                         <div class="col-md-4">
                                             <small class="text-muted d-block">{{ __('messages.Final price') }}</small>
-                                            <strong class="text-success">{{ number_format($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                                            <strong class="text-success">{{ format_local_number($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
                                         </div>
                                     @endif
                                     @if ($product->isSimple())
@@ -279,7 +279,7 @@
                                             <small class="text-muted d-block">{{ __('messages.Stock') }}</small>
                                             <strong class="{{ $product->isInStock() ? 'text-success' : 'text-danger' }}">
                                                 @if ($product->tracksStock())
-                                                    {{ $product->stock ?? 0 }}
+                                                    @num($product->stock ?? 0)
                                                 @else
                                                     {{ $product->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
                                                 @endif
@@ -367,7 +367,7 @@
                                                             {{ $related->getTranslation('name', $locale, false) ?: $related->getTranslation('name', 'en') }}
                                                         </td>
                                                         <td><code class="small">{{ $related->sku }}</code></td>
-                                                        <td>{{ number_format((float) $related->price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
+                                                        <td>{{ format_local_number((float) $related->price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
                                                         <td class="text-end">
                                                             <a href="{{ route('v1.admin.products.show', $related) }}"
                                                                 class="btn btn-sm btn-outline-secondary">

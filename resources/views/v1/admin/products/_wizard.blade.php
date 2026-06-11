@@ -40,9 +40,10 @@
             ? array_values(old('product_variants'))
             : $existingProductVariants,
         'catalogUnits' => $catalogUnits->map(fn ($unit) => [
-            'id' => $unit->id,
+            'id' => (string) $unit->id,
             'code' => $unit->code,
-            'name' => $unit->getTranslation('name', app()->getLocale()),
+            'name' => $unit->getTranslation('name', app()->getLocale())
+                ?: $unit->getTranslation('name', 'en'),
         ])->values()->all(),
         'existingProductUnits' => old('product_units')
             ? array_values(old('product_units'))
@@ -80,18 +81,6 @@
 @endphp
 
 <div class="product-wizard" x-data="productWizard(@js($wizardConfig))" x-init="init()">
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('messages.Close') }}"></button>
-        </div>
-    @endif
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <p class="text-muted mb-0">

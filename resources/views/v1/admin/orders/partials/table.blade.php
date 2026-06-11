@@ -1,4 +1,4 @@
-@php $currency = app_currency(); @endphp
+@php $currency = display_currency(); @endphp
 
 @if ($orders->count() > 0)
     <div class="table-responsive">
@@ -43,7 +43,7 @@
                                 <div class="small text-muted mt-1">{{ ucfirst(str_replace('_', ' ', $order->payment_method)) }}</div>
                             @endif
                         </td>
-                        <td><strong>{{ number_format((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
+                        <td><strong>{{ format_local_number((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
                         <td><div class="small text-muted">{{ $order->delivery_expected_time ?? '—' }}</div></td>
                         <td class="small text-muted">{{ $order->created_at?->format('M d, Y H:i') }}</td>
                         <td>@include('v1.admin.orders.partials.order-log-summary', ['order' => $order])</td>

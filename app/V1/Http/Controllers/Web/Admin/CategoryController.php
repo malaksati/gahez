@@ -28,18 +28,30 @@ class CategoryController extends AdminController
         $categoriesByParent = $this->categories->getCategoriesGroupedByParent();
         $orphanCategories = $this->categories->getOrphanCategories();
 
+        $parentsOnly = ($filters['parent_id'] ?? '') !== '';
+
         $categorySections = $rootCategories->getCollection()
-            ->map(fn (Category $root) => [
-                'root' => $root,
-                'tree' => $this->categories->filterCategoryTreeByFilters(
+            ->map(function (Category $root) use ($categoriesByParent, $filters, $parentsOnly) {
+                $tree = $this->categories->filterCategoryTreeByFilters(
                     $this->categories->flattenCategorySection($root, $categoriesByParent),
                     $filters,
-                ),
-            ])
+                );
+
+                if ($parentsOnly) {
+                    $tree = $this->categories->restrictCategoryTreeToParentsOnly($tree);
+                }
+
+                return [
+                    'root' => $root,
+                    'tree' => $tree,
+                ];
+            })
             ->filter(fn (array $section) => $section['tree']->isNotEmpty())
             ->values();
 
-        if (! empty($filters['search'])) {
+        if ($parentsOnly) {
+            $orphanCategories = collect();
+        } elseif (! empty($filters['search'])) {
             $orphanCategories = $this->categories->filterCategoriesMatchingSearch(
                 $orphanCategories,
                 (string) $filters['search'],
@@ -57,7 +69,7 @@ class CategoryController extends AdminController
             'v1.admin.categories.index',
             'v1.admin.categories.partials.results',
             array_merge($resultsData, [
-                'parentCategories' => $this->categories->getAllCategories(),
+                'parentCategories' => $this->categories->getRootCategories(),
             ]),
             $resultsData,
         );

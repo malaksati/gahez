@@ -60,10 +60,18 @@ const api = async (path, options = {}) => {
 
 Prefer `PUT /cart/items/{cartItemId}` with JSON `{ "quantity": N }` when updating existing lines.
 
-### Support tickets with files
+### Support tickets & chats with files
 
-Use `multipart/form-data` for `POST /tickets` and `POST /tickets/{id}/messages`.  
-Field names: `attachments[0]` or `attachment[0]` (both accepted).
+Use `multipart/form-data` for:
+
+- `POST /tickets` and `POST /tickets/{id}/messages`
+- `POST /support-chats` and `POST /support-chats/{id}/messages`
+
+Field names: `attachments[0]` or `attachment[0]` (both accepted). Same file type and 5 MB limits.
+
+### Customer goals
+
+`GET /goals` after login — show progress widgets in the app home or profile.
 
 <a name="theme-usage"></a>
 ## Theme usage

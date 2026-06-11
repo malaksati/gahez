@@ -1,6 +1,6 @@
 @php
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
 @endphp
 
 <div class="card border-0 shadow-sm mb-4 mt-3">
@@ -47,19 +47,19 @@
 
                             <div class="d-flex justify-content-between small mb-2">
                                 <span class="text-muted">{{ __('messages.Progress') }}</span>
-                                <strong>{{ number_format($percent, 0) }}%</strong>
+                                <strong>{{ format_local_number($percent, 0) }}%</strong>
                             </div>
 
                             <div class="small text-muted mb-1">
-                                {{ number_format((float) $row['order_total'], 2) }} {{ $currency }}
+                                {{ format_local_number((float) $row['order_total'], 2) }} {{ $currency }}
                                 /
-                                {{ number_format((float) $row['min_order_total'], 2) }} {{ $currency }}
+                                {{ format_local_number((float) $row['min_order_total'], 2) }} {{ $currency }}
                                 {{ __('messages.Target') }}
                             </div>
 
                             <div class="small text-muted mb-1">
                                 {{ __('messages.Reward') }}:
-                                <strong class="text-body">{{ number_format((float) $row['reward_amount'], 2) }} {{ $currency }}</strong>
+                                <strong class="text-body">{{ format_local_number((float) $row['reward_amount'], 2) }} {{ $currency }}</strong>
                             </div>
 
                             <div class="row g-2 mt-1">

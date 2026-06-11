@@ -99,7 +99,7 @@
       margin: 0.75rem 0;
 
       .storage-progress {
-        background: white;
+        background: $gahez-50;
         height: 100%;
         border-radius: 50px;
         transition: width 0.5s ease-in-out;
@@ -721,14 +721,14 @@
 
 :root {
   --files-bg: #{$body-bg};
-  --files-sidebar-bg: #{$white};
+  --files-sidebar-bg: #{$gahez-50};
   --files-border: #{$border-color};
   --files-text: #{$body-color};
   --files-text-muted: #{$text-muted};
-  --files-header-bg: #{$white};
-  --files-item-bg: #{$white};
-  --files-item-hover: #{$gray-50};
-  --files-upload-bg: #{$gray-50};
+  --files-header-bg: #{$gahez-50};
+  --files-item-bg: #{$gahez-50};
+  --files-item-hover: #{$gahez-100};
+  --files-upload-bg: #{$gahez-100};
 }
 
 [data-bs-theme="dark"] {

@@ -1,6 +1,6 @@
 @php
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
 @endphp
 
 @if ($goals->count() > 0)
@@ -24,8 +24,8 @@
                             <strong>{{ $goal->getTranslation('name', $locale, false) ?: $goal->getTranslation('name', 'en') }}</strong>
                         </td>
                         <td>{{ __('messages.Goal period '.$goal->period_type) }}</td>
-                        <td>{{ number_format((float) $goal->min_order_total, 2) }} {{ $currency }}</td>
-                        <td>{{ number_format((float) $goal->reward_amount, 2) }} {{ $currency }}</td>
+                        <td>{{ format_local_number((float) $goal->min_order_total, 2) }} {{ $currency }}</td>
+                        <td>{{ format_local_number((float) $goal->reward_amount, 2) }} {{ $currency }}</td>
                         <td>@include('v1.admin.partials.validity-period', ['model' => $goal])</td>
                         <td>
                             <div class="form-check form-switch">

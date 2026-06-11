@@ -2,7 +2,7 @@
 
 @php
     $page = 'reports';
-    $currency = app_currency();
+    $currency = display_currency();
     $needsDateRange = in_array($type, [
         'sales-period',
         'sales-payment-methods',
@@ -69,10 +69,10 @@
             @elseif ($type === 'sales-period')
                 @foreach ([
                     ['label' => __('messages.Orders'), 'value' => $report['summary']['orders_count'] ?? 0],
-                    ['label' => __('messages.Revenue'), 'value' => number_format($report['summary']['revenue'] ?? 0, 2).' '.$currency],
-                    ['label' => __('messages.Average demand'), 'value' => number_format($report['summary']['avg_order'] ?? 0, 2).' '.$currency],
+                    ['label' => __('messages.Revenue'), 'value' => format_local_number($report['summary']['revenue'] ?? 0, 2).' '.$currency],
+                    ['label' => __('messages.Average demand'), 'value' => format_local_number($report['summary']['avg_order'] ?? 0, 2).' '.$currency],
                     ['label' => __('messages.Shipments'), 'value' => $report['summary']['shipments'] ?? 0],
-                    ['label' => __('messages.Shipping revenue'), 'value' => number_format($report['summary']['shipping_revenue'] ?? 0, 2).' '.$currency],
+                    ['label' => __('messages.Shipping revenue'), 'value' => format_local_number($report['summary']['shipping_revenue'] ?? 0, 2).' '.$currency],
                 ] as $kpi)
                     <div class="col-md-6 col-xl-4 col-xxl">
                         <div class="card h-100 border-0 shadow-sm">
@@ -86,7 +86,7 @@
             @elseif ($type === 'sales-payment-methods')
                 @foreach ([
                     ['label' => __('messages.Total orders'), 'value' => $report['summary']['total_orders'] ?? 0],
-                    ['label' => __('messages.Total revenue'), 'value' => number_format($report['summary']['total_revenue'] ?? 0, 2).' '.$currency],
+                    ['label' => __('messages.Total revenue'), 'value' => format_local_number($report['summary']['total_revenue'] ?? 0, 2).' '.$currency],
                 ] as $kpi)
                     <div class="col-md-6">
                         <div class="card h-100 border-0 shadow-sm">

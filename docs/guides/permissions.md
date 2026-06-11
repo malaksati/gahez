@@ -36,11 +36,10 @@ Defined in `database/seeders/RoleSeeder.php`.
 | `manage ratings` | Product ratings |
 | `manage product-reports` | Product reports |
 | `manage tickets` | Support tickets |
+| `manage support-chats` | Real-time support chat inbox |
 | `manage settings` | Settings, theme, security |
 | `manage admins` | Admin users |
 | `manage customers` | Customers |
-| `manage delivery` | Drivers, zones, shifts, assignments |
-
 ---
 
 ## Super-admin bypass
@@ -114,9 +113,6 @@ Super-admin accounts **cannot** be deleted or have permissions stripped via admi
 |--------|-----------|
 | Public catalog | No auth |
 | Customer routes | `auth:sanctum` |
-| Delivery routes | `auth:sanctum` + `delivery.user` middleware |
-
-`EnsureDeliveryUser` checks the user has an active `Delivery` profile record.
 
 ---
 
@@ -129,7 +125,6 @@ Registered in `bootstrap/app.php`:
 | `role` | `RoleMiddleware` |
 | `permission` | `PermissionMiddleware` |
 | `role_or_permission` | `RoleOrPermissionMiddleware` |
-| `delivery.user` | `EnsureDeliveryUser` |
 
 ---
 

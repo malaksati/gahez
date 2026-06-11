@@ -160,7 +160,7 @@
       transition: all var(--transition-fast);
 
       &:hover {
-        background: white;
+        background: $gahez-50;
         transform: translate(-50%, -50%) scale(1.1);
       }
     }
@@ -186,7 +186,7 @@
 
         &:focus {
           border-color: var(--bs-primary);
-          box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+          box-shadow: 0 0 0 0.25rem rgba($gahez-600, 0.25);
         }
       }
 

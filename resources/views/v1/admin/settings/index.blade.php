@@ -100,7 +100,7 @@
                                         name="point_to_value"
                                         value="{{ old('point_to_value', setting('point_to_value', 1)) }}"
                                     >
-                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                    <span class="input-group-text">{{ display_currency() }}</span>
                                 </div>
                                 <small class="text-muted">{{ __('messages.Point to value hint') }}</small>
                                 @error('point_to_value')
@@ -144,7 +144,7 @@
                                         name="cart_min_subtotal"
                                         value="{{ old('cart_min_subtotal', setting('cart_min_subtotal', 0)) }}"
                                     >
-                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                    <span class="input-group-text">{{ display_currency() }}</span>
                                 </div>
                                 <small class="text-muted">{{ __('messages.Minimum order subtotal hint') }}</small>
                                 @error('cart_min_subtotal')
@@ -163,7 +163,7 @@
                                         name="shipping_price_per_km"
                                         value="{{ old('shipping_price_per_km', setting('shipping_price_per_km', 0)) }}"
                                     >
-                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                    <span class="input-group-text">{{ display_currency() }}</span>
                                 </div>
                                 @error('shipping_price_per_km')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -181,7 +181,7 @@
                                         name="fast_shipping_fee"
                                         value="{{ old('fast_shipping_fee', setting('fast_shipping_fee', 0)) }}"
                                     >
-                                    <span class="input-group-text">{{ setting('currency', app_currency()) }}</span>
+                                    <span class="input-group-text">{{ display_currency() }}</span>
                                 </div>
                                 <small class="text-muted">{{ __('messages.Fast shipping extra fee hint') }}</small>
                                 @error('fast_shipping_fee')

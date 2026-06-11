@@ -3,7 +3,7 @@
 @php
     $page = 'orders';
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
     $title = __('messages.Order').' #'.$order->id;
 
     $statusBadgeHtml = view('v1.admin.orders.partials.order-status-badge', ['status' => $order->status])->render();
@@ -68,22 +68,22 @@
                         </dd>
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Sub total') }}</dt>
-                        <dd class="col-sm-8 mt-3">{{ number_format((float) $order->sub_total, 2) }}{{ $currency ? ' '.$currency : '' }}</dd>
+                        <dd class="col-sm-8 mt-3">{{ format_local_number((float) $order->sub_total, 2) }}{{ $currency ? ' '.$currency : '' }}</dd>
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Order discount') }}</dt>
-                        <dd class="col-sm-8 mt-3">{{ number_format((float) $order->order_discount, 2) }}{{ $currency ? ' '.$currency : '' }}</dd>
+                        <dd class="col-sm-8 mt-3">{{ format_local_number((float) $order->order_discount, 2) }}{{ $currency ? ' '.$currency : '' }}</dd>
 
                         @if ($order->coupon)
                             <dt class="col-sm-4 mt-3">{{ __('messages.Coupon') }}</dt>
                             <dd class="col-sm-8 mt-3">
                                 <a href="{{ route('v1.admin.coupons.show', $order->coupon) }}"><code>{{ $order->coupon->code }}</code></a>
-                                <span class="text-muted ms-1">(-{{ number_format((float) $order->coupon_discount, 2) }}{{ $currency ? ' '.$currency : '' }})</span>
+                                <span class="text-muted ms-1">(-{{ format_local_number((float) $order->coupon_discount, 2) }}{{ $currency ? ' '.$currency : '' }})</span>
                             </dd>
                         @endif
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Shipping') }}</dt>
                         <dd class="col-sm-8 mt-3">
-                            {{ number_format((float) $order->total_shipping, 2) }}{{ $currency ? ' '.$currency : '' }}
+                            {{ format_local_number((float) $order->total_shipping, 2) }}{{ $currency ? ' '.$currency : '' }}
                             @if ($order->is_fast_shipping)
                                 <span class="badge bg-info text-dark ms-1">{{ __('messages.Fast shipping') }}</span>
                             @endif
@@ -97,12 +97,12 @@
                         @if ((float) $order->wallet_used > 0)
                             <dt class="col-sm-4 mt-3">{{ __('messages.Wallet used') }}</dt>
                             <dd class="col-sm-8 mt-3">
-                                <span class="badge bg-primary">{{ number_format((float) $order->wallet_used, 2) }}{{ $currency ? ' '.$currency : '' }}</span>
+                                <span class="badge bg-primary">{{ format_local_number((float) $order->wallet_used, 2) }}{{ $currency ? ' '.$currency : '' }}</span>
                             </dd>
                         @endif
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Total') }}</dt>
-                        <dd class="col-sm-8 mt-3"><strong class="fs-5">{{ number_format((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></dd>
+                        <dd class="col-sm-8 mt-3"><strong class="fs-5">{{ format_local_number((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></dd>
 
                         <dt class="col-sm-4 mt-3">{{ __('messages.Payment') }}</dt>
                         <dd class="col-sm-8 mt-3">
@@ -206,10 +206,10 @@
                                                 </div>
                                             </td>
                                             <td><span class="text-muted small">{{ $variantName ?? '—' }}</span></td>
-                                            <td class="text-center">{{ $item->quantity }}</td>
+                                            <td class="text-center">@num($item->quantity)</td>
                                             <td><span class="text-muted small">{{ $item->note ?: '—' }}</span></td>
-                                            <td class="text-end">{{ number_format((float) $item->unit_price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
-                                            <td class="text-end"><strong>{{ number_format($lineTotal, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
+                                            <td class="text-end">{{ format_local_number((float) $item->unit_price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
+                                            <td class="text-end"><strong>{{ format_local_number($lineTotal, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
                                         </tr>
                                     @endforeach
                                 </tbody>

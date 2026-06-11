@@ -13,11 +13,11 @@ class SettingSeeder extends Seeder
             ['key' => 'app_name', 'value' => 'Gahez', 'type' => 'string'],
             ['key' => 'currency', 'value' => 'EGP', 'type' => 'string'],
             ['key' => 'cashback_percentage', 'value' => '5', 'type' => 'number'],
-            ['key' => 'point_to_value', 'value' => '0.01', 'type' => 'number'],
-            ['key' => 'shipping_price_per_km', 'value' => '0.5', 'type' => 'number'],
-            ['key' => 'cart_min_line_count', 'value' => '0', 'type' => 'number'],
-            ['key' => 'cart_min_subtotal', 'value' => '0', 'type' => 'number'],
-            ['key' => 'fast_shipping_fee', 'value' => '0', 'type' => 'number'],
+            ['key' => 'point_to_value', 'value' => '10', 'type' => 'number'],
+            ['key' => 'shipping_price_per_km', 'value' => '5', 'type' => 'number'],
+            ['key' => 'cart_min_line_count', 'value' => '5', 'type' => 'number'],
+            ['key' => 'cart_min_subtotal', 'value' => '2000', 'type' => 'number'],
+            ['key' => 'fast_shipping_fee', 'value' => '100', 'type' => 'number'],
         ];
 
         foreach ($settings as $setting) {

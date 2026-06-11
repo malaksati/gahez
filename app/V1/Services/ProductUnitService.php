@@ -156,12 +156,20 @@ class ProductUnitService
                         ->all();
                 }
 
+                $locale = app()->getLocale();
+
                 return [
                     'id' => $row->id,
                     'product_variant_id' => $row->product_variant_id ? (string) $row->product_variant_id : '',
                     'variant_option_ids' => $optionIds,
                     'variant_key' => $this->comboKey($optionIds),
-                    'unit_id' => (string) $row->unit_id,
+                    'unit_id' => $row->unit_id ? (string) $row->unit_id : '',
+                    'unit_code' => $row->unit?->code ?? '',
+                    'unit_name' => $row->unit
+                        ? ($row->unit->getTranslation('name', $locale, false)
+                            ?: $row->unit->getTranslation('name', 'en', false)
+                            ?: $row->unit->getTranslation('name', 'en'))
+                        : '',
                     'sku' => $row->sku ?? '',
                     'price' => (string) $row->price,
                     'stock' => $row->stock !== null ? (string) $row->stock : '',

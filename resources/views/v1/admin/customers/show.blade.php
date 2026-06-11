@@ -30,11 +30,11 @@
                     <div class="d-flex justify-content-center gap-3 mt-2">
                         <div class="text-center">
                             <div class="text-muted small">{{ __('messages.Wallet balance') }}</div>
-                            <strong>{{ number_format((float) $customer->wallet, 2) }} {{ app_currency() }}</strong>
+                            <strong>{{ format_local_number((float) $customer->wallet, 2) }} {{ display_currency() }}</strong>
                         </div>
                         <div class="text-center">
                             <div class="text-muted small">{{ __('messages.Points balance') }}</div>
-                            <strong>{{ number_format((int) $customer->points) }}</strong>
+                            <strong>{{ format_local_number((int) $customer->points) }}</strong>
                         </div>
                     </div>
                 </div>
@@ -153,9 +153,9 @@
                                                 @endif
                                             </td>
                                             <td class="text-end {{ $tx->type === 'addition' ? 'text-success' : 'text-danger' }}">
-                                                {{ $tx->type === 'addition' ? '+' : '-' }}{{ number_format((int) $tx->amount) }}
+                                                {{ $tx->type === 'addition' ? '+' : '-' }}{{ format_local_number((int) $tx->amount) }}
                                             </td>
-                                            <td class="text-end">{{ number_format((int) $tx->balance_after) }}</td>
+                                            <td class="text-end">{{ format_local_number((int) $tx->balance_after) }}</td>
                                             <td class="small text-muted">{{ $tx->notes ?? '—' }}</td>
                                         </tr>
                                     @endforeach

@@ -77,6 +77,85 @@
   }
 }
 
+[data-bs-theme="dark"] {
+  .admin-header {
+    .navbar {
+      background-color: rgba($gahez-950, 0.96) !important;
+      border-bottom-color: $gahez-800 !important;
+    }
+
+    .navbar-brand .brand-logo {
+      height: 48px;
+    }
+  }
+
+  .admin-sidebar {
+    background-color: var(--bs-body-bg);
+    border-inline-end-color: $gahez-800;
+
+    .sidebar-nav {
+      .nav .nav-link {
+        color: $gahez-200;
+
+        i {
+          color: $gahez-400;
+        }
+
+        &:hover {
+          background-color: rgba($gahez-800, 0.65);
+          color: $gahez-100;
+
+          i {
+            color: $gahez-200;
+          }
+        }
+
+        &.active {
+          background-color: $gahez-600;
+          color: $gahez-950;
+          box-shadow: 0 2px 8px rgba($gahez-950, 0.45);
+
+          i {
+            color: $gahez-950;
+          }
+
+          &:hover {
+            background-color: $gahez-500;
+            color: $gahez-950;
+
+            i {
+              color: $gahez-950;
+            }
+          }
+        }
+      }
+
+      .nav-submenu .nav-link.active:hover {
+        background-color: $gahez-600;
+        color: $gahez-950;
+
+        i {
+          color: $gahez-950;
+          opacity: 1;
+        }
+      }
+
+      .text-muted {
+        color: $gahez-400 !important;
+      }
+    }
+  }
+
+  .admin-main {
+    background-color: $gahez-950;
+  }
+
+  .stats-card .stats-icon.bg-primary {
+    background-color: rgba($gahez-600, 0.22) !important;
+    color: $gahez-300 !important;
+  }
+}
+
 .auth-branding {
   background: var(--brand-auth-gradient) !important;
 }

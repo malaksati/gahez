@@ -511,6 +511,31 @@ POST /products/{id}/report
 
 ---
 
+## Support chats (real-time)
+
+```http
+GET /support-chats
+POST /support-chats
+GET /support-chats/{id}
+GET /support-chats/{id}/messages
+POST /support-chats/{id}/messages
+```
+
+Create with JSON (`subject`, `message`) or multipart (optional `attachments[0]`).  
+Cannot send messages to a **closed** chat. Admin: **Messages → Support chats** (`manage support-chats`).
+
+---
+
+## Goals
+
+```http
+GET /goals
+```
+
+Active goals with progress for the authenticated customer.
+
+---
+
 ## Support tickets
 
 ```http
@@ -660,6 +685,12 @@ Import the Apidog/Postman collection from `docs/apidog/gahez-api.postman_collect
 | Refund requests (admin) | Accept/reject on `/admin/order-refund-requests` |
 | Admin live notifications | Polls `/admin/notifications/feed` |
 | Payment methods | `cash_on_delivery` and `wallet` only |
+| Support chats API | `GET/POST /support-chats`, messages, attachments |
+| Goals API | `GET /goals` |
+| Product name sort | Admin list `name_asc` / `name_desc` |
+| Theme & locale toggles | Pill switches (admin + landing) |
+| Arabic-Indic digits | Admin UI + `trans()` when locale is `ar` |
+| Light theme surfaces | Warm `gahez-50` backgrounds (no pure white) |
 
 ---
 

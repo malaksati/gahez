@@ -42,14 +42,16 @@ Accept: application/json
 Accept-Language: en
 ```
 
-## Multipart endpoints (tickets)
+## Multipart endpoints (tickets & support chats)
 
-Use **form-data** body type, not JSON:
+Use **form-data** body type when attaching files:
 
 | Endpoint | Fields |
 |----------|--------|
 | `POST /tickets` | `subject`, `description`, `attachments[0]` (file) |
 | `POST /tickets/{id}/messages` | `message`, `attachments[0]` (file) |
+| `POST /support-chats` | `subject`, `message`, `attachments[0]` (file) |
+| `POST /support-chats/{id}/messages` | `message`, `attachments[0]` (file) |
 
 Both field names work: **`attachments[0]`** (recommended) or **`attachment[0]`**.
 

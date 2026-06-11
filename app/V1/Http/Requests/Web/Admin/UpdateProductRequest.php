@@ -15,6 +15,7 @@ class UpdateProductRequest extends AdminFormRequest
     protected function prepareForValidation(): void
     {
         $this->prepareProductPricingFields();
+        $this->prepareProductUnitsInput();
 
         $product = $this->route('product');
         $productId = is_object($product) ? $product->getKey() : (int) $product;
@@ -35,7 +36,6 @@ class UpdateProductRequest extends AdminFormRequest
             ProductValidation::update($productId),
             ProductValidation::adminMediaAndRelations($productId),
             ProductValidation::adminProductVariants(),
-            ProductValidation::adminProductUnits(),
         );
     }
 

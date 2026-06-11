@@ -66,6 +66,26 @@ if (! function_exists('app_currency')) {
     }
 }
 
+if (! function_exists('display_currency')) {
+    /**
+     * Locale-aware currency label for UI (stored EGP → L.E. or ج.م).
+     */
+    function display_currency(?string $code = null): string
+    {
+        $code = strtoupper(trim($code ?? app_currency()));
+
+        if ($code === '') {
+            return '';
+        }
+
+        if ($code === 'EGP') {
+            return uses_arabic_indic_digits() ? 'ج.م' : 'L.E.';
+        }
+
+        return $code;
+    }
+}
+
 if (! function_exists('storage_public_url')) {
     /**
      * Public URL for a file stored on the "public" disk (relative path, e.g. settings/foo.png).
@@ -146,5 +166,81 @@ if (! function_exists('brand_color')) {
             '950' => '#4a3306',
             default => '#faad28',
         };
+    }
+}
+
+if (! function_exists('uses_arabic_indic_digits')) {
+    function uses_arabic_indic_digits(?string $locale = null): bool
+    {
+        $locale ??= app()->getLocale();
+
+        return str_starts_with(strtolower($locale), 'ar');
+    }
+}
+
+if (! function_exists('localize_digits')) {
+    function localize_digits(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        if (! uses_arabic_indic_digits()) {
+            return $value;
+        }
+
+        return strtr($value, [
+            '0' => '٠',
+            '1' => '١',
+            '2' => '٢',
+            '3' => '٣',
+            '4' => '٤',
+            '5' => '٥',
+            '6' => '٦',
+            '7' => '٧',
+            '8' => '٨',
+            '9' => '٩',
+        ]);
+    }
+}
+
+if (! function_exists('format_local_number')) {
+    function format_local_number(
+        float|int|string|null $number,
+        int $decimals = 0,
+        ?string $decimalSeparator = null,
+        ?string $thousandsSeparator = null,
+    ): string {
+        if ($number === null || $number === '') {
+            $number = 0;
+        }
+
+        if (uses_arabic_indic_digits()) {
+            $decimalSeparator ??= '٫';
+            $thousandsSeparator ??= '٬';
+        } else {
+            $decimalSeparator ??= '.';
+            $thousandsSeparator ??= ',';
+        }
+
+        $formatted = number_format((float) $number, $decimals, $decimalSeparator, $thousandsSeparator);
+
+        return uses_arabic_indic_digits()
+            ? localize_digits($formatted)
+            : $formatted;
+    }
+}
+
+if (! function_exists('local_num')) {
+    /**
+     * Format a database numeric value for the active locale (Arabic → ٠–٩).
+     */
+    function local_num(
+        float|int|string|null $number,
+        int $decimals = 0,
+        ?string $decimalSeparator = null,
+        ?string $thousandsSeparator = null,
+    ): string {
+        return format_local_number($number, $decimals, $decimalSeparator, $thousandsSeparator);
     }
 }

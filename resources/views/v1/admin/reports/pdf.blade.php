@@ -208,13 +208,13 @@
                         ],
                         'sales-period' => [
                             ['label' => __('messages.Orders'), 'value' => $report['summary']['orders_count'] ?? 0],
-                            ['label' => __('messages.Revenue'), 'value' => number_format($report['summary']['revenue'] ?? 0, 2).' '.app_currency()],
-                            ['label' => __('messages.Average demand'), 'value' => number_format($report['summary']['avg_order'] ?? 0, 2).' '.app_currency()],
+                            ['label' => __('messages.Revenue'), 'value' => format_local_number($report['summary']['revenue'] ?? 0, 2).' '.display_currency()],
+                            ['label' => __('messages.Average demand'), 'value' => format_local_number($report['summary']['avg_order'] ?? 0, 2).' '.display_currency()],
                             ['label' => __('messages.Shipments'), 'value' => $report['summary']['shipments'] ?? 0],
                         ],
                         'sales-payment-methods' => [
                             ['label' => __('messages.Total orders'), 'value' => $report['summary']['total_orders'] ?? 0],
-                            ['label' => __('messages.Total revenue'), 'value' => number_format($report['summary']['total_revenue'] ?? 0, 2).' '.app_currency()],
+                            ['label' => __('messages.Total revenue'), 'value' => format_local_number($report['summary']['total_revenue'] ?? 0, 2).' '.display_currency()],
                         ],
                         default => [],
                     } as $item)

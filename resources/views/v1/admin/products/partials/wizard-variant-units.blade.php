@@ -1,5 +1,5 @@
 {{-- Variant + unit pricing (variable products, variants step) --}}
-<div class="mt-4" x-show="productVariants.length > 0" x-cloak>
+<div class="mt-4" x-show="isVariable && productVariants.length > 0" x-cloak data-product-units-scope="variable">
     <h6 class="mb-2">{{ __('messages.Variant units') }}</h6>
     <p class="text-muted small mb-3">{{ __('messages.Variant units wizard hint') }}</p>
 
@@ -75,13 +75,17 @@
                         <td>
                             <select class="form-select form-select-sm"
                                 :name="`product_units[${index}][unit_id]`"
+                                data-unit-select
                                 x-model="row.unit_id"
                                 @change="refreshVariantUnitRowSku(index)"
                                 required>
                                 <option value="">{{ __('messages.Select unit') }}</option>
-                                <template x-for="unit in catalogUnits" :key="unit.id">
-                                    <option :value="String(unit.id)" x-text="unit.name"></option>
-                                </template>
+                                @foreach ($catalogUnits as $catalogUnit)
+                                    <option value="{{ (string) $catalogUnit->id }}">
+                                        {{ $catalogUnit->getTranslation('name', app()->getLocale())
+                                            ?: $catalogUnit->getTranslation('name', 'en') }}
+                                    </option>
+                                @endforeach
                             </select>
                         </td>
                         <td>

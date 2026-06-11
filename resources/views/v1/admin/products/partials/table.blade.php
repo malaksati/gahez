@@ -1,6 +1,6 @@
 @php
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
 @endphp
 
 @if ($products->count() > 0)
@@ -87,11 +87,11 @@
                             @endif
                         </td>
                         <td>
-                            <strong>{{ number_format((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
+                            <strong>{{ format_local_number((float) $product->price, 2) }}{{ $currency ? ' '.$currency : '' }}</strong>
                             @if ($product->hasDiscount())
                                 <br>
                                 <small class="text-success">
-                                    {{ number_format($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                    {{ format_local_number($product->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}
                                 </small>
                             @endif
                         </td>

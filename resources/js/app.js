@@ -128,6 +128,39 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    Alpine.data('localeSwitch', (config = {}) => ({
+        current: config.current || 'en',
+        enUrl: config.enUrl || '/locale/en',
+        arUrl: config.arUrl || '/locale/ar',
+
+        get isArabic() {
+            return String(this.current).startsWith('ar');
+        },
+
+        switchTo(locale) {
+            if (locale === 'ar' && !this.isArabic) {
+                window.location.href = this.arUrl;
+            } else if (locale === 'en' && this.isArabic) {
+                window.location.href = this.enUrl;
+            }
+        },
+
+        toggle() {
+            if (this._navigating) {
+                return;
+            }
+
+            this._navigating = true;
+            const nextLocale = this.isArabic ? 'en' : 'ar';
+            this.current = nextLocale;
+            const url = nextLocale === 'ar' ? this.arUrl : this.enUrl;
+
+            window.setTimeout(() => {
+                window.location.href = url;
+            }, 420);
+        },
+    }));
+
     Alpine.data('productWizard', (config = {}) => productWizard(config));
 
     Alpine.data('offerablePicker', (config = {}) => ({

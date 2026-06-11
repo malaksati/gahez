@@ -182,16 +182,18 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 
 | Feature | Admin | API |
 |---------|-------|-----|
+| **Support chats** (real-time threads) | ✅ assign, status, reply | ✅ CRUD + messages |
 | Support tickets + messages | ✅ | ✅ |
-| **Ticket file attachments** (multipart) | ✅ reply | ✅ create + reply |
+| **Ticket / chat file attachments** (multipart) | ✅ reply | ✅ create + reply |
 | Product ratings | ✅ visibility | ✅ submit |
 | Product reports | ✅ workflow | ✅ submit |
+| Customer goals (gamification) | ✅ | ✅ `GET /goals` |
 
-Attachments: jpeg, png, jpg, gif, webp, pdf, doc, docx (max 5 MB). Stored via `UploadStorage` under `tickets/` and `tickets/messages/`.
+Attachments: jpeg, png, jpg, gif, webp, pdf, doc, docx (max 5 MB). Tickets → `tickets/`; support chats → `support/` paths via `UploadStorage`.
 
 API accepts `attachments[0]` or `attachment[0]` field names.
 
-**Key files:** `TicketController`, `TicketService`, `ResolvesTicketAttachments`
+**Key files:** `SupportChatController`, `SupportChatService`, `TicketController`, `TicketService`, `GoalController`
 
 ---
 
@@ -246,6 +248,10 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 | **Birthday rewards** | Birthdate on profile, scheduled coupons/gifts |
 | **LaRecipe docs** | Browsable `/docs` API reference |
 | **Import/export** | Queued Excel transfer for catalog entities |
+| **Support chats** | Customer API + admin inbox; multipart attachments |
+| **Admin UX** | Theme/locale pill toggles; warm `gahez-50` light surfaces; dark orange/brown palette |
+| **Arabic numerals** | `format_local_number`, `@num`, Arabic-Indic digits in admin + `trans()` |
+| **Product list sort** | Name A–Z / Z–A filter in admin |
 
 ---
 

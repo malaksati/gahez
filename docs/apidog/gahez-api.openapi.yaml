@@ -24,6 +24,8 @@ tags:
   - name: Wishlist
   - name: Wallet
   - name: Tickets
+  - name: SupportChats
+  - name: Goals
 
 security:
   - bearerAuth: []
@@ -709,6 +711,91 @@ paths:
                 message: { type: string }
       responses:
         '201': { description: Message added }
+
+  /support-chats:
+    get:
+      tags: [SupportChats]
+      summary: List support chats
+      parameters:
+        - { name: per_page, in: query, schema: { type: integer, default: 15 } }
+      responses:
+        '200': { description: Paginated chats }
+    post:
+      tags: [SupportChats]
+      summary: Create support chat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject: { type: string, maxLength: 255 }
+                message: { type: string }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                subject: { type: string }
+                message: { type: string }
+                attachments:
+                  type: array
+                  items: { type: string, format: binary }
+                attachment:
+                  type: array
+                  items: { type: string, format: binary }
+      responses:
+        '201': { description: Created }
+
+  /support-chats/{id}:
+    get:
+      tags: [SupportChats]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Chat detail }
+
+  /support-chats/{id}/messages:
+    get:
+      tags: [SupportChats]
+      summary: List chat messages
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - { name: per_page, in: query, schema: { type: integer, default: 30 } }
+      responses:
+        '200': { description: Paginated messages }
+    post:
+      tags: [SupportChats]
+      summary: Send chat message
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+                attachments:
+                  type: array
+                  items: { type: string, format: binary }
+                attachment:
+                  type: array
+                  items: { type: string, format: binary }
+      responses:
+        '201': { description: Message added }
+        '403': { description: Chat closed }
+
+  /goals:
+    get:
+      tags: [Goals]
+      summary: Active goals with user progress
+      responses:
+        '200': { description: Goals list }
 
 components:
   securitySchemes:

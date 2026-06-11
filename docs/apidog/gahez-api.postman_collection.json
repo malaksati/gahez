@@ -12,7 +12,8 @@
     { "key": "orderId", "value": "1" },
     { "key": "addressId", "value": "1" },
     { "key": "cartItemId", "value": "1" },
-    { "key": "ticketId", "value": "1" }
+    { "key": "ticketId", "value": "1" },
+    { "key": "supportChatId", "value": "1" }
   ],
   "auth": {
     "type": "bearer",
@@ -228,11 +229,12 @@
       ]
     },
     {
-      "name": "Wishlist & Wallet",
+      "name": "Wishlist, Wallet & Goals",
       "item": [
         { "name": "Wishlist", "request": { "method": "GET", "url": "{{baseUrl}}/wishlist" } },
         { "name": "Toggle wishlist", "request": { "method": "POST", "url": "{{baseUrl}}/wishlist/{{productId}}" } },
-        { "name": "Wallet history", "request": { "method": "GET", "url": "{{baseUrl}}/wallet/history" } }
+        { "name": "Wallet history", "request": { "method": "GET", "url": "{{baseUrl}}/wallet/history" } },
+        { "name": "Goals", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/goals" } }
       ]
     },
     {
@@ -275,6 +277,49 @@
               ]
             },
             "url": "{{baseUrl}}/tickets/{{ticketId}}/messages"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Support chats",
+      "item": [
+        { "name": "List support chats", "request": { "method": "GET", "url": "{{baseUrl}}/support-chats?per_page=15" } },
+        {
+          "name": "Create support chat",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Order issue\",\n  \"message\": \"My order is late\"\n}"
+            },
+            "url": "{{baseUrl}}/support-chats"
+          }
+        },
+        { "name": "Show support chat", "request": { "method": "GET", "url": "{{baseUrl}}/support-chats/{{supportChatId}}" } },
+        { "name": "List messages", "request": { "method": "GET", "url": "{{baseUrl}}/support-chats/{{supportChatId}}/messages?per_page=30" } },
+        {
+          "name": "Send message",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Any update?\"\n}" },
+            "url": "{{baseUrl}}/support-chats/{{supportChatId}}/messages"
+          }
+        },
+        {
+          "name": "Send message with attachment",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "message", "value": "See attached photo.", "type": "text" },
+                { "key": "attachments[0]", "type": "file", "src": [] }
+              ]
+            },
+            "url": "{{baseUrl}}/support-chats/{{supportChatId}}/messages"
           }
         }
       ]

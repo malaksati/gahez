@@ -70,27 +70,12 @@
             </div>
 
             <div class="navbar-nav flex-row">
-                <div class="dropdown me-2">
-                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-translate"></i>
-                        <span class="d-none d-md-inline ms-1">{{ strtoupper(app()->getLocale()) }}</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('locale.switch', ['locale' => 'en']) }}">English</a></li>
-                        <li><a class="dropdown-item {{ app()->getLocale() === 'ar' ? 'active' : '' }}" href="{{ route('locale.switch', ['locale' => 'ar']) }}">العربية</a></li>
-                    </ul>
-                </div>
+                @include('layouts.partials.theme-switch-button', ['variant' => 'admin'])
+                @include('layouts.partials.locale-switch-button', ['variant' => 'admin'])
 
                 @auth
                     @include('layouts.partials.notifications-dropdown')
                 @endauth
-
-                <div x-data="themeSwitch">
-                    <button class="btn btn-outline-secondary me-2" type="button" @click="toggle()" title="{{ __('messages.Toggle theme') }}">
-                        <i class="bi bi-sun-fill" x-show="currentTheme === 'light'"></i>
-                        <i class="bi bi-moon-fill" x-show="currentTheme === 'dark'"></i>
-                    </button>
-                </div>
 
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">

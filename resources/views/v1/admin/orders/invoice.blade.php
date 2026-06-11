@@ -1,6 +1,6 @@
 @php
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
     $discountTotal = (float) $order->order_discount + (float) $order->coupon_discount;
     $htmlLang = str_replace('_', '-', $locale);
     $isRtl = str_starts_with(strtolower($locale), 'ar');
@@ -401,10 +401,10 @@
                                     <div class="product-meta">{{ $variantName }}</div>
                                 @endif
                             </td>
-                            <td class="text-end"><span class="ltr">{{ number_format((float) $item->unit_price, 2) }}
+                            <td class="text-end"><span class="ltr">{{ format_local_number((float) $item->unit_price, 2) }}
                                     {{ $currency }}</span></td>
-                            <td class="text-center"><span class="ltr">{{ $item->quantity }}</span></td>
-                            <td class="text-end"><strong><span class="ltr">{{ number_format($lineTotal, 2) }}
+                            <td class="text-center"><span class="ltr">@num($item->quantity)</span></td>
+                            <td class="text-end"><strong><span class="ltr">{{ format_local_number($lineTotal, 2) }}
                                         {{ $currency }}</span></strong></td>
                         </tr>
                     @endforeach
@@ -414,13 +414,13 @@
             <table class="totals-table">
                 <tr class="totals-line-muted">
                     <td class="totals-label">{{ __('messages.Sub total') }}</td>
-                    <td class="totals-value"><span class="ltr">{{ number_format((float) $order->sub_total, 2) }}
+                    <td class="totals-value"><span class="ltr">{{ format_local_number((float) $order->sub_total, 2) }}
                             {{ $currency }}</span></td>
                 </tr>
                 @if ($discountTotal > 0)
                     <tr class="totals-line-muted">
                         <td class="totals-label">{{ __('messages.Discount') }}</td>
-                        <td class="totals-value danger"><span class="ltr">-{{ number_format($discountTotal, 2) }}
+                        <td class="totals-value danger"><span class="ltr">-{{ format_local_number($discountTotal, 2) }}
                                 {{ $currency }}</span></td>
                     </tr>
                 @endif
@@ -429,7 +429,7 @@
                         <td class="totals-label">{{ __('messages.Coupon') }} (<span
                                 class="ltr">{{ $order->coupon->code }}</span>)</td>
                         <td class="totals-value danger"><span
-                                class="ltr">-{{ number_format((float) $order->coupon_discount, 2) }}
+                                class="ltr">-{{ format_local_number((float) $order->coupon_discount, 2) }}
                                 {{ $currency }}</span></td>
                     </tr>
                 @endif
@@ -437,19 +437,19 @@
                     <tr class="totals-line-muted">
                         <td class="totals-label">{{ __('messages.Wallet used') }}</td>
                         <td class="totals-value danger"><span
-                                class="ltr">-{{ number_format((float) $order->wallet_used, 2) }}
+                                class="ltr">-{{ format_local_number((float) $order->wallet_used, 2) }}
                                 {{ $currency }}</span></td>
                     </tr>
                 @endif
                 <tr class="totals-line-muted">
                     <td class="totals-label">{{ __('messages.Shipping') }}</td>
                     <td class="totals-value"><span
-                            class="ltr">{{ number_format((float) $order->total_shipping, 2) }}
+                            class="ltr">{{ format_local_number((float) $order->total_shipping, 2) }}
                             {{ $currency }}</span></td>
                 </tr>
                 <tr class="totals-grand">
                     <td class="totals-label">{{ __('messages.Grand total') }}</td>
-                    <td class="totals-value"><span class="ltr">{{ number_format((float) $order->total, 2) }}
+                    <td class="totals-value"><span class="ltr">{{ format_local_number((float) $order->total, 2) }}
                             {{ $currency }}</span></td>
                 </tr>
             </table>

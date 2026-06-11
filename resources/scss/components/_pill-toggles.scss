@@ -1,0 +1,248 @@
+// ==========================================================================
+// Neumorphic pill toggles — theme & locale (shared size)
+// ==========================================================================
+
+@mixin pill-toggle-dark-track {
+  background: linear-gradient(135deg, $gahez-950 0%, $gahez-900 50%, $gahez-800 100%);
+  border-color: rgba($gahez-500, 0.25);
+  box-shadow:
+    inset 4px 4px 12px rgba(0, 0, 0, 0.55),
+    inset -3px -3px 8px rgba($gahez-600, 0.12),
+    0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+@mixin pill-toggle-dark-track-label {
+  color: $gahez-100;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+@mixin pill-toggle-light-track {
+  background: linear-gradient(135deg, $gahez-50 0%, $gahez-100 45%, $gahez-200 100%);
+  border-color: rgba($gahez-600, 0.28);
+  box-shadow:
+    inset 4px 4px 10px rgba($gahez-950, 0.22),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.9),
+    0 3px 10px rgba($gahez-950, 0.12);
+}
+
+@mixin pill-toggle-light-track-label {
+  color: $gahez-900;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+@mixin pill-toggle-light-thumb {
+  background: linear-gradient(155deg, $gahez-800 0%, $gahez-950 100%);
+  color: $gahez-100;
+  box-shadow:
+    4px 4px 10px rgba($gahez-950, 0.45),
+    -2px -2px 5px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pill-toggle {
+  --pill-toggle-width: 6.3rem;
+  --pill-toggle-height: 3rem;
+  --pill-toggle-thumb: 2.35rem;
+  --pill-toggle-pad: 0.3rem;
+
+  position: relative;
+  display: inline-block;
+  width: var(--pill-toggle-width);
+  height: var(--pill-toggle-height);
+  border: none;
+  border-radius: 999px;
+  padding: var(--pill-toggle-pad);
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+  transition:
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    border 0.35s ease;
+  background: linear-gradient(145deg, $gahez-50 0%, $gahez-200 50%, $gahez-300 100%);
+  border: 1px solid rgba($gahez-700, 0.22);
+  box-shadow:
+    inset 4px 4px 10px rgba($gahez-950, 0.22),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.9),
+    0 3px 10px rgba($gahez-950, 0.12);
+
+  &:focus-visible {
+    outline: 2px solid $gahez-500;
+    outline-offset: 2px;
+  }
+
+  --pill-toggle-travel: calc(var(--pill-toggle-width) - var(--pill-toggle-thumb) - var(--pill-toggle-pad) * 2);
+
+  &__thumb {
+    position: absolute;
+    top: var(--pill-toggle-pad);
+    left: var(--pill-toggle-pad);
+    width: var(--pill-toggle-thumb);
+    height: var(--pill-toggle-thumb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transform: translateX(0);
+    will-change: transform;
+    transition:
+      transform 0.4s cubic-bezier(0.34, 1.15, 0.48, 1),
+      background 0.35s ease,
+      box-shadow 0.35s ease,
+      color 0.35s ease;
+    background: linear-gradient(155deg, $gahez-800 0%, $gahez-950 100%);
+    color: $gahez-100;
+    box-shadow:
+      4px 4px 10px rgba($gahez-950, 0.45),
+      -2px -2px 5px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    i {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+  }
+
+  &__flag {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: block;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  &__label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: $gahez-900;
+    z-index: 1;
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: opacity 0.3s ease, color 0.35s ease;
+
+    &--end {
+      inset-inline-end: 0.75rem;
+    }
+
+    &--start {
+      inset-inline-start: 0.75rem;
+    }
+  }
+
+  &.is-right .pill-toggle__thumb {
+    transform: translateX(var(--pill-toggle-travel));
+  }
+
+  // Mirror thumb travel in RTL (start/end flip, not negate translateX)
+  [dir="rtl"] &:not(.is-right) .pill-toggle__thumb {
+    transform: translateX(var(--pill-toggle-travel));
+  }
+
+  [dir="rtl"] &.is-right .pill-toggle__thumb {
+    transform: translateX(0);
+  }
+
+  // Theme — light track (thumb left, sun)
+  &--theme {
+    &.is-light {
+      @include pill-toggle-light-track;
+
+      .pill-toggle__label {
+        @include pill-toggle-light-track-label;
+      }
+
+      .pill-toggle__thumb {
+        @include pill-toggle-light-thumb;
+      }
+    }
+
+    // Theme — dark track (thumb right, moon)
+    &.is-dark {
+      @include pill-toggle-dark-track;
+
+      .pill-toggle__label {
+        @include pill-toggle-dark-track-label;
+      }
+
+      .pill-toggle__thumb {
+        background: linear-gradient(155deg, $gahez-50 0%, $gahez-100 100%);
+        color: $gahez-900;
+        box-shadow:
+          4px 4px 12px rgba(0, 0, 0, 0.4),
+          -2px -2px 6px rgba(255, 255, 255, 0.55),
+          inset 0 -1px 0 rgba($gahez-300, 0.5);
+      }
+    }
+  }
+
+  // Locale — EN & AR share the same light track (thumb position differs)
+  &--locale.is-en,
+  &--locale.is-ar {
+    @include pill-toggle-light-track;
+
+    .pill-toggle__label {
+      @include pill-toggle-light-track-label;
+    }
+
+    .pill-toggle__thumb {
+      @include pill-toggle-light-thumb;
+    }
+  }
+
+  &--admin {
+    margin-right: 0.5rem;
+  }
+
+  &--landing {
+    margin-inline: 0.15rem;
+  }
+}
+
+[data-bs-theme="dark"] {
+  .pill-toggle--theme.is-light {
+    background: linear-gradient(135deg, $gahez-900 0%, $gahez-800 50%, $gahez-700 100%);
+    border-color: rgba($gahez-500, 0.3);
+
+    .pill-toggle__label {
+      color: $gahez-100;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .pill-toggle--locale.is-en,
+  .pill-toggle--locale.is-ar {
+    @include pill-toggle-dark-track;
+
+    .pill-toggle__label {
+      @include pill-toggle-dark-track-label;
+    }
+
+    .pill-toggle__thumb {
+      background: linear-gradient(155deg, $gahez-800 0%, $gahez-950 100%);
+      box-shadow:
+        4px 4px 10px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba($gahez-700, 0.15);
+    }
+  }
+}
+
+.landing-nav:not(.is-scrolled) .pill-toggle--landing {
+  box-shadow:
+    inset 4px 4px 10px rgba($gahez-950, 0.2),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.75),
+    0 3px 10px rgba($gahez-950, 0.1);
+}
+
+[data-bs-theme="dark"] .landing-nav:not(.is-scrolled) .pill-toggle--landing {
+  box-shadow:
+    inset 4px 4px 12px rgba(0, 0, 0, 0.5),
+    inset -3px -3px 8px rgba($gahez-600, 0.1),
+    0 3px 12px rgba(0, 0, 0, 0.3);
+}

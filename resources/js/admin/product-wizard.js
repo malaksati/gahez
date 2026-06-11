@@ -30,7 +30,12 @@ export function productWizard(config = {}) {
     }
 
     const catalogVariants = config.catalogVariants ?? [];
-    const catalogUnits = config.catalogUnits ?? [];
+    const catalogUnits = (config.catalogUnits ?? []).map((unit) => ({
+        ...unit,
+        id: String(unit.id ?? ''),
+        name: unit.name ?? '',
+        code: unit.code ?? '',
+    }));
     const initialRows = config.existingProductVariants ?? [];
     const initialUnitRows = config.existingProductUnits ?? [];
     const quickCatalogVariantUrl = config.quickCatalogVariantUrl ?? '';
@@ -108,10 +113,56 @@ export function productWizard(config = {}) {
 
             if (initialUnitRows.length > 0) {
                 this.productUnits = initialUnitRows.map((row) => this.normalizeProductUnitRow(row));
+                this.ensureCatalogUnitsForProductRows();
                 this.refreshProductUnitSkus();
             } else if (!this.isVariable) {
                 this.addProductUnitRow();
             }
+        },
+
+        ensureCatalogUnitsForProductRows() {
+            const knownIds = new Set(
+                (this.catalogUnits ?? []).map((unit) => String(unit.id)),
+            );
+
+            for (const row of this.productUnits) {
+                const unitId = row.unit_id ? String(row.unit_id) : '';
+
+                if (!unitId || knownIds.has(unitId)) {
+                    continue;
+                }
+
+                const unit = {
+                    id: unitId,
+                    code: row.unit_code ?? '',
+                    name: row.unit_name || `Unit #${unitId}`,
+                };
+
+                this.catalogUnits.push(unit);
+                this.appendCatalogUnitToSelects(unit);
+                knownIds.add(unitId);
+            }
+        },
+
+        appendCatalogUnitToSelects(unit) {
+            const unitId = String(unit?.id ?? '');
+
+            if (!unitId) {
+                return;
+            }
+
+            const label = unit.name || unit.name_en || `Unit #${unitId}`;
+
+            document.querySelectorAll('[data-unit-select]').forEach((select) => {
+                if (select.querySelector(`option[value="${unitId}"]`)) {
+                    return;
+                }
+
+                const option = document.createElement('option');
+                option.value = unitId;
+                option.textContent = label;
+                select.appendChild(option);
+            });
         },
 
         defaultPieceUnitId() {
@@ -137,7 +188,11 @@ export function productWizard(config = {}) {
                 product_variant_id: row.product_variant_id ? String(row.product_variant_id) : '',
                 variant_option_ids: variantOptionIds,
                 variant_key: variantKey,
-                unit_id: row.unit_id ? String(row.unit_id) : '',
+                unit_id: row.unit_id !== null && row.unit_id !== undefined && String(row.unit_id) !== ''
+                    ? String(row.unit_id)
+                    : '',
+                unit_code: row.unit_code ?? '',
+                unit_name: row.unit_name ?? '',
                 sku: row.sku ?? '',
                 price: row.price ?? '0',
                 stock: row.stock ?? '',
@@ -447,7 +502,14 @@ export function productWizard(config = {}) {
                 const payload = await response.json();
 
                 if (payload.unit) {
-                    this.catalogUnits = [...this.catalogUnits, payload.unit];
+                    const unit = {
+                        ...payload.unit,
+                        id: String(payload.unit.id ?? ''),
+                        name: payload.unit.name ?? payload.unit.name_en ?? '',
+                        code: payload.unit.code ?? '',
+                    };
+                    this.catalogUnits = [...this.catalogUnits, unit];
+                    this.appendCatalogUnitToSelects(unit);
                     this.newCatalogUnit = { name_en: '', name_ar: '', code: '' };
                 }
             } finally {
@@ -1064,6 +1126,18 @@ export function productWizard(config = {}) {
             });
         },
 
+        disableInactiveProductUnitInputs(form) {
+            const activeScope = this.isVariable ? 'variable' : 'simple';
+
+            form.querySelectorAll('[data-product-units-scope]').forEach((section) => {
+                const enabled = section.getAttribute('data-product-units-scope') === activeScope;
+
+                section.querySelectorAll('[name^="product_units"]').forEach((input) => {
+                    input.disabled = !enabled;
+                });
+            });
+        },
+
         submitWizard(event) {
             event.preventDefault();
 
@@ -1072,6 +1146,7 @@ export function productWizard(config = {}) {
             }
 
             this.syncFilesBeforeSubmit();
+            this.disableInactiveProductUnitInputs(event.target);
             event.target.submit();
         },
 

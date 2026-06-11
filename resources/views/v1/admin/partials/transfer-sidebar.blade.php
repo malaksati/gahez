@@ -36,10 +36,10 @@
                                 <span class="badge bg-{{ $statusClass }} text-capitalize">{{ $batch->status }}</span>
                             </td>
                             <td class="small text-muted">
-                                {{ $batch->processed_rows }}/{{ $batch->total_rows }}
+                                @num($batch->processed_rows)/@num($batch->total_rows)
                                 <br>
-                                <span class="text-success">{{ $batch->success_count }}</span> /
-                                <span class="text-danger">{{ $batch->failed_count }}</span>
+                                <span class="text-success">@num($batch->success_count)</span> /
+                                <span class="text-danger">@num($batch->failed_count)</span>
                             </td>
                             <td>
                                 <a href="{{ route($showRoutePrefix.'.show', $batch) }}" class="btn btn-sm btn-outline-secondary" title="{{ __('messages.Details') }}">
@@ -88,7 +88,7 @@
                                 @endphp
                                 <span class="badge bg-{{ $statusClass }} text-capitalize">{{ $batch->status }}</span>
                             </td>
-                            <td class="small text-muted">{{ $batch->total_rows }}</td>
+                            <td class="small text-muted">@num($batch->total_rows)</td>
                             <td class="text-nowrap">
                                 @if ($batch->hasDownloadableFile())
                                     <a href="{{ route($downloadRoutePrefix.'.download', $batch) }}" class="btn btn-sm btn-outline-primary" title="{{ __('messages.Download file') }}">

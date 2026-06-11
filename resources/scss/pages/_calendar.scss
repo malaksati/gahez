@@ -1076,12 +1076,12 @@
 
 :root {
   --calendar-bg: #{$body-bg};
-  --calendar-sidebar-bg: #{$white};
+  --calendar-sidebar-bg: #{$gahez-50};
   --calendar-border: #{$border-color};
   --calendar-text: #{$body-color};
   --calendar-text-muted: #{$text-muted};
-  --calendar-day-bg: #{$white};
-  --calendar-day-hover: #{$gray-50};
+  --calendar-day-bg: #{$gahez-50};
+  --calendar-day-hover: #{$gahez-100};
 }
 
 [data-bs-theme="dark"] {

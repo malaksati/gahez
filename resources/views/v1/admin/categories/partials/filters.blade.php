@@ -3,22 +3,6 @@
         <form method="GET" action="{{ route('v1.admin.categories.index') }}" class="row g-2 align-items-end" data-admin-list-filters>
             @include('v1.admin.partials.filter-search-input', ['placeholder' => __('messages.Search categories')])
             <div class="col-md-2">
-                <label class="form-label small mb-1">{{ __('messages.Status') }}</label>
-                <select name="status" class="form-select form-select-sm">
-                    <option value="">{{ __('messages.All') }}</option>
-                    <option value="active" @selected(request('status') === 'active')>{{ __('messages.Active') }}</option>
-                    <option value="inactive" @selected(request('status') === 'inactive')>{{ __('messages.Inactive') }}</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small mb-1">{{ __('messages.Featured') }}</label>
-                <select name="featured" class="form-select form-select-sm">
-                    <option value="">{{ __('messages.All') }}</option>
-                    <option value="1" @selected(request('featured') === '1')>{{ __('messages.Yes') }}</option>
-                    <option value="0" @selected(request('featured') === '0')>{{ __('messages.No') }}</option>
-                </select>
-            </div>
-            <div class="col-md-2">
                 <label class="form-label small mb-1">{{ __('messages.Parent category') }}</label>
                 <select name="parent_id" class="form-select form-select-sm">
                     <option value="">{{ __('messages.All') }}</option>
@@ -30,7 +14,23 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
+                <label class="form-label small mb-1">{{ __('messages.Status') }}</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{{ __('messages.All') }}</option>
+                    <option value="active" @selected(request('status') === 'active')>{{ __('messages.Active') }}</option>
+                    <option value="inactive" @selected(request('status') === 'inactive')>{{ __('messages.Inactive') }}</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small mb-1">{{ __('messages.Featured') }}</label>
+                <select name="featured" class="form-select form-select-sm">
+                    <option value="">{{ __('messages.All') }}</option>
+                    <option value="1" @selected(request('featured') === '1')>{{ __('messages.Yes') }}</option>
+                    <option value="0" @selected(request('featured') === '0')>{{ __('messages.No') }}</option>
+                </select>
+            </div>
+            <div class="col-md-1">
                 <label class="form-label small mb-1">{{ __('messages.Sort') }}</label>
                 <select name="sort" class="form-select form-select-sm">
                     <option value="sort_order" @selected(request('sort', 'sort_order') === 'sort_order')>{{ __('messages.Sort order') }}</option>

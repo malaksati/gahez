@@ -97,8 +97,8 @@ class PointService
                 'balance_after' => $pointsAfter,
                 'notes' => __('messages.Cashback for order #:id (:percent% of :total)', [
                     'id' => $lockedOrder->id,
-                    'percent' => rtrim(rtrim(number_format($cashbackPercentage, 2), '0'), '.'),
-                    'total' => number_format((float) $lockedOrder->sub_total, 2).' '.app_currency(),
+                    'percent' => rtrim(rtrim(format_local_number($cashbackPercentage, 2), '0'), '.'),
+                    'total' => format_local_number((float) $lockedOrder->sub_total, 2).' '.display_currency(),
                 ]),
             ]);
 
@@ -110,8 +110,8 @@ class PointService
                 'notes' => __('messages.Cashback wallet credit for order #:id (:points pts × :rate :currency)', [
                     'id' => $lockedOrder->id,
                     'points' => $points,
-                    'rate' => number_format($pointToValue, 2),
-                    'currency' => app_currency(),
+                    'rate' => format_local_number($pointToValue, 2),
+                    'currency' => display_currency(),
                 ]),
             ]);
 

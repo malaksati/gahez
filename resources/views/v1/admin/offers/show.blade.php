@@ -55,7 +55,7 @@
                         @if ($offer->min_cart_amount)
                             @include('v1.admin.partials.show-field', [
                                 'label' => __('messages.Minimum cart amount'),
-                                'value' => number_format((float) $offer->min_cart_amount, 2).' '.app_currency(),
+                                'value' => format_local_number((float) $offer->min_cart_amount, 2).' '.display_currency(),
                             ])
                         @endif
                         @if ($offer->max_discounted_quantity)

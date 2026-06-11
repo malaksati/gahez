@@ -79,6 +79,13 @@ class CategoryService
         return $flat->values();
     }
 
+    public function restrictCategoryTreeToParentsOnly(Collection $flat): Collection
+    {
+        return $flat
+            ->filter(fn (Category $category) => (int) ($category->tree_depth ?? 0) === 0)
+            ->values();
+    }
+
     /**
      * @param  array<string, mixed>  $filters
      */

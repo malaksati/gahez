@@ -13,7 +13,7 @@ class StoreConfigController extends Controller
             'success' => true,
             'data' => [
                 'app_name' => setting('app_name', config('app.name')),
-                'currency' => app_currency(),
+                'currency' => display_currency(),
                 'logo_url' => brand_logo_url(),
             ],
         ]);

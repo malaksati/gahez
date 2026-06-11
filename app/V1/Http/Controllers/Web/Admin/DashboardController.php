@@ -29,15 +29,15 @@ class DashboardController extends AdminController
         $stats = [
             [
                 'label' => __('messages.Total revenue'),
-                'value' => number_format((float) $revenue, 2),
-                'suffix' => app_currency(),
+                'value' => format_local_number((float) $revenue, 2),
+                'suffix' => display_currency(),
                 'description' => __('messages.From paid orders'),
                 'icon' => 'currency',
                 'color' => 'amber',
             ],
             [
                 'label' => __('messages.Orders'),
-                'value' => number_format($ordersCount),
+                'value' => format_local_number($ordersCount),
                 'description' => __('messages.:count pending', ['count' => $pendingOrders]),
                 'icon' => 'cart',
                 'color' => 'blue',
@@ -45,7 +45,7 @@ class DashboardController extends AdminController
             ],
             [
                 'label' => __('messages.Products'),
-                'value' => number_format($productsCount),
+                'value' => format_local_number($productsCount),
                 'description' => __('messages.In catalog'),
                 'icon' => 'cube',
                 'color' => 'emerald',
@@ -53,14 +53,14 @@ class DashboardController extends AdminController
             ],
             [
                 'label' => __('messages.Customers'),
-                'value' => number_format($usersCount),
+                'value' => format_local_number($usersCount),
                 'description' => __('messages.Registered users'),
                 'icon' => 'users',
                 'color' => 'violet',
             ],
             [
                 'label' => __('messages.Open tickets'),
-                'value' => number_format($openTickets),
+                'value' => format_local_number($openTickets),
                 'description' => __('messages.Needs attention'),
                 'icon' => 'chat',
                 'color' => 'rose',

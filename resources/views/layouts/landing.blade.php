@@ -1,6 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light" id="landing-html" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -45,21 +53,11 @@
                     <li class="nav-item">
                         <a class="landing-nav-link" href="#how-it-works">{{ __('messages.How it works') }}</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="landing-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-translate me-1"></i>{{ strtoupper(app()->getLocale()) }}
-                        </a>
-                        <ul class="dropdown-menu {{ app()->getLocale() === 'ar' ? 'dropdown-menu-start' : 'dropdown-menu-end' }}">
-                            <li>
-                                <a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}"
-                                    href="{{ route('locale.switch', ['locale' => 'en']) }}">English</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item {{ app()->getLocale() === 'ar' ? 'active' : '' }}"
-                                    href="{{ route('locale.switch', ['locale' => 'ar']) }}">العربية</a>
-                            </li>
-                        </ul>
+                    <li class="nav-item d-flex align-items-center ms-lg-1">
+                        @include('layouts.partials.theme-switch-button', ['variant' => 'landing'])
+                    </li>
+                    <li class="nav-item d-flex align-items-center ms-lg-1">
+                        @include('layouts.partials.locale-switch-button', ['variant' => 'landing'])
                     </li>
 
                     @auth

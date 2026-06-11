@@ -71,7 +71,7 @@
       .qr-placeholder {
         width: 200px;
         height: 200px;
-        background: var(--bs-white);
+        background: var(--bs-body-bg);
         border: 2px dashed var(--bs-border-color);
         border-radius: var(--bs-border-radius);
         display: flex;
@@ -109,7 +109,7 @@
 
         .backup-code {
           font-family: monospace;
-          background: var(--bs-white);
+          background: var(--bs-body-bg);
           border: 1px solid var(--bs-border-color);
           border-radius: var(--bs-border-radius-sm);
           padding: 0.5rem;

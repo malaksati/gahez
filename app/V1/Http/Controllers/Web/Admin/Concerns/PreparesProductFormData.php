@@ -19,11 +19,34 @@ trait PreparesProductFormData
             'existingProductVariants' => $product
                 ? $products->serializeProductVariantsForWizard($product)
                 : [],
-            'catalogUnits' => Unit::query()->active()->orderBy('code')->get(),
+            'catalogUnits' => $this->catalogUnitsForProductForm($product),
             'existingProductUnits' => $product
                 ? $products->serializeProductUnitsForWizard($product)
                 : [],
         ];
+    }
+
+    protected function catalogUnitsForProductForm(?Product $product): Collection
+    {
+        $units = Unit::query()->active()->orderBy('code')->get();
+
+        if ($product === null) {
+            return $units;
+        }
+
+        $usedUnitIds = $product->productUnits()->pluck('unit_id')->unique();
+
+        if ($usedUnitIds->isEmpty()) {
+            return $units;
+        }
+
+        $missing = Unit::query()
+            ->whereIn('id', $usedUnitIds)
+            ->whereNotIn('id', $units->pluck('id'))
+            ->orderBy('code')
+            ->get();
+
+        return $units->merge($missing)->unique('id')->sortBy('code')->values();
     }
 
     protected function serializeCatalogVariants(VariantService $variants, string $locale): Collection

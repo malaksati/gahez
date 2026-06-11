@@ -4,7 +4,7 @@
 
 .auth-page {
     min-height: 100vh;
-    background: var(--bs-body-bg, #f8fafc);
+    background: var(--bs-body-bg, #{$gahez-50});
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,7 +20,7 @@
 
 .auth-wrapper {
     display: flex;
-    background: var(--bs-body-bg, white);
+    background: var(--bs-body-bg, #{$gahez-50});
     border-radius: var(--border-radius, 0.75rem);
     box-shadow: var(--box-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1));
     overflow: hidden;
@@ -86,7 +86,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: var(--bs-body-bg, white);
+    background: var(--bs-body-bg, #{$gahez-50});
     transition: background-color 0.3s ease;
 }
 
@@ -96,7 +96,7 @@
 }
 
 .auth-card {
-    background: var(--bs-body-bg, white);
+    background: var(--bs-body-bg, #{$gahez-50});
     border-radius: var(--border-radius, 0.75rem);
     padding: 2rem;
     border: none;
@@ -157,14 +157,14 @@
     border-radius: var(--border-radius-sm, 0.5rem);
     border: 1px solid var(--bs-border-color, #cbd5e1);
     transition: all 0.2s;
-    background-color: var(--bs-body-bg, white);
+    background-color: var(--bs-body-bg, #{$gahez-50});
     color: var(--bs-body-color, #1e293b);
 
     &:focus {
         border-color: var(--bs-primary, #{$gahez-600});
         box-shadow: 0 0 0 3px rgba($gahez-600, 0.15);
         outline: none;
-        background-color: var(--bs-body-bg, white);
+        background-color: var(--bs-body-bg, #{$gahez-50});
     }
 
     &.is-invalid {
@@ -180,11 +180,11 @@
     .btn {
         border-left: none;
         border-color: var(--bs-border-color, #cbd5e1);
-        background-color: var(--bs-body-bg, white);
+        background-color: var(--bs-body-bg, #{$gahez-50});
         color: var(--bs-secondary-color, #64748b);
 
         &:hover {
-            background-color: var(--bs-secondary-bg, #f8fafc);
+            background-color: var(--bs-secondary-bg, #{$gahez-100});
             color: var(--bs-primary, #{$gahez-600});
         }
 
@@ -198,26 +198,42 @@
     }
 }
 
-.btn-lg {
+.auth-page .btn-primary.btn-lg {
     padding: 0.75rem 1.5rem;
     font-size: 0.9rem;
     font-weight: 600;
     border-radius: var(--border-radius-sm, 0.5rem);
-    transition: all 0.2s;
-    background-color: var(--bs-primary, #{$gahez-600});
-    border-color: var(--bs-primary, #{$gahez-600});
-    color: white;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    background-color: $gahez-600;
+    border-color: $gahez-600;
+    color: $gahez-950;
 
-    &:hover {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
+    &:hover,
+    &:focus {
+        background-color: $gahez-500;
+        border-color: $gahez-500;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        color: white;
+        box-shadow: 0 4px 12px rgba($gahez-600, 0.35);
+        color: $gahez-950;
     }
 
-    &:active {
+    &:active,
+    &.active {
+        background-color: $gahez-700;
+        border-color: $gahez-700;
         transform: translateY(0);
+        color: $gahez-50;
+    }
+
+    &:disabled,
+    &.disabled,
+    &.btn-loading {
+        background-color: $gahez-600;
+        border-color: $gahez-600;
+        color: transparent;
+        opacity: 0.85;
+        transform: none;
+        box-shadow: none;
     }
 }
 
@@ -225,7 +241,7 @@
     .form-check-input {
         margin-top: 0.25rem;
         border-color: var(--bs-border-color, #cbd5e1);
-        background-color: var(--bs-body-bg, white);
+        background-color: var(--bs-body-bg, #{$gahez-50});
 
         &:checked {
             background-color: var(--bs-primary, #{$gahez-600});
@@ -294,13 +310,13 @@
 }
 
 // Links
-a {
+.auth-page a {
     color: var(--bs-primary, #{$gahez-600});
     text-decoration: none;
     transition: color 0.2s;
 
     &:hover {
-        color: #4f46e5;
+        color: $gahez-700;
         text-decoration: underline;
     }
 
@@ -367,9 +383,8 @@ a {
 }
 
 // Loading State
-.btn-loading {
+.auth-page .btn-loading {
     position: relative;
-    color: transparent !important;
     pointer-events: none;
 
     &::after {
@@ -381,7 +396,7 @@ a {
         left: 50%;
         margin-left: -8px;
         margin-top: -8px;
-        border: 2px solid #ffffff;
+        border: 2px solid $gahez-950;
         border-radius: 50%;
         border-top-color: transparent;
         animation: spinner 0.6s linear infinite;

@@ -14,6 +14,8 @@
         'categories' => $categories,
         'allProducts' => $allProducts,
         'catalogVariants' => $catalogVariants,
+        'catalogUnits' => $catalogUnits,
         'existingProductVariants' => $existingProductVariants,
+        'existingProductUnits' => $existingProductUnits,
     ])
 @endsection

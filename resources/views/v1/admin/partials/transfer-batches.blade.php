@@ -37,11 +37,11 @@
                                 </td>
                                 <td class="small text-muted">
                                     @if ($batch->direction === 'import')
-                                        {{ $batch->processed_rows }} / {{ $batch->total_rows }}
-                                        · {{ __('messages.Success') }}: {{ $batch->success_count }}
-                                        · {{ __('messages.Failed') }}: {{ $batch->failed_count }}
+                                        @num($batch->processed_rows) / @num($batch->total_rows)
+                                        · {{ __('messages.Success') }}: @num($batch->success_count)
+                                        · {{ __('messages.Failed') }}: @num($batch->failed_count)
                                     @else
-                                        {{ $batch->total_rows }} {{ __('messages.rows') }}
+                                        @num($batch->total_rows) {{ __('messages.rows') }}
                                     @endif
                                 </td>
                                 <td class="text-nowrap">

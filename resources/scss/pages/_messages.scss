@@ -90,7 +90,7 @@
 
         &:focus {
           border-color: var(--bs-primary);
-          box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.15);
+          box-shadow: 0 0 0 0.25rem rgba($gahez-600, 0.15);
         }
 
         &::placeholder {
@@ -708,10 +708,11 @@
 
         &.btn-primary {
           background: var(--bs-primary);
-          color: white;
+          color: $gahez-950;
 
           &:hover {
             background: var(--bs-primary);
+            color: $gahez-950;
             transform: scale(1.05);
           }
 
@@ -861,24 +862,24 @@
 
 :root {
   --messages-bg: #{$body-bg};
-  --messages-sidebar-bg: #{$white};
+  --messages-sidebar-bg: #{$gahez-50};
   --messages-border: #{$border-color};
   --messages-text: #{$body-color};
   --messages-text-muted: #{$text-muted};
-  --messages-chat-bg: #{$gray-50};
-  --messages-bubble-bg: #{$white};
-  --messages-input-bg: #{$white};
+  --messages-chat-bg: #{$gahez-50};
+  --messages-bubble-bg: #{$gahez-50};
+  --messages-input-bg: #{$gahez-50};
 }
 
 [data-bs-theme="dark"] {
-  --messages-bg: #{$dark-bg};
-  --messages-sidebar-bg: #{$gray-800};
-  --messages-border: #{$dark-border-color};
-  --messages-text: #{$dark-color};
-  --messages-text-muted: #{$dark-text-muted};
-  --messages-chat-bg: #{$gray-900};
-  --messages-bubble-bg: #{$gray-800};
-  --messages-input-bg: #{$gray-800};
+  --messages-bg: #{$gahez-950};
+  --messages-sidebar-bg: #{$gahez-900};
+  --messages-border: #{$gahez-800};
+  --messages-text: #{$gahez-100};
+  --messages-text-muted: #{$gahez-400};
+  --messages-chat-bg: #{$gahez-950};
+  --messages-bubble-bg: #{$gahez-800};
+  --messages-input-bg: #{$gahez-800};
 
   .conversation-item.active {
     .conversation-name,

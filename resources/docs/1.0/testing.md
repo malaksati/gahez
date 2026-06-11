@@ -49,6 +49,13 @@ After `php artisan db:seed`:
 | Delivery shifts API | `GET /delivery/shifts`, subscribe |
 | Admin live notifications | Feed polling + toasts |
 | Product/category sort order | Admin `sort_order` (blank auto-appends) |
+| Product name sort filter | Admin list `name_asc` / `name_desc` |
+| Support chats API | `GET/POST /support-chats`, messages, attachments |
+| Admin support chats UI | Assign, status, real-time thread (`manage support-chats`) |
+| Goals API | `GET /goals` — customer progress |
+| Theme & locale toggles | Pill switches in admin header + landing (`localStorage` theme) |
+| Arabic-Indic digits | Admin UI + `trans()` when locale is `ar` |
+| Warm light theme | `gahez-50` surfaces across admin, auth, landing |
 
 ---
 

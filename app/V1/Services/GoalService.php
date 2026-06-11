@@ -187,7 +187,7 @@ class GoalService
                     'name' => $goal->getTranslation('name', app()->getLocale(), false)
                         ?: $goal->getTranslation('name', 'en', false)
                         ?: __('messages.Goal'),
-                    'amount' => number_format($orderTotal, 2).' '.app_currency(),
+                    'amount' => format_local_number($orderTotal, 2).' '.display_currency(),
                 ]),
             ]);
 

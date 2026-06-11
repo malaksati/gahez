@@ -34,13 +34,37 @@ Middleware: `app/Http/Middleware/SetLocaleFromRequest.php` (applied to **web** a
 Accept-Language: ar
 ```
 
-**Admin language switch:**
+**Admin / landing language switch:**
+
+Pill toggle in the header (or landing nav): **EN | AR** with UK / Egypt flags.  
+Equivalent route:
 
 ```
 GET /locale/ar
+GET /locale/en
 ```
 
 Sets session + cookie, then redirects back.
+
+**Admin / landing theme:**
+
+Sun/moon pill toggle stores preference in `localStorage.theme` and sets `data-bs-theme` on `<html>` (`light` or `dark`).
+
+---
+
+## Arabic-Indic digits (admin UI)
+
+When locale is Arabic (`ar`), numeric displays in the admin panel use **Arabic-Indic digits** (٠–٩) for prices, counts, and formatted numbers.
+
+| Helper / Blade | Usage |
+|----------------|-------|
+| `format_local_number($n)` | Format number with locale separators + digits |
+| `localize_digits($string)` | Convert Western digits in a string |
+| `@num($value)` | Blade directive for formatted numbers |
+| `@digits($value)` | Blade directive for digit conversion only |
+
+API `trans()` / `__()` messages also localize digits via `LocalizingTranslator`.  
+API JSON numeric fields remain Western digits for client parsing unless you format on the client with `Accept-Language: ar`.
 
 ---
 
@@ -132,7 +156,7 @@ name.ar — required
 
 ## RTL (right-to-left)
 
-Admin panel uses Bootstrap; Arabic layout depends on your theme/CSS. For **LaRecipe docs RTL**, optional package: `binarytorch/larecipe-rtl`.
+Arabic sets `dir="rtl"` on `<html>`. Admin panel and landing page use logical CSS for toggles and navigation. Light theme surfaces use warm **`gahez-50`** cream backgrounds (no pure white). For **LaRecipe docs RTL**, optional package: `binarytorch/larecipe-rtl`.
 
 ---
 

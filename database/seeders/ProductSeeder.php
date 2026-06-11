@@ -5,264 +5,183 @@ namespace Database\Seeders;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
-use App\Models\ProductVariantValue;
-use App\Models\Setting;
-use App\Models\Unit;
 use App\Models\ProductUnit;
-use App\Models\VariantOption;
+use App\Models\Unit;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $brand = Brand::query()->first();
-        $fruits = Category::query()->where('slug', 'fruits-vegetables')->first();
-        $dairy = Category::query()->where('slug', 'dairy')->first();
-        $bakery = Category::query()->where('slug', 'bakery')->first();
-
         $products = [
             [
                 'sku' => 'APPLE-1KG',
-                'slug' => 'fresh-apples-1kg',
-                'name' => ['en' => 'Fresh Apples 1kg', 'ar' => 'تفاح طازج ١ كجم'],
-                'description' => ['en' => 'Crisp red apples.', 'ar' => 'تفاح أحمر مقرمش.'],
-                'price' => 1.75,
+                'slug' => 'red-apples-1kg',
+                'name' => ['en' => 'Red Apples 1kg', 'ar' => 'تفاح أحمر 1 كجم'],
+                'description' => ['en' => 'Fresh red apples.', 'ar' => 'تفاح أحمر طازج.'],
+                'brand' => 'Fresh Farms',
+                'category_slug' => 'fruits-vegetables',
+                'unit_code' => 'kg',
+                'price' => 150,
                 'stock' => 120,
                 'is_featured' => true,
                 'is_new' => true,
-                'categories' => [$fruits?->id],
             ],
             [
                 'sku' => 'MILK-1L',
                 'slug' => 'fresh-milk-1l',
-                'name' => ['en' => 'Fresh Milk 1L', 'ar' => 'حليب طازج ١ لتر'],
-                'description' => ['en' => 'Full cream fresh milk.', 'ar' => 'حليب كامل الدسم.'],
-                'price' => 0.95,
+                'name' => ['en' => 'Fresh Milk 1L', 'ar' => 'لبن طازج 1 لتر'],
+                'description' => ['en' => 'Full cream fresh milk.', 'ar' => 'لبن كامل الدسم.'],
+                'brand' => 'Gahez',
+                'category_slug' => 'dairy',
+                'unit_code' => 'bottle',
+                'price' => 60,
                 'stock' => 200,
                 'is_featured' => true,
-                'categories' => [$dairy?->id],
             ],
             [
-                'sku' => 'BREAD-WHITE',
-                'slug' => 'white-bread-loaf',
-                'name' => ['en' => 'White Bread Loaf', 'ar' => 'خبز أبيض'],
-                'description' => ['en' => 'Soft bakery loaf.', 'ar' => 'رغيف مخبوز طري.'],
-                'price' => 0.65,
+                'sku' => 'BREAD-500G',
+                'slug' => 'white-bread-500g',
+                'name' => ['en' => 'White Bread 500g', 'ar' => 'خبز أبيض 500 جرام'],
+                'description' => ['en' => 'Soft bakery bread.', 'ar' => 'خبز طري من المخبز.'],
+                'brand' => 'Gahez',
+                'category_slug' => 'bakery',
+                'unit_code' => 'piece',
+                'price' => 15,
                 'stock' => 80,
-                'categories' => [$bakery?->id],
             ],
             [
-                'sku' => 'WATER',
-                'slug' => 'mineral-water',
-                'name' => ['en' => 'Mineral Water', 'ar' => 'مياه معدنية'],
-                'description' => ['en' => 'Still mineral water in bottle or box.', 'ar' => 'مياه معدنية غير غازية بزجاجة أو صندوق.'],
-                'price' => 0.35,
-                'stock' => 500,
-                'categories' => [],
-                'product_units' => [
-                    [
-                        'unit_code' => 'bottle',
-                        'sku' => 'WATER-1B',
-                        'price' => 0.35,
-                        'stock' => 500,
-                        'factor' => 1,
-                        'is_default' => true,
-                    ],
-                    [
-                        'unit_code' => 'box',
-                        'sku' => 'WATER-12BOX',
-                        'price' => 3.60,
-                        'stock' => 80,
-                        'factor' => 12,
-                        'is_default' => false,
-                    ],
-                ],
+                'sku' => 'JUICE-1L',
+                'slug' => 'orange-juice-1l',
+                'name' => ['en' => 'Orange Juice 1L', 'ar' => 'عصير برتقال 1 لتر'],
+                'description' => ['en' => 'No added sugar orange juice.', 'ar' => 'عصير برتقال بدون سكر مضاف.'],
+                'brand' => 'Daily Essentials',
+                'category_slug' => 'beverages',
+                'unit_code' => 'bottle',
+                'price' => 70,
+                'stock' => 60,
+                'is_new' => true,
             ],
             [
-                'sku' => 'GIFT-BOX',
-                'slug' => 'birthday-gift-box',
-                'name' => ['en' => 'Birthday Gift Box', 'ar' => 'صندوق هدية عيد ميلاد'],
-                'description' => ['en' => 'Small gift box for promotions.', 'ar' => 'صندوق هدايا صغير للعروض.'],
-                'price' => 3.50,
-                'stock' => 50,
-                'categories' => [],
+                'sku' => 'CHIPS-200G',
+                'slug' => 'potato-chips-200g',
+                'name' => ['en' => 'Potato Chips 200g', 'ar' => 'شيبسي 200 جرام'],
+                'description' => ['en' => 'Classic salted chips.', 'ar' => 'شيبسي مملح كلاسيكي.'],
+                'brand' => 'Daily Essentials',
+                'category_slug' => 'groceries',
+                'unit_code' => 'box',
+                'price' => 35,
+                'stock' => 150,
+            ],
+            [
+                'sku' => 'WATER-1.5L',
+                'slug' => 'mineral-water-1-5l',
+                'name' => ['en' => 'Mineral Water 1.5L', 'ar' => 'مياه معدنية 1.5 لتر'],
+                'description' => ['en' => 'Still mineral water.', 'ar' => 'مياه معدنية غازية.'],
+                'brand' => 'Gahez',
+                'category_slug' => 'beverages',
+                'unit_code' => 'bottle',
+                'price' => 20,
+                'stock' => 300,
+            ],
+            [
+                'sku' => 'DETERGENT-1L',
+                'slug' => 'laundry-detergent-1l',
+                'name' => ['en' => 'Laundry Detergent 1L', 'ar' => 'منظف ملابس 1 لتر'],
+                'description' => ['en' => 'Concentrated laundry detergent.', 'ar' => 'منظف ملابس مركز.'],
+                'brand' => 'Daily Essentials',
+                'category_slug' => 'household',
+                'unit_code' => 'bottle',
+                'price' => 120,
+                'stock' => 45,
+            ],
+            [
+                'sku' => 'TOMATO-1KG',
+                'slug' => 'tomatoes-1kg',
+                'name' => ['en' => 'Tomatoes 1kg', 'ar' => 'طماطم 1 كجم'],
+                'description' => ['en' => 'Ripe red tomatoes.', 'ar' => 'طماطم حمراء طازجة.'],
+                'brand' => 'Fresh Farms',
+                'category_slug' => 'fruits-vegetables',
+                'unit_code' => 'kg',
+                'price' => 45,
+                'stock' => 90,
             ],
         ];
 
         foreach ($products as $data) {
-            $categoryIds = array_filter($data['categories'] ?? []);
-            $unitRows = $data['product_units'] ?? null;
-            $defaultUnitPrice = $data['price'] ?? 0;
-            $defaultUnitStock = $data['stock'] ?? null;
-            unset($data['categories'], $data['product_units'], $data['price'], $data['stock']);
-
-            $product = Product::query()->updateOrCreate(
-                ['sku' => $data['sku']],
-                array_merge([
-                    'type' => 'simple',
-                    'brand_id' => $brand?->id,
-                    'discount' => 0,
-                    'discount_type' => null,
-                    'is_active' => true,
-                    'is_approved' => true,
-                    'is_bookable' => true,
-                    'is_in_stock' => true,
-                ], $data),
-            );
-
-            if ($categoryIds) {
-                $product->categories()->syncWithoutDetaching($categoryIds);
-            }
-
-            if ($unitRows !== null) {
-                $this->syncProductUnits($product, $unitRows);
-            } else {
-                $this->ensureDefaultProductUnit($product, $defaultUnitPrice, $defaultUnitStock);
-            }
-        }
-
-        $this->seedVariableTShirt($brand);
-
-        $giftProduct = Product::query()->where('sku', 'GIFT-BOX')->first();
-        if ($giftProduct) {
-            Setting::query()->updateOrCreate(
-                ['key' => 'birthday_gift_product_id'],
-                ['value' => (string) $giftProduct->id, 'type' => 'number'],
-            );
-            setting_forget('birthday_gift_product_id');
+            $this->seedProduct($data);
         }
     }
 
     /**
-     * @param  list<array<string, mixed>>  $rows
+     * @param  array<string, mixed>  $data
      */
-    protected function syncProductUnits(Product $product, array $rows): void
+    protected function seedProduct(array $data): Product
     {
-        ProductUnit::query()->where('product_id', $product->id)->delete();
+        $brand = Brand::query()
+            ->where('name->en', $data['brand'])
+            ->first();
 
-        foreach ($rows as $index => $row) {
-            $unitId = Unit::query()->where('code', $row['unit_code'])->value('id');
-
-            if (! $unitId) {
-                continue;
-            }
-
-            ProductUnit::query()->create([
-                'product_id' => $product->id,
-                'unit_id' => $unitId,
-                'sku' => $row['sku'] ?? null,
-                'price' => $row['price'] ?? 0,
-                'stock' => $row['stock'] ?? null,
-                'is_in_stock' => true,
-                'factor' => max(1, (int) ($row['factor'] ?? 1)),
-                'is_default' => (bool) ($row['is_default'] ?? $index === 0),
-                'sort_order' => $index,
-                'is_active' => true,
-            ]);
-        }
-    }
-
-    protected function ensureDefaultProductUnit(Product $product, float $price = 0, ?int $stock = null): void
-    {
-        if (ProductUnit::query()->where('product_id', $product->id)->exists()) {
-            return;
+        if (! $brand) {
+            $brand = Brand::query()->first();
         }
 
-        $pieceUnitId = Unit::query()->where('code', 'piece')->value('id');
+        $category = Category::query()
+            ->where('slug', $data['category_slug'])
+            ->first();
 
-        if (! $pieceUnitId) {
-            return;
-        }
+        $unit = Unit::query()
+            ->where('code', $data['unit_code'])
+            ->first();
 
-        ProductUnit::query()->create([
-            'product_id' => $product->id,
-            'unit_id' => $pieceUnitId,
-            'price' => $price,
-            'stock' => $stock,
-            'is_in_stock' => $product->is_in_stock,
-            'factor' => 1,
-            'is_default' => true,
-            'sort_order' => 0,
-            'is_active' => true,
-        ]);
-    }
-
-    protected function seedVariableTShirt(?Brand $brand): void
-    {
-        $sizeSmall = VariantOption::query()->where('code', 'S')->first();
-        $sizeMedium = VariantOption::query()->where('code', 'M')->first();
-        $colorBlack = VariantOption::query()->where('code', 'BLK')->first();
-
-        if (! $sizeSmall || ! $sizeMedium || ! $colorBlack) {
-            return;
+        if (! $unit) {
+            $unit = Unit::query()->where('code', 'piece')->first();
         }
 
         $product = Product::query()->updateOrCreate(
-            ['sku' => 'TSHIRT-VAR'],
+            ['sku' => $data['sku']],
             [
-                'type' => 'variable',
-                'slug' => 'cotton-t-shirt',
-                'name' => ['en' => 'Cotton T-Shirt', 'ar' => 'تيشيرت قطني'],
-                'description' => ['en' => 'Comfortable cotton tee.', 'ar' => 'تيشيرت قطني مريح.'],
-                'brand_id' => $brand?->id,
+                'type' => 'simple',
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'slug' => $data['slug'],
+                'discount' => 0,
+                'discount_type' => null,
                 'is_active' => true,
+                'is_featured' => $data['is_featured'] ?? false,
+                'is_new' => $data['is_new'] ?? false,
                 'is_approved' => true,
                 'is_bookable' => true,
                 'is_in_stock' => true,
+                'brand_id' => $brand?->id,
             ],
         );
 
-        $combinations = [
-            [
-                'sku' => 'TSHIRT-S-BLK',
-                'slug' => 'cotton-t-shirt-s-black',
-                'name' => ['en' => 'Small / Black', 'ar' => 'صغير / أسود'],
-                'price' => 4.50,
-                'stock' => 25,
-                'option_ids' => [$sizeSmall->id, $colorBlack->id],
-            ],
-            [
-                'sku' => 'TSHIRT-M-BLK',
-                'slug' => 'cotton-t-shirt-m-black',
-                'name' => ['en' => 'Medium / Black', 'ar' => 'وسط / أسود'],
-                'price' => 4.75,
-                'stock' => 30,
-                'option_ids' => [$sizeMedium->id, $colorBlack->id],
-            ],
-        ];
-
-        foreach ($combinations as $row) {
-            $optionIds = $row['option_ids'];
-            unset($row['option_ids']);
-
-            $variant = ProductVariant::query()->updateOrCreate(
-                ['sku' => $row['sku']],
-                array_merge($row, [
-                    'product_id' => $product->id,
-                    'discount' => 0,
-                    'discount_type' => 'percentage',
-                    'is_active' => true,
-                    'is_in_stock' => true,
-                ]),
-            );
-
-            $variant->values()->delete();
-
-            foreach ($optionIds as $optionId) {
-                $option = VariantOption::query()->find($optionId);
-                if (! $option) {
-                    continue;
-                }
-
-                ProductVariantValue::query()->create([
-                    'product_variant_id' => $variant->id,
-                    'variant_option_id' => $optionId,
-                    'value' => $option->getTranslations('name'),
-                ]);
-            }
+        if ($category) {
+            $product->categories()->syncWithoutDetaching([$category->id]);
         }
 
+        if ($unit) {
+            ProductUnit::query()->updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'unit_id' => $unit->id,
+                ],
+                [
+                    'sku' => $data['sku'],
+                    'price' => $data['price'],
+                    'stock' => $data['stock'],
+                    'is_in_stock' => true,
+                    'factor' => 1,
+                    'discount' => null,
+                    'discount_type' => null,
+                    'is_default' => true,
+                    'sort_order' => 0,
+                    'is_active' => true,
+                ],
+            );
+        }
+
+        return $product;
     }
 }

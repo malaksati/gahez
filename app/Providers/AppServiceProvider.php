@@ -4,10 +4,13 @@ namespace App\Providers;
 
 use App\Channels\ResilientMailChannel;
 use App\Models\Verification;
+use App\Translation\LocalizingTranslator;
+use Illuminate\Translation\Translator;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +19,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(MailChannel::class, ResilientMailChannel::class);
+
+        $this->app->extend('translator', function (Translator $translator) {
+            $localizing = new LocalizingTranslator(
+                $translator->getLoader(),
+                $translator->getLocale(),
+            );
+            $localizing->setFallback($translator->getFallback());
+
+            return $localizing;
+        });
 
         $this->syncMysqlTimezoneFromAppTimezone();
     }
@@ -57,6 +70,14 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Paginator::useBootstrapFive();
+
+        Blade::directive('num', function (string $expression) {
+            return "<?php echo e(local_num({$expression})); ?>";
+        });
+
+        Blade::directive('digits', function (string $expression) {
+            return "<?php echo e(localize_digits({$expression})); ?>";
+        });
 
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $code = (string) random_int(100000, 999999);

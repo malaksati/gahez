@@ -148,6 +148,8 @@ class ProductRepository
     {
         match ($sort) {
             'oldest' => $query->oldest(),
+            'name_asc' => $query->orderByRaw("JSON_EXTRACT(name, '$.en') ASC"),
+            'name_desc' => $query->orderByRaw("JSON_EXTRACT(name, '$.en') DESC"),
             'price_asc' => $query->latest(),
             'price_desc' => $query->latest(),
             default => $query->latest(),

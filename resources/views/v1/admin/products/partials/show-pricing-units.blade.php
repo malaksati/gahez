@@ -34,25 +34,25 @@
                         </td>
                         <td><code class="small">{{ $productUnit->sku ?: '—' }}</code></td>
                         <td>{{ $productUnit->factor }}</td>
-                        <td>{{ number_format((float) $productUnit->price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
+                        <td>{{ format_local_number((float) $productUnit->price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
                         <td>
                             @if ($productUnit->discount > 0)
                                 @if ($productUnit->discount_type === 'percentage')
-                                    {{ $productUnit->discount }}%
+                                    @num($productUnit->discount)%
                                 @else
-                                    {{ number_format((float) $productUnit->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                    {{ format_local_number((float) $productUnit->discount, 2) }}{{ $currency ? ' '.$currency : '' }}
                                 @endif
                             @else
                                 <span class="text-muted">—</span>
                             @endif
                         </td>
                         <td class="text-success fw-semibold">
-                            {{ number_format($productUnit->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}
+                            {{ format_local_number($productUnit->final_price, 2) }}{{ $currency ? ' '.$currency : '' }}
                         </td>
                         <td>
                             <span class="badge {{ $productUnit->isInStock() ? 'bg-success' : 'bg-danger' }}">
                                 @if ($productUnit->tracksStock())
-                                    {{ $productUnit->stock }}
+                                    @num($productUnit->stock)
                                 @else
                                     {{ $productUnit->is_in_stock ? __('messages.Available') : __('messages.Out of stock') }}
                                 @endif

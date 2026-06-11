@@ -76,6 +76,15 @@
   }
 }
 
+// Product list inline search — match card surface (lighter than bg-light / gahez-100)
+.product-list-search-bar {
+  background-color: var(--bs-body-bg);
+
+  .form-control {
+    background-color: var(--bs-body-bg);
+  }
+}
+
 // Product management specific styles
 .product-management {
   .stats-card {
@@ -105,7 +114,7 @@
     &:hover {
       border-color: var(--bs-primary);
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 8px 25px rgba($gahez-600, 0.15);
     }
 
     &.selected {

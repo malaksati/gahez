@@ -3,11 +3,11 @@
 // ==========================================================================
 
 .landing-page {
-  --landing-hero-bg: linear-gradient(145deg, #{$gahez-50} 0%, #{$gahez-100} 45%, #fff8eb 100%);
-  --landing-surface: rgba(255, 255, 255, 0.85);
+  --landing-hero-bg: linear-gradient(145deg, #{$gahez-50} 0%, #{$gahez-100} 45%, #{$gahez-50} 100%);
+  --landing-surface: rgba($gahez-50, 0.92);
   --landing-border: rgba($gahez-600, 0.12);
   --landing-text-muted: #{$gahez-700};
-  background-color: #faf6ee;
+  background-color: $gahez-50;
   color: $gahez-950;
   font-family: 'Inter', system-ui, sans-serif;
 
@@ -62,7 +62,7 @@
   transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 
   &.is-scrolled {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba($gahez-50, 0.92);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid $gahez-100;
     box-shadow: 0 4px 24px rgba($gahez-950, 0.06);
@@ -88,12 +88,12 @@
 
       &:hover {
         color: $gahez-900;
-        background: rgba(255, 255, 255, 0.65);
+        background: rgba($gahez-50, 0.72);
       }
 
       &.active {
         color: $gahez-900;
-        background: rgba(255, 255, 255, 0.85);
+        background: rgba($gahez-50, 0.9);
       }
     }
 
@@ -105,10 +105,10 @@
     .btn-landing-outline {
       border-color: $gahez-300;
       color: $gahez-800;
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba($gahez-50, 0.65);
 
       &:hover {
-        background: #fff;
+        background: $gahez-50;
         border-color: $gahez-400;
         color: $gahez-900;
       }
@@ -241,7 +241,7 @@
   max-width: 380px;
   padding: 2rem;
   border-radius: 1.5rem;
-  background: linear-gradient(160deg, #fff 0%, rgba(255, 255, 255, 0.92) 100%);
+  background: linear-gradient(160deg, $gahez-50 0%, rgba($gahez-50, 0.92) 100%);
   border: 1px solid rgba($gahez-200, 0.9);
   box-shadow: 0 20px 48px rgba($gahez-950, 0.08);
 
@@ -254,7 +254,7 @@
   position: absolute;
   padding: 0.65rem 1rem;
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba($gahez-50, 0.95);
   color: $gahez-900;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -291,7 +291,7 @@
 
 .landing-stats {
   padding: 2.5rem 0;
-  background: #fff;
+  background: $gahez-50;
   border-bottom: 1px solid $gahez-100;
 }
 
@@ -351,7 +351,7 @@
   grid-column: span 4;
   padding: 1.75rem;
   border-radius: 1.25rem;
-  background: #fff;
+  background: $gahez-50;
   border: 1px solid $gahez-100;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 
@@ -478,12 +478,12 @@
   }
 
   .btn-ghost-hero {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba($gahez-50, 0.88);
     border-color: rgba($gahez-700, 0.2);
     color: $gahez-900;
 
     &:hover {
-      background: #fff;
+      background: $gahez-50;
       border-color: $gahez-400;
       color: $gahez-950;
     }
@@ -576,7 +576,7 @@
 }
 
 .landing-page .btn-ghost-hero {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba($gahez-50, 0.8);
   border: 1px solid $gahez-200;
   color: $gahez-900;
   font-weight: 600;
@@ -584,8 +584,253 @@
   padding: 0.65rem 1.35rem;
 
   &:hover {
-    background: #fff;
+    background: $gahez-50;
     border-color: $gahez-300;
     color: $gahez-950;
+  }
+}
+
+[data-bs-theme="dark"] {
+  .landing-page {
+    --landing-hero-bg: linear-gradient(145deg, #{$gahez-950} 0%, #{$gahez-900} 50%, #2a1a05 100%);
+    --landing-surface: rgba($gahez-900, 0.8);
+    --landing-border: rgba($gahez-500, 0.22);
+    --landing-text-muted: #{$gahez-300};
+    background-color: $gahez-950;
+    color: $gahez-100;
+  }
+
+  .landing-nav.is-scrolled {
+    background: rgba($gahez-950, 0.94);
+    border-bottom-color: rgba($gahez-700, 0.35);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+
+    .landing-nav-link {
+      color: $gahez-200;
+
+      &:hover,
+      &.active {
+        color: $gahez-50;
+        background: rgba($gahez-700, 0.35);
+      }
+    }
+  }
+
+  .landing-nav:not(.is-scrolled) {
+    .landing-nav-link {
+      color: $gahez-200;
+
+      &:hover,
+      &.active {
+        color: $gahez-50;
+        background: rgba($gahez-800, 0.55);
+      }
+    }
+
+    .landing-nav-toggler {
+      border-color: rgba($gahez-600, 0.45);
+      color: $gahez-200;
+    }
+
+    .btn-landing-outline {
+      border-color: rgba($gahez-500, 0.45);
+      color: $gahez-200;
+      background: rgba($gahez-900, 0.45);
+
+      &:hover {
+        background: rgba($gahez-800, 0.65);
+        border-color: rgba($gahez-400, 0.55);
+        color: $gahez-50;
+      }
+    }
+  }
+
+  .landing-nav-link {
+    color: $gahez-200;
+
+    &:hover,
+    &.active {
+      color: $gahez-50;
+      background: rgba($gahez-700, 0.35);
+    }
+  }
+
+  .landing-hero {
+    color: $gahez-100;
+
+    &::before {
+      background: radial-gradient(circle, rgba($gahez-600, 0.25) 0%, transparent 70%);
+    }
+
+    &::after {
+      background: radial-gradient(circle, rgba($gahez-700, 0.2) 0%, transparent 70%);
+    }
+  }
+
+  .landing-hero-title {
+    color: $gahez-50;
+
+    .highlight {
+      color: $gahez-400;
+    }
+  }
+
+  .landing-hero-muted {
+    color: $gahez-300 !important;
+  }
+
+  .landing-hero-badge {
+    color: $gahez-200;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+    i {
+      color: $gahez-400;
+    }
+  }
+
+  .landing-hero-card {
+    background: linear-gradient(160deg, $gahez-900 0%, rgba($gahez-950, 0.95) 100%);
+    border-color: rgba($gahez-600, 0.3);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  }
+
+  .landing-hero-float {
+    background: rgba($gahez-900, 0.95);
+    color: $gahez-100;
+    border-color: rgba($gahez-600, 0.3);
+  }
+
+  .landing-stats {
+    background: $gahez-900;
+    border-bottom-color: rgba($gahez-700, 0.35);
+  }
+
+  .landing-stat {
+    .value {
+      color: $gahez-200;
+    }
+
+    .label {
+      color: $gahez-400;
+    }
+  }
+
+  .landing-section-header {
+    h2 {
+      color: $gahez-50;
+    }
+
+    p {
+      color: $gahez-300;
+    }
+  }
+
+  .landing-bento-item {
+    background: $gahez-900;
+    border-color: rgba($gahez-700, 0.35);
+
+    &:hover {
+      border-color: rgba($gahez-600, 0.45);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    h3 {
+      color: $gahez-100;
+    }
+
+    p {
+      color: $gahez-300;
+    }
+  }
+
+  .landing-bento-icon {
+    background: rgba($gahez-700, 0.45);
+    color: $gahez-200;
+  }
+
+  .landing-step {
+    .step-num {
+      color: rgba($gahez-600, 0.55);
+    }
+
+    h3 {
+      color: $gahez-100;
+    }
+
+    p {
+      color: $gahez-300;
+    }
+  }
+
+  .landing-cta {
+    background: linear-gradient(120deg, $gahez-900 0%, $gahez-800 40%, $gahez-700 100%);
+    color: $gahez-100;
+    border-top-color: rgba($gahez-600, 0.35);
+    border-bottom-color: rgba($gahez-600, 0.35);
+
+    h2 {
+      color: $gahez-50;
+    }
+
+    p {
+      color: $gahez-300;
+    }
+
+    .btn-ghost-hero {
+      background: rgba($gahez-950, 0.55);
+      border-color: rgba($gahez-500, 0.35);
+      color: $gahez-100;
+
+      &:hover {
+        background: rgba($gahez-950, 0.75);
+        border-color: rgba($gahez-400, 0.45);
+        color: $gahez-50;
+      }
+    }
+  }
+
+  .landing-footer {
+    background: linear-gradient(180deg, $gahez-950 20%, $gahez-900 100%);
+    color: $gahez-400;
+    border-top-color: rgba($gahez-700, 0.35);
+
+    a,
+    .btn-link {
+      color: $gahez-400;
+
+      &:hover {
+        color: $gahez-300;
+      }
+    }
+
+    .footer-brand {
+      color: $gahez-100;
+    }
+
+    .footer-desc,
+    .footer-heading {
+      color: $gahez-300;
+    }
+
+    .footer-copy {
+      color: $gahez-500;
+      border-top-color: rgba($gahez-700, 0.35);
+    }
+  }
+
+  .landing-page .btn-light-hero {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .landing-page .btn-ghost-hero {
+    background: rgba($gahez-900, 0.55);
+    border-color: rgba($gahez-600, 0.35);
+    color: $gahez-100;
+
+    &:hover {
+      background: rgba($gahez-800, 0.75);
+      border-color: rgba($gahez-500, 0.45);
+      color: $gahez-50;
+    }
   }
 }

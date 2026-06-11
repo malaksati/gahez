@@ -55,9 +55,9 @@ class GoalResource extends JsonResource
 
         if ($localizedDescription === null || trim($localizedDescription) === '') {
             $localizedDescription = __('messages.Goal cashback description', [
-                'reward' => number_format((float) $goal->reward_amount, 2),
-                'target' => number_format((float) $goal->min_order_total, 2),
-                'currency' => app_currency(),
+                'reward' => format_local_number((float) $goal->reward_amount, 2),
+                'target' => format_local_number((float) $goal->min_order_total, 2),
+                'currency' => display_currency(),
             ]);
         }
 

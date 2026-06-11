@@ -1,5 +1,5 @@
 @props([
-    'col' => 'col-md-4',
+    'col' => 'col-md-3',
     'placeholder' => '',
     'value' => request('search'),
 ])

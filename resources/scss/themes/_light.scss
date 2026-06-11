@@ -1,16 +1,75 @@
 // ==========================================================================
-// Light Theme Styles
+// Light Theme Styles — warm gahez-50 surfaces (no pure white)
 // ==========================================================================
 
 [data-bs-theme="light"] {
+  --bs-primary: #{$gahez-600};
+  --bs-primary-rgb: #{red($gahez-600)}, #{green($gahez-600)}, #{blue($gahez-600)};
   --bs-body-bg: #{$gahez-50};
   --bs-body-color: #{$gahez-950};
   --bs-border-color: #{$gahez-200};
   --bs-border-color-translucent: rgba(17, 24, 74, 0.08);
+  --bs-emphasis-color: #{$gahez-950};
+  --bs-secondary-bg: #{$gahez-50};
+  --bs-secondary-bg-rgb: #{red($gahez-50)}, #{green($gahez-50)}, #{blue($gahez-50)};
+  --bs-tertiary-bg: #{$gahez-50};
+  --bs-tertiary-bg-rgb: #{red($gahez-50)}, #{green($gahez-50)}, #{blue($gahez-50)};
+  --bs-light: #{$gahez-100};
+  --bs-light-rgb: #{red($gahez-100)}, #{green($gahez-100)}, #{blue($gahez-100)};
+  --bs-light-bg-subtle: #{$gahez-50};
+  --bs-light-border-subtle: #{$gahez-100};
+  --bs-light-text-emphasis: #{$gahez-900};
+
+  $surface-light-bg: $gahez-50;
+  $surface-light-muted: $gahez-100;
+  $surface-light-border: $gahez-100;
+
+  .admin-main {
+    background-color: $surface-light-bg;
+  }
+
+  .admin-header {
+    .navbar {
+      background-color: rgba($gahez-50, 0.98) !important;
+      border-bottom-color: $gahez-200 !important;
+    }
+  }
 
   .card {
-    background-color: #{$gahez-50};
-    border: 1px solid $gahez-100;
+    background-color: $surface-light-bg;
+    border: 1px solid $surface-light-border;
+  }
+
+  .card-header,
+  .card .card-header,
+  .card .card-footer,
+  .card-header.bg-white,
+  .card-header.bg-transparent,
+  .card-footer.bg-white {
+    background-color: $surface-light-bg !important;
+    border-color: $surface-light-border !important;
+  }
+
+  .bg-white {
+    background-color: $surface-light-bg !important;
+  }
+
+  .bg-light,
+  .text-bg-light {
+    background-color: $surface-light-muted !important;
+    border-color: $surface-light-border !important;
+  }
+
+  .badge.bg-light,
+  .badge.text-bg-light {
+    background-color: $surface-light-muted !important;
+    border-color: $surface-light-border !important;
+  }
+
+  .border-bottom.bg-light,
+  .p-3.bg-light {
+    background-color: $surface-light-muted !important;
+    border-color: $surface-light-border !important;
   }
 
   .table-light {
@@ -18,8 +77,50 @@
     --bs-table-color: #{$gahez-900};
   }
 
+  thead.table-light th {
+    background-color: $gahez-50 !important;
+  }
+
+  .modal-content,
+  .dropdown-menu,
+  .offcanvas,
+  .popover,
+  .toast {
+    background-color: $surface-light-bg;
+  }
+
+  .form-control,
+  .form-select,
+  .form-check-input {
+    background-color: $surface-light-bg;
+  }
+
+  .input-group-text {
+    background-color: $surface-light-bg;
+    color: var(--bs-body-color);
+    border-color: $surface-light-border;
+  }
+
+  .input-group .btn {
+    background-color: $surface-light-bg;
+  }
+
+  .admin-search-dropdown {
+    background-color: $surface-light-bg !important;
+    border-color: $surface-light-border !important;
+  }
+
   .admin-sidebar {
     background-color: var(--bs-body-bg);
     border-inline-end-color: var(--bs-border-color);
   }
+
+  --messages-sidebar-bg: #{$gahez-50};
+  --messages-bubble-bg: #{$gahez-50};
+  --messages-input-bg: #{$gahez-50};
+  --files-sidebar-bg: #{$gahez-50};
+  --files-header-bg: #{$gahez-50};
+  --files-item-bg: #{$gahez-50};
+  --calendar-sidebar-bg: #{$gahez-50};
+  --calendar-day-bg: #{$gahez-50};
 }

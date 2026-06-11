@@ -2,7 +2,7 @@
 
 @php
     $locale = app()->getLocale();
-    $currency = app_currency();
+    $currency = display_currency();
 @endphp
 
 @section('title', $goal->getTranslation('name', $locale, false) ?: __('messages.Goal'))
@@ -16,10 +16,10 @@
             <dd class="col-sm-8">{{ __('messages.Goal period '.$goal->period_type) }}</dd>
 
             <dt class="col-sm-4">{{ __('messages.Minimum order subtotal') }}</dt>
-            <dd class="col-sm-8">{{ number_format((float) $goal->min_order_total, 2) }} {{ $currency }}</dd>
+            <dd class="col-sm-8">{{ format_local_number((float) $goal->min_order_total, 2) }} {{ $currency }}</dd>
 
             <dt class="col-sm-4">{{ __('messages.Reward amount') }}</dt>
-            <dd class="col-sm-8">{{ number_format((float) $goal->reward_amount, 2) }} {{ $currency }}</dd>
+            <dd class="col-sm-8">{{ format_local_number((float) $goal->reward_amount, 2) }} {{ $currency }}</dd>
 
             <dt class="col-sm-4">{{ __('messages.Validity') }}</dt>
             <dd class="col-sm-8">@include('v1.admin.partials.validity-period', ['model' => $goal])</dd>

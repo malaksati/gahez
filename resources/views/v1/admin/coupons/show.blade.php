@@ -2,7 +2,7 @@
 
 @php
     $page = 'coupons';
-    $currency = app_currency();
+    $currency = display_currency();
     $badges = view('v1.admin.partials.active-badge', ['active' => $coupon->is_active])->render();
 @endphp
 
@@ -38,7 +38,7 @@
                         @include('v1.admin.partials.show-field', [
                             'label' => __('messages.Min cart amount'),
                             'value' => $coupon->min_cart_amount > 0
-                                ? number_format((float) $coupon->min_cart_amount, 2).($currency ? ' '.$currency : '')
+                                ? format_local_number((float) $coupon->min_cart_amount, 2).($currency ? ' '.$currency : '')
                                 : '—',
                         ])
                         @php

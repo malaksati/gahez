@@ -14,6 +14,8 @@ Authenticated customer endpoints. Requires `Authorization: Bearer {token}`.
 - [Delivery time slots](#delivery-time-slots)
 - [Product feedback](#product-feedback)
 - [Support tickets](#support-tickets)
+- [Support chats (real-time)](#support-chats)
+- [Goals](#goals)
 - [Become a delivery driver](#become-delivery-driver)
 - [Refund requests](#refund-requests)
 
@@ -317,6 +319,63 @@ Content-Type: multipart/form-data
 | `attachment[0]` | file | optional alias |
 
 Response includes `attachments` as full URLs on both ticket and message objects.
+
+<a name="support-chats"></a>
+## Support chats (real-time)
+
+Lightweight chat threads for quick customer ↔ store messaging (separate from formal tickets).
+
+```http
+GET /support-chats?per_page=15
+POST /support-chats
+GET /support-chats/{id}
+GET /support-chats/{id}/messages?per_page=30
+POST /support-chats/{id}/messages
+```
+
+### Create chat
+
+```http
+POST /support-chats
+Content-Type: application/json
+```
+
+```json
+{
+  "subject": "Order issue",
+  "message": "My order is late"
+}
+```
+
+Or **multipart/form-data** with optional `attachments[0]` / `attachment[0]` (same rules as tickets).
+
+At least one of `message` or attachments is expected when opening a chat. `subject` is optional (max 255).
+
+### Send message
+
+```http
+POST /support-chats/{id}/messages
+```
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `message` | string | optional if attachments present |
+| `attachments[0]` | file | optional |
+
+Cannot message a **closed** chat (`403`). Admin replies from **Messages → Support chats** in the panel.
+
+**Chat object:** `id`, `status`, `subject`, `last_message_at`, `latest_message`, `unread_messages_count`, `created_at`.
+
+<a name="goals"></a>
+## Goals
+
+Gamification targets for the logged-in customer (progress toward rewards).
+
+```http
+GET /goals
+```
+
+Returns active goals with current progress for the user.
 
 <a name="become-delivery-driver"></a>
 ## Become a delivery driver

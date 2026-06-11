@@ -97,4 +97,29 @@ class CategorySortOrderTest extends TestCase
         $this->assertSame($parentB->id, $child->parent_id);
         $this->assertSame(1, $child->sort_order);
     }
+
+    public function test_restrict_category_tree_to_parents_only_keeps_root_rows(): void
+    {
+        $root = $this->categories->create([
+            'name' => ['en' => 'Groceries', 'ar' => 'بقالة'],
+            'is_active' => true,
+        ]);
+
+        $child = $this->categories->create([
+            'name' => ['en' => 'Dairy', 'ar' => 'ألبان'],
+            'is_active' => true,
+            'parent_id' => $root->id,
+        ]);
+
+        $byParent = $this->categories->getCategoriesGroupedByParent();
+        $flat = $this->categories->flattenCategorySection($root, $byParent);
+
+        $this->assertCount(2, $flat);
+
+        $parentsOnly = $this->categories->restrictCategoryTreeToParentsOnly($flat);
+
+        $this->assertCount(1, $parentsOnly);
+        $this->assertSame($root->id, $parentsOnly->first()->id);
+        $this->assertNotContains($child->id, $parentsOnly->pluck('id'));
+    }
 }
