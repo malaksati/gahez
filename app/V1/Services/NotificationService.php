@@ -40,4 +40,11 @@ class NotificationService
     {
         $this->adminUsers()->each(fn (User $admin) => $admin->notify($notification));
     }
+
+    public function notifyAdminsWithPermission(string $permission, Notification $notification): void
+    {
+        $this->adminUsers()
+            ->filter(fn (User $admin) => $admin->can($permission))
+            ->each(fn (User $admin) => $admin->notify($notification));
+    }
 }

@@ -171,6 +171,7 @@ class AdminUserService
                 'manage ratings' => __('messages.Manage ratings'),
                 'manage product-reports' => __('messages.Manage product reports'),
                 'manage tickets' => __('messages.Manage tickets'),
+                'manage support-chats' => __('messages.Manage support chats'),
             ],
             __('messages.System') => [
                 'manage settings' => __('messages.Manage settings'),

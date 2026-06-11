@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -272,150 +273,128 @@ return new class extends Migration
     public function down(): void
     {
         if (Schema::hasTable('products')) {
-            Schema::table('products', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'products_status_index');
-                $this->dropIndexIfExists($table, 'products_price_index');
-                $this->dropIndexIfExists($table, 'products_type_index');
-                $this->dropIndexIfExists($table, 'products_created_at_index');
-                $this->dropIndexIfExists($table, 'products_is_new_index');
-                $this->dropIndexIfExists($table, 'products_is_bookable_index');
-            });
+            $this->dropIndexSafely('products', 'products_status_index');
+            $this->dropIndexSafely('products', 'products_price_index');
+            $this->dropIndexSafely('products', 'products_type_index');
+            $this->dropIndexSafely('products', 'products_created_at_index');
+            $this->dropIndexSafely('products', 'products_is_new_index');
+            $this->dropIndexSafely('products', 'products_is_bookable_index');
         }
 
         if (Schema::hasTable('orders')) {
-            Schema::table('orders', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'orders_user_status_index');
-                $this->dropIndexIfExists($table, 'orders_status_payment_index');
-                $this->dropIndexIfExists($table, 'orders_payment_created_index');
-                $this->dropIndexIfExists($table, 'orders_created_at_index');
-                $this->dropIndexIfExists($table, 'orders_total_index');
-                $this->dropIndexIfExists($table, 'orders_payment_method_index');
-                $this->dropIndexIfExists($table, 'orders_refund_status_index');
-            });
+            $this->dropIndexSafely('orders', 'orders_user_status_index');
+            $this->dropIndexSafely('orders', 'orders_status_payment_index');
+            $this->dropIndexSafely('orders', 'orders_payment_created_index');
+            $this->dropIndexSafely('orders', 'orders_created_at_index');
+            $this->dropIndexSafely('orders', 'orders_total_index');
+            $this->dropIndexSafely('orders', 'orders_payment_method_index');
+            $this->dropIndexSafely('orders', 'orders_refund_status_index');
         }
 
         if (Schema::hasTable('cart_items')) {
-            Schema::table('cart_items', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'cart_items_user_product_index');
-                $this->dropIndexIfExists($table, 'cart_items_user_product_variant_index');
-            });
+            $this->dropIndexSafely('cart_items', 'cart_items_user_product_index');
+            $this->dropIndexSafely('cart_items', 'cart_items_user_product_variant_index');
         }
 
         if (Schema::hasTable('categories')) {
-            Schema::table('categories', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'categories_status_index');
-                $this->dropIndexIfExists($table, 'categories_created_at_index');
-            });
+            $this->dropIndexSafely('categories', 'categories_status_index');
+            $this->dropIndexSafely('categories', 'categories_created_at_index');
         }
 
         if (Schema::hasTable('users')) {
-            Schema::table('users', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'users_role_status_index');
-                $this->dropIndexIfExists($table, 'users_created_at_index');
-            });
+            $this->dropIndexSafely('users', 'users_role_status_index');
+            $this->dropIndexSafely('users', 'users_created_at_index');
         }
 
         if (Schema::hasTable('product_variants')) {
-            Schema::table('product_variants', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'product_variants_product_active_index');
-            });
+            $this->dropIndexSafely('product_variants', 'product_variants_product_active_index');
         }
 
         if (Schema::hasTable('product_categories')) {
-            Schema::table('product_categories', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'product_categories_category_id_index');
-            });
+            $this->dropIndexSafely('product_categories', 'product_categories_category_id_index');
         }
 
         if (Schema::hasTable('product_ratings')) {
-            Schema::table('product_ratings', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'product_ratings_product_visible_index');
-                $this->dropIndexIfExists($table, 'product_ratings_rating_index');
-            });
+            $this->dropIndexSafely('product_ratings', 'product_ratings_product_visible_index');
+            $this->dropIndexSafely('product_ratings', 'product_ratings_rating_index');
         }
 
         if (Schema::hasTable('product_reports')) {
-            Schema::table('product_reports', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'product_reports_status_index');
-                $this->dropIndexIfExists($table, 'product_reports_product_status_index');
-            });
+            $this->dropIndexSafely('product_reports', 'product_reports_status_index');
+            $this->dropIndexSafely('product_reports', 'product_reports_product_status_index');
         }
 
         if (Schema::hasTable('addresses')) {
-            Schema::table('addresses', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'addresses_user_default_index');
-                $this->dropIndexIfExists($table, 'addresses_user_active_index');
-            });
+            $this->dropIndexSafely('addresses', 'addresses_user_default_index');
+            $this->dropIndexSafely('addresses', 'addresses_user_active_index');
         }
 
         if (Schema::hasTable('tickets')) {
-            Schema::table('tickets', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'tickets_user_status_index');
-                $this->dropIndexIfExists($table, 'tickets_status_index');
-                $this->dropIndexIfExists($table, 'tickets_created_at_index');
-            });
+            $this->dropIndexSafely('tickets', 'tickets_user_status_index');
+            $this->dropIndexSafely('tickets', 'tickets_status_index');
+            $this->dropIndexSafely('tickets', 'tickets_created_at_index');
         }
 
         if (Schema::hasTable('ticket_messages')) {
-            Schema::table('ticket_messages', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'ticket_messages_ticket_created_index');
-            });
+            $this->dropIndexSafely('ticket_messages', 'ticket_messages_ticket_created_index');
         }
 
         if (Schema::hasTable('coupons')) {
-            Schema::table('coupons', function (Blueprint $table) {
-                if ($this->hasIndex('coupons', 'coupons_active_end_date_index')) {
-                    $this->dropIndexIfExists($table, 'coupons_active_end_date_index');
-                } else {
-                    $this->dropIndexIfExists($table, 'coupons_is_active_index');
-                }
-            });
+            if ($this->hasIndex('coupons', 'coupons_active_end_date_index')) {
+                $this->dropIndexSafely('coupons', 'coupons_active_end_date_index');
+            } else {
+                $this->dropIndexSafely('coupons', 'coupons_is_active_index');
+            }
         }
 
         if (Schema::hasTable('order_refund_requests')) {
-            Schema::table('order_refund_requests', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'refund_requests_status_index');
-            });
+            $this->dropIndexSafely('order_refund_requests', 'refund_requests_status_index');
         }
 
         if (Schema::hasTable('order_logs')) {
-            Schema::table('order_logs', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'order_logs_order_created_index');
-                $this->dropIndexIfExists($table, 'order_logs_type_index');
-            });
+            $this->dropIndexSafely('order_logs', 'order_logs_order_created_index');
+            $this->dropIndexSafely('order_logs', 'order_logs_type_index');
         }
 
         if (Schema::hasTable('wallet_transactions')) {
-            Schema::table('wallet_transactions', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'wallet_transactions_user_created_index');
-            });
+            $this->dropIndexSafely('wallet_transactions', 'wallet_transactions_user_created_index');
         }
 
         if (Schema::hasTable('offers')) {
-            Schema::table('offers', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'offers_active_dates_index');
-            });
+            $this->dropIndexSafely('offers', 'offers_active_dates_index');
         }
 
         if (Schema::hasTable('branches')) {
-            Schema::table('branches', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'branches_is_active_index');
-            });
+            $this->dropIndexSafely('branches', 'branches_is_active_index');
         }
 
         if (Schema::hasTable('variants')) {
-            Schema::table('variants', function (Blueprint $table) {
-                $this->dropIndexIfExists($table, 'variants_status_index');
-            });
+            $this->dropIndexSafely('variants', 'variants_status_index');
         }
     }
 
-    protected function dropIndexIfExists(Blueprint $table, string $index): void
+    protected function dropIndexSafely(string $table, string $index): void
     {
-        $tableName = $table->getTable();
-
-        if ($this->hasIndex($tableName, $index)) {
-            $table->dropIndex($index);
+        if (! $this->hasIndex($table, $index)) {
+            return;
         }
+
+        try {
+            Schema::table($table, function (Blueprint $blueprint) use ($index) {
+                $blueprint->dropIndex($index);
+            });
+        } catch (QueryException $e) {
+            if (! $this->isForeignKeyDependentIndexDropError($e)) {
+                throw $e;
+            }
+        }
+    }
+
+    protected function isForeignKeyDependentIndexDropError(QueryException $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        return str_contains($message, '1553')
+            || str_contains($message, 'needed in a foreign key constraint');
     }
 };

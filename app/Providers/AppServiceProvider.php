@@ -8,6 +8,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,10 +16,46 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(MailChannel::class, ResilientMailChannel::class);
+
+        $this->syncMysqlTimezoneFromAppTimezone();
+    }
+
+    /**
+     * MySQL on Laragon often lacks time_zone tables, so named zones like
+     * "Africa/Cairo" fail. Map APP_TIMEZONE to a numeric offset for PDO.
+     */
+    protected function syncMysqlTimezoneFromAppTimezone(): void
+    {
+        if (env('DB_TIMEZONE') !== null) {
+            return;
+        }
+
+        $this->app->booting(function () {
+            try {
+                $offset = (new \DateTimeImmutable('now', new \DateTimeZone(config('app.timezone'))))->format('P');
+
+                config([
+                    'database.connections.mysql.timezone' => $offset,
+                    'database.connections.mariadb.timezone' => $offset,
+                ]);
+            } catch (\Throwable) {
+                // Keep config/database.php default (+02:00).
+            }
+        });
     }
 
     public function boot(): void
     {
+        Broadcast::routes([
+            'middleware' => ['auth:sanctum', 'locale'],
+            'prefix' => 'api/v1',
+        ]);
+
+        Broadcast::routes([
+            'middleware' => ['web', 'auth', 'role:admin|super-admin'],
+            'prefix' => 'admin',
+        ]);
+
         Paginator::useBootstrapFive();
 
         VerifyEmail::createUrlUsing(function ($notifiable) {

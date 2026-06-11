@@ -62,6 +62,8 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            // Use offset (e.g. +02:00) — named zones need MySQL time_zone tables loaded.
+            'timezone' => env('DB_TIMEZONE', '+02:00'),
         ],
 
         'mariadb' => [
@@ -82,6 +84,7 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'timezone' => env('DB_TIMEZONE', '+02:00'),
         ],
 
         'pgsql' => [

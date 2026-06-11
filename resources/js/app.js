@@ -20,6 +20,7 @@ import { initVariantFormOptions } from './admin/variant-form-options';
 import { initOrderCreate } from './admin/order-create';
 import { initLiveNotifications } from './admin/live-notifications';
 import { initAddressMapPickers } from './admin/address-map-picker';
+import { initSupportChatShow } from './admin/support-chat-show';
 
 window.Alpine = Alpine;
 
@@ -354,6 +355,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (document.querySelector('[data-map-picker]')) {
         initAddressMapPickers(window.__addressMapPickerLabels ?? {});
+    }
+
+    if (document.querySelector('[data-support-chat-show]')) {
+        initSupportChatShow(window.__supportChatRealtime ?? {});
     }
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new Tooltip(el));

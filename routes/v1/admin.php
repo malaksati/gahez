@@ -25,6 +25,7 @@ use App\V1\Http\Controllers\Web\Admin\ReportController;
 use App\V1\Http\Controllers\Web\Admin\SecurityController;
 use App\V1\Http\Controllers\Web\Admin\SettingsController;
 use App\V1\Http\Controllers\Web\Admin\SliderController;
+use App\V1\Http\Controllers\Web\Admin\SupportChatController;
 use App\V1\Http\Controllers\Web\Admin\TicketController;
 use App\V1\Http\Controllers\Web\Admin\VariantController;
 use App\V1\Http\Controllers\Web\Admin\VariantDataTransferController;
@@ -178,6 +179,16 @@ Route::middleware('permission:manage tickets')->group(function () {
     Route::resource('tickets', TicketController::class)->only(['index', 'show', 'edit', 'update']);
     Route::post('tickets/{ticket}/messages', [TicketController::class, 'storeMessage'])->name('tickets.messages.store');
     Route::put('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.status.update');
+});
+
+// Support chats
+Route::middleware('permission:manage support-chats')->group(function () {
+    Route::get('support-chats', [SupportChatController::class, 'index'])->name('support-chats.index');
+    Route::get('support-chats/{support}', [SupportChatController::class, 'show'])->name('support-chats.show');
+    Route::get('support-chats/{support}/messages', [SupportChatController::class, 'messages'])->name('support-chats.messages.index');
+    Route::post('support-chats/{support}/messages', [SupportChatController::class, 'storeMessage'])->name('support-chats.messages.store');
+    Route::put('support-chats/{support}/assign', [SupportChatController::class, 'assign'])->name('support-chats.assign');
+    Route::put('support-chats/{support}/status', [SupportChatController::class, 'updateStatus'])->name('support-chats.status.update');
 });
 
 // Settings

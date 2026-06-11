@@ -32,6 +32,7 @@ class RoleSeeder extends Seeder
             'manage ratings',
             'manage product-reports',
             'manage tickets',
+            'manage support-chats',
             'manage settings',
             'manage admins',
             'manage customers',

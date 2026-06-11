@@ -42,6 +42,7 @@
             modalHint: @json(__('messages.Map picker modal hint')),
         };
     </script>
+    @stack('head-config')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>

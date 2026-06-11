@@ -127,6 +127,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Address::class);
     }
 
+    public function supports()
+    {
+        return $this->hasMany(Support::class);
+    }
+
+    public function assignedSupports()
+    {
+        return $this->hasMany(Support::class, 'assigned_admin_id');
+    }
+
     protected function getDefaultGuardName(): string
     {
         return 'web';

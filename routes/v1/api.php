@@ -15,6 +15,7 @@ use App\V1\Http\Controllers\Api\ProfileController;
 use App\V1\Http\Controllers\Api\StoreConfigController;
 use App\V1\Http\Controllers\Api\ProductController;
 use App\V1\Http\Controllers\Api\SliderController;
+use App\V1\Http\Controllers\Api\SupportChatController;
 use App\V1\Http\Controllers\Api\TicketController;
 use App\V1\Http\Controllers\Api\OrderRefundRequestController;
 use App\V1\Http\Controllers\Api\ProductRatingController;
@@ -62,7 +63,7 @@ Route::get('/user', fn(Request $request) => $request->user())->middleware('auth:
     API Routes for public users without authentication
 */
 
-Route::get('store/config', [StoreConfigController::class, 'show'])->middleware('throttle:60,1');
+// Route::get('store/config', [StoreConfigController::class, 'show'])->middleware('throttle:60,1');
 
 Route::middleware('throttle:30,1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
@@ -129,5 +130,11 @@ Route::middleware('throttle:30,1')->group(function () {
         Route::get('tickets/{id}', [TicketController::class, 'show'])->whereNumber('id');
         Route::put('tickets/{id}', [TicketController::class, 'update'])->whereNumber('id');
         Route::post('tickets/{id}/messages', [TicketController::class, 'storeMessage'])->whereNumber('id');
+
+        Route::get('support-chats', [SupportChatController::class, 'index']);
+        Route::post('support-chats', [SupportChatController::class, 'store']);
+        Route::get('support-chats/{support}', [SupportChatController::class, 'show'])->whereNumber('support');
+        Route::get('support-chats/{support}/messages', [SupportChatController::class, 'messages'])->whereNumber('support');
+        Route::post('support-chats/{support}/messages', [SupportChatController::class, 'storeMessage'])->whereNumber('support');
     });
 });

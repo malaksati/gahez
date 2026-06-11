@@ -147,7 +147,7 @@
                     </li>
                 @endcan
 
-                @canany(['manage ratings', 'manage product-reports', 'manage tickets'])
+                @canany(['manage ratings', 'manage product-reports', 'manage tickets', 'manage support-chats'])
                     <li class="nav-item mt-3">
                         <small class="text-muted px-3 text-uppercase fw-bold">{{ __('messages.Rating & Support') }}</small>
                     </li>
@@ -176,6 +176,15 @@
                             href="{{ route('v1.admin.tickets.index') }}">
                             <i class="bi bi-chat-dots"></i>
                             <span>{{ __('messages.Tickets') }}</span>
+                        </a>
+                    </li>
+                @endcan
+                @can('manage support-chats')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('v1.admin.support-chats.*') ? 'active' : '' }}"
+                            href="{{ route('v1.admin.support-chats.index') }}">
+                            <i class="bi bi-chat-left-text"></i>
+                            <span>{{ __('messages.Support chats') }}</span>
                         </a>
                     </li>
                 @endcan
