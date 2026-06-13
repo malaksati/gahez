@@ -1,6 +1,6 @@
 # Permissions guide
 
-Admin panel access uses **Spatie Laravel Permission** (`spatie/laravel-permission`). The API uses **Sanctum** + role markers (`user`, `delivery`), not fine-grained Spatie permissions.
+Admin panel access uses **Spatie Laravel Permission** (`spatie/laravel-permission`). The API uses **Sanctum** + the `user` role marker, not fine-grained Spatie permissions.
 
 ---
 
@@ -11,7 +11,6 @@ Admin panel access uses **Spatie Laravel Permission** (`spatie/laravel-permissio
 | `super-admin` | `web` | Full access; bypasses all permission checks |
 | `admin` | `web` | Admin panel; permissions assigned per user |
 | `user` | `web` | Customer (API identity) |
-| `delivery` | `web` | Delivery driver (API identity) |
 
 Defined in `database/seeders/RoleSeeder.php`.
 
@@ -29,6 +28,7 @@ Defined in `database/seeders/RoleSeeder.php`.
 | `manage variants` | Variants + options + import/export |
 | `manage coupons` | Coupons |
 | `manage offers` | Offers |
+| `manage goals` | Customer goals |
 | `manage sliders` | Sliders |
 | `manage orders` | Orders |
 | `manage refunds` | Refund requests (index accept/reject + edit) |
@@ -40,8 +40,6 @@ Defined in `database/seeders/RoleSeeder.php`.
 | `manage settings` | Settings, theme, security |
 | `manage admins` | Admin users |
 | `manage customers` | Customers |
-| `manage delivery` | Drivers, zones, shifts, assignments |
-
 ---
 
 ## Super-admin bypass
@@ -90,7 +88,6 @@ Route::middleware('permission:manage products')->group(function () {
 | `super-admin@gmail.com` | super-admin | All |
 | `admin@gmail.com` | admin | All (synced individually) |
 | `customer1@gmail.com` | user | None |
-| `driver1@gmail.com` | delivery | None |
 
 Password: `12345678`
 
@@ -100,10 +97,9 @@ Password: `12345678`
 
 Super-admin accounts **cannot** be deleted or have permissions stripped via admin UI.
 
-### New customer / driver
+### New customer
 
-- Customer registration → `assignRole('user')`
-- Delivery profile creation → `assignRole('delivery')`
+Customer registration → `assignRole('user')`
 
 ---
 
@@ -115,9 +111,6 @@ Super-admin accounts **cannot** be deleted or have permissions stripped via admi
 |--------|-----------|
 | Public catalog | No auth |
 | Customer routes | `auth:sanctum` |
-| Delivery routes | `auth:sanctum` + `delivery.user` middleware |
-
-`EnsureDeliveryUser` checks the user has an active `Delivery` profile record.
 
 ---
 
@@ -130,7 +123,6 @@ Registered in `bootstrap/app.php`:
 | `role` | `RoleMiddleware` |
 | `permission` | `PermissionMiddleware` |
 | `role_or_permission` | `RoleOrPermissionMiddleware` |
-| `delivery.user` | `EnsureDeliveryUser` |
 
 ---
 

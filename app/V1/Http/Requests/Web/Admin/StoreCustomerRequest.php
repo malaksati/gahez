@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Web\Admin;
 
 use App\V1\Http\Requests\Rules\AddressValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator;
@@ -19,7 +20,7 @@ class StoreCustomerRequest extends AdminFormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:255', 'unique:users,phone'],
+            'phone' => [...PhoneValidation::rules(), 'unique:users,phone'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'birthdate' => ['nullable', 'date', 'before:today'],
             'wallet' => ['nullable', 'numeric', 'min:0'],
@@ -69,5 +70,8 @@ class StoreCustomerRequest extends AdminFormRequest
             'is_active' => $this->boolean('is_active'),
             'is_verified' => $this->boolean('is_verified'),
         ]);
+
+        PhoneValidation::prepareRequest($this, ['phone']);
+        PhoneValidation::prepareNested($this, 'address', 'phone');
     }
 }

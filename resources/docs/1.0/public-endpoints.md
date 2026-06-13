@@ -9,7 +9,6 @@ No authentication required.
 - [Verify account](#verify-account)
 - [Password reset](#password-reset)
 - [Catalog](#catalog)
-- [Plans](#plans)
 
 <a name="store-config"></a>
 ## Store config
@@ -26,7 +25,7 @@ GET /store/config
 {
   "success": true,
   "data": {
-    "app_name": "Gahez",
+    "app_name": "Gahez Akeed",
     "currency": "EGP",
     "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }
@@ -117,10 +116,5 @@ GET /sliders
 GET /offers
 ```
 
-<a name="plans"></a>
-## Plans
+**Sliders query:** optional `type` — e.g. `GET /sliders?type=home`
 
-```http
-GET /plans
-POST /plans/{plan}/subscribe
-```

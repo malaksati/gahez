@@ -11,12 +11,10 @@ Authenticated customer endpoints. Requires `Authorization: Bearer {token}`.
 - [Orders & checkout](#orders-checkout)
 - [Wishlist](#wishlist)
 - [Wallet](#wallet)
-- [Delivery time slots](#delivery-time-slots)
 - [Product feedback](#product-feedback)
 - [Support tickets](#support-tickets)
 - [Support chats (real-time)](#support-chats)
 - [Goals](#goals)
-- [Become a delivery driver](#become-delivery-driver)
 - [Refund requests](#refund-requests)
 
 <a name="profile"></a>
@@ -70,7 +68,7 @@ POST /notifications/mark-all-read
     {
       "id": "uuid",
       "type": "offer_promotion",
-      "title": "New offer at Gahez",
+      "title": "New offer at Gahez Akeed",
       "message": "New offer: 15% off Apples",
       "data": {
         "offer_id": 1,
@@ -116,7 +114,7 @@ DELETE /addresses/{id}
 }
 ```
 
-Address must fall inside an active **delivery zone** at checkout.
+Address must be valid for the customer account at checkout.
 
 <a name="cart"></a>
 ## Cart
@@ -186,7 +184,9 @@ Each cart item includes:
 
 ### Cart index `meta`
 
-Includes `subtotal`, `total_quantity`, `coupon`, `gift_offer`, `qualifies_for_free_delivery`, `order_discount`, etc.
+Includes `subtotal`, `total_quantity`, `coupon`, `gift_offer`, `qualifies_for_free_delivery`, `free_delivery_threshold`, `cart_limits`, `shipping`, `order_discount`, etc.
+
+See [Shipping & checkout](/docs/1.0/delivery-api) for `shipping` and `cart_limits` field details.
 
 <a name="orders-checkout"></a>
 ## Orders & checkout
@@ -200,11 +200,12 @@ POST /orders
 ```json
 {
   "address_id": 1,
+  "shipping_day": "thursday",
+  "is_fast_shipping": false,
   "payment_method": "cash_on_delivery",
   "coupon_code": "WELCOME10",
   "use_wallet": false,
   "notes": "Leave at door",
-  "shift_id": 3,
   "gift_offer_id": null,
   "gift_product_id": null,
   "item_notes": [
@@ -216,10 +217,11 @@ POST /orders
 
 | Field | Description |
 |-------|-------------|
-| `address_id` | Required. Customer address inside a zone. |
-| `payment_method` | e.g. `cash_on_delivery`, `wallet`, card methods |
+| `address_id` | Required. Customer address. |
+| `shipping_day` | Required. `monday` … `sunday`. Standard excludes today; fast requires today. |
+| `is_fast_shipping` | Optional boolean. Same-day fast shipping adds configured extra fee. |
+| `payment_method` | `cash_on_delivery` or `wallet` |
 | `use_wallet` | Apply wallet balance (not with COD) |
-| `shift_id` | Optional delivery slot |
 | `gift_offer_id` / `gift_product_id` | Threshold gift selection |
 | `item_notes` | Optional. Per-line notes by `product_id` + `variant_id` (nullable, max 500 chars) |
 
@@ -234,7 +236,6 @@ POST /orders/{id}/pay
 POST /orders/{id}/reorder
 POST /orders/{id}/refund-request
 POST /orders/{id}/rate
-POST /orders/{id}/rate-delivery
 ```
 
 ### Pay order
@@ -260,15 +261,6 @@ Toggle add/remove.
 ```http
 GET /wallet/history
 ```
-
-<a name="delivery-time-slots"></a>
-## Delivery time slots
-
-```http
-GET /delivery-expected-time
-```
-
-Available shifts for checkout.
 
 <a name="product-feedback"></a>
 ## Product feedback
@@ -298,6 +290,7 @@ Content-Type: multipart/form-data
 
 | Field | Type | Rules |
 |-------|------|-------|
+| `type` | string | required — `complaint` or `recommendation` |
 | `subject` | string | required |
 | `description` | string | required |
 | `attachments[0]` | file | optional |
@@ -376,14 +369,6 @@ GET /goals
 ```
 
 Returns active goals with current progress for the user.
-
-<a name="become-delivery-driver"></a>
-## Become a delivery driver
-
-```http
-GET /become-delivery/status
-POST /become-delivery
-```
 
 <a name="refund-requests"></a>
 ## Refund requests

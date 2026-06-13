@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Brand;
 use App\Models\Product;
 use App\V1\Services\ProductService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,9 +83,30 @@ class ProductSkuGenerationTest extends TestCase
         $this->assertSame('fresh-eggs-2', Product::ensureUniqueSlug('fresh-eggs'));
     }
 
+    public function test_is_sku_taken_includes_soft_deleted_products(): void
+    {
+        $brandId = $this->createBrandId();
+
+        $deleted = Product::query()->create([
+            'type' => 'simple',
+            'name' => ['en' => 'Taken', 'ar' => 'مأخوذ'],
+            'description' => ['en' => 'Desc', 'ar' => 'وصف'],
+            'sku' => 'PRD-0042',
+            'slug' => 'taken-sku',
+            'is_active' => true,
+            'is_approved' => true,
+            'is_bookable' => true,
+            'brand_id' => $brandId,
+        ]);
+
+        $deleted->delete();
+
+        $this->assertTrue(Product::isSkuTaken('PRD-0042'));
+    }
+
     protected function createBrandId(): int
     {
-        return \App\Models\Brand::query()->create([
+        return Brand::query()->create([
             'name' => ['en' => 'Brand', 'ar' => 'ماركة'],
             'is_active' => true,
         ])->id;

@@ -34,7 +34,7 @@ trait ValidatesProductVariants
                     continue;
                 }
 
-                $skuQuery = ProductVariant::query()->where('sku', $sku);
+                $skuQuery = ProductVariant::withTrashed()->where('sku', $sku);
                 if (! empty($row['id'])) {
                     $skuQuery->where('id', '!=', (int) $row['id']);
                 }

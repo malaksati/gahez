@@ -11,6 +11,10 @@ function escapeHtml(value) {
         .replace(/"/g, '&quot;');
 }
 
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+}
+
 function getToastContainer() {
     let container = document.getElementById('admin-toast-container');
 
@@ -26,7 +30,38 @@ function getToastContainer() {
     return container;
 }
 
-function showNotificationToast(notification, labels) {
+async function markNotificationRead(notificationId, config) {
+    if (!notificationId || !config.markReadUrl) {
+        return null;
+    }
+
+    const url = config.markReadUrl.replace('__ID__', encodeURIComponent(notificationId));
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Mark notification read failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        return Number(data.unread_count ?? NaN);
+    } catch (error) {
+        console.error('Mark notification read failed', error);
+
+        return null;
+    }
+}
+
+function showNotificationToast(notification, labels, config, dropdown) {
     const container = getToastContainer();
     const toastEl = document.createElement('div');
 
@@ -55,9 +90,18 @@ function showNotificationToast(notification, labels) {
 
     if (notification.url) {
         toastEl.classList.add('admin-notification-toast--clickable');
-        toastEl.addEventListener('click', (event) => {
+        toastEl.addEventListener('click', async (event) => {
             if (event.target.closest('.btn-close')) {
                 return;
+            }
+
+            event.preventDefault();
+
+            const unreadCount = await markNotificationRead(notification.id, config);
+
+            if (unreadCount !== null && !Number.isNaN(unreadCount)) {
+                updateBadge(dropdown, unreadCount);
+                updateMarkAllButton(dropdown, unreadCount);
             }
 
             window.location.href = notification.url;
@@ -81,6 +125,8 @@ function renderNotificationItem(notification, labels) {
 
     link.href = notification.url;
     link.className = `dropdown-item py-2${notification.read_at ? '' : ' fw-semibold'}`;
+    link.setAttribute('data-notification-link', '');
+    link.setAttribute('data-notification-id', notification.id);
     link.innerHTML = `
         <div class="small text-muted">${escapeHtml(notification.created_at_human)}</div>
         <div class="text-truncate">${escapeHtml(notification.message || labels.newNotification)}</div>
@@ -168,6 +214,50 @@ export function initLiveNotifications(config = {}) {
 
     let pollTimer = null;
     let inFlight = false;
+    let dropdownOpen = false;
+
+    const toggleButton = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+    const menu = dropdown.querySelector('[data-notifications-menu]');
+
+    if (toggleButton) {
+        toggleButton.addEventListener('show.bs.dropdown', () => {
+            dropdownOpen = true;
+        });
+
+        toggleButton.addEventListener('hidden.bs.dropdown', () => {
+            dropdownOpen = false;
+            syncFeed();
+        });
+    }
+
+    if (menu) {
+        menu.addEventListener('click', async (event) => {
+            const link = event.target.closest('[data-notification-link]');
+
+            if (!link) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const notificationId = link.dataset.notificationId;
+            const targetUrl = link.getAttribute('href');
+
+            if (!targetUrl) {
+                return;
+            }
+
+            const unreadCount = await markNotificationRead(notificationId, config);
+
+            if (unreadCount !== null && !Number.isNaN(unreadCount)) {
+                updateBadge(dropdown, unreadCount);
+                updateMarkAllButton(dropdown, unreadCount);
+                link.classList.remove('fw-semibold');
+            }
+
+            window.location.href = targetUrl;
+        });
+    }
 
     function discoverNotifications(notifications) {
         notifications.forEach((notification) => {
@@ -176,7 +266,7 @@ export function initLiveNotifications(config = {}) {
             }
 
             toastedIds.add(notification.id);
-            showNotificationToast(notification, labels);
+            showNotificationToast(notification, labels, config, dropdown);
         });
     }
 
@@ -206,7 +296,11 @@ export function initLiveNotifications(config = {}) {
 
             discoverNotifications(notifications);
             updateBadge(dropdown, unreadCount);
-            updateNotificationList(dropdown, notifications, labels);
+
+            if (!dropdownOpen) {
+                updateNotificationList(dropdown, notifications, labels);
+            }
+
             updateMarkAllButton(dropdown, unreadCount);
         } catch (error) {
             console.error('Notification feed sync failed', error);

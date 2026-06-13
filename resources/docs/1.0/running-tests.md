@@ -1,6 +1,6 @@
 # Running tests guide
 
-Gahez uses **PHPUnit 12** with Laravel’s `php artisan test` runner. Tests use an **in-memory SQLite** database — no MySQL setup required.
+Gahez Akeed uses **PHPUnit 12** with Laravel’s `php artisan test` runner. Tests use an **in-memory SQLite** database — no MySQL setup required.
 
 ---
 
@@ -56,12 +56,14 @@ Integration tests against HTTP API and app flows:
 
 | File | Covers |
 |------|--------|
-| `CartCheckoutApiTest.php` | Add to cart, checkout, empty cart, out-of-zone |
+| `CartCheckoutApiTest.php` | Cart, checkout preview, shipping day, fast shipping |
 | `OfferCartTest.php` | Offer/cart interactions, BOGO pricing |
 | `ProfileApiTest.php` | Profile show/update, birthdate |
-| `StoreConfigApiTest.php` | `GET /store/config` theme payload |
-| `DeliveryAssignmentTest.php` | Driver in-transit/delivered, COD payment |
-| `BecomeDeliveryApiTest.php` | Become-a-driver application API |
+| `StoreConfigApiTest.php` | `GET /store/config` payload |
+| `TicketApiTest.php` | Ticket create with `type`, messages |
+| `AdminNotificationReadTest.php` | Admin mark notification read |
+| `AdminSubmittedNotificationsTest.php` | Product report / refund request alerts |
+| `SupportChatTest.php` | Support chat API + attachments |
 
 ### Unit (`tests/Unit/`)
 
@@ -70,7 +72,8 @@ Service and helper logic without full HTTP stack:
 | File | Covers |
 |------|--------|
 | `OfferServiceTest.php` | Offer types, BOGO, category BOGO, max discounted qty |
-| `BirthdayRewardServiceTest.php` | Birthday coupon/gift rewards |
+| `CheckoutSettingsServiceTest.php` | Shipping weekdays, fast/standard rules |
+| `TicketServiceTest.php` | Ticket types and messages |
 | `SuperAdminAuthorizationTest.php` | Super-admin permissions |
 | `CustomerBroadcastServiceTest.php` | Offer/coupon customer notifications |
 | `CategorySortOrderTest.php` | Category `sort_order` auto-append |

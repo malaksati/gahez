@@ -1,6 +1,6 @@
-# Gahez E-Commerce
+# Gahez Akeed E-Commerce
 
-Laravel 13 e-commerce platform with an **admin panel**, **customer REST API**, and **delivery driver API**.
+Laravel 13 e-commerce platform with an **admin panel** and **customer REST API**.
 
 **Stack:** PHP 8.3, Sanctum, Spatie Permission, Spatie Translatable, Maatwebsite Excel, Vite, Bootstrap 5.
 
@@ -11,7 +11,7 @@ Laravel 13 e-commerce platform with an **admin panel**, **customer REST API**, a
 | Surface | URL | Auth |
 |---------|-----|------|
 | Admin panel | `/admin` | Session + `admin\|super-admin` |
-| Customer & driver API | `/api/v1` | Sanctum bearer token |
+| Customer API | `/api/v1` | Sanctum bearer token |
 | API docs (LaRecipe) | `/docs` | Public |
 | Public site | `/` | Guest |
 
@@ -66,7 +66,6 @@ Password for all: `12345678` (after `php artisan db:seed`)
 | Super admin | `super-admin@gmail.com` |
 | Admin | `admin@gmail.com` |
 | Customer | `customer1@gmail.com` |
-| Driver | `driver1@gmail.com` |
 
 ---
 
@@ -76,7 +75,7 @@ Password for all: `12345678` (after `php artisan db:seed`)
 |------|----------|
 | `app/V1/Http/Controllers/` | Admin + API controllers |
 | `app/V1/Services/` | Business logic (~40 services) |
-| `routes/v1/api.php` | Customer & driver API routes |
+| `routes/v1/api.php` | Customer API routes |
 | `routes/v1/admin.php` | Admin panel routes |
 | `resources/docs/1.0/` | LaRecipe markdown source (keep in sync with `docs/guides/`) |
 | `tests/` | PHPUnit Feature + Unit tests |
@@ -87,6 +86,7 @@ Password for all: `12345678` (after `php artisan db:seed`)
 
 | Variable | Purpose |
 |----------|---------|
+| `APP_NAME` | Default app name (`Gahez Akeed`); overridden by `settings.app_name` when seeded |
 | `QUEUE_CONNECTION` | `database` by default; run `php artisan queue:work` in production |
 | `DATA_TRANSFER_SYNC` | `true` = synchronous Excel import/export |
 | `FILESYSTEM_DISK` | `local`; public uploads use `storage/app/public` |

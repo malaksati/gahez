@@ -4,10 +4,13 @@ namespace App\V1\Services;
 
 use App\Models\Category;
 use App\V1\Repositories\CategoryRepository;
+use App\V1\Support\UploadStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryService
 {
@@ -25,7 +28,7 @@ class CategoryService
         return $this->categories->getPaginatedCategories($perPage, $filters);
     }
 
-    public function getPaginatedCategorySections(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function getPaginatedCategorySections(int $perPage = 20, array $filters = []): LengthAwarePaginator
     {
         return $this->categories->getPaginatedRootCategories($perPage, $filters);
     }
@@ -188,9 +191,11 @@ class CategoryService
         return $this->categories->getCategoriesWithChildren();
     }
 
-    public function create(array $data): Category
+    public function create(array $data, ?UploadedFile $image = null): Category
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $image) {
+            $data = $this->prepareImageData($data, $image);
+
             $data = $this->normalizeSortOrderInput($data);
             $parentId = $data['parent_id'] ?? null;
             $sortOrder = isset($data['sort_order']) ? max(1, (int) $data['sort_order']) : null;
@@ -200,9 +205,11 @@ class CategoryService
         });
     }
 
-    public function update(Category $category, array $data): bool
+    public function update(Category $category, array $data, ?UploadedFile $image = null, bool $removeImage = false): bool
     {
-        return DB::transaction(function () use ($category, $data) {
+        return DB::transaction(function () use ($category, $data, $image, $removeImage) {
+            $data = $this->prepareImageData($data, $image, $category, $removeImage);
+
             $data = $this->normalizeSortOrderInput($data);
 
             $parentChanged = array_key_exists('parent_id', $data)
@@ -236,6 +243,43 @@ class CategoryService
         }
 
         return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function prepareImageData(
+        array $data,
+        ?UploadedFile $image = null,
+        ?Category $category = null,
+        bool $removeImage = false,
+    ): array {
+        if ($removeImage && $category !== null) {
+            $this->deleteStoredImage($category);
+            $data['image'] = null;
+        } elseif ($image instanceof UploadedFile && $image->isValid()) {
+            if ($category !== null) {
+                $this->deleteStoredImage($category);
+            }
+
+            $data['image'] = UploadStorage::store($image, 'categories', 'public');
+        } else {
+            unset($data['image']);
+        }
+
+        unset($data['remove_image']);
+
+        return $data;
+    }
+
+    protected function deleteStoredImage(Category $category): void
+    {
+        $path = $category->getRawOriginal('image');
+
+        if ($path && ! str_starts_with($path, 'http')) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     protected function resolveSortOrderForCreate(?int $sortOrder, ?int $parentId): int

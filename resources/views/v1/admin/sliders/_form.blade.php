@@ -1,20 +1,37 @@
 @csrf
 
+@php
+    $isEdit = isset($slider);
+@endphp
+
 <div class="card-body">
-    <div>
-        <label for="slider-image" class="form-label">{{ __('messages.Image') }}</label>
-        <input id="slider-image" type="file" name="image" accept="image/*" class="form-control @error('image') is-invalid @enderror">
-        @error('image')
+    <div class="mb-3">
+        <label for="slider-type" class="form-label">{{ __('messages.Slider type') }}</label>
+        <select
+            id="slider-type"
+            name="type"
+            class="form-select @error('type') is-invalid @enderror"
+            required
+        >
+            @foreach (\App\Models\Slider::typeLabels() as $value => $label)
+                <option
+                    value="{{ $value }}"
+                    @selected(old('type', $slider->type ?? \App\Models\Slider::TYPE_HOME) === $value)
+                >
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
+        @error('type')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-
-        @if (isset($slider) && $slider->image)
-            <div class="mt-3">
-                <div class="small text-muted mb-1">{{ __('messages.Image') }}</div>
-                <img src="{{ $slider->image_path }}" alt="{{ __('messages.Image') }}" class="img-thumbnail" style="max-height: 140px;">
-            </div>
-        @endif
+        <div class="form-text">{{ __('messages.Slider type hint') }}</div>
     </div>
+
+    @include('v1.admin.sliders.partials.image-upload', [
+        'existingUrl' => $isEdit ? $slider->image_path : null,
+        'required' => ! $isEdit,
+    ])
 </div>
 
 <div class="card-footer bg-white d-flex gap-2">

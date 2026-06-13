@@ -165,11 +165,9 @@
                                 <td>
                                     <div class="d-flex flex-column align-items-center">
                                         <button type="button" class="btn btn-sm btn-outline-secondary mb-2"
-                                            @click="document.getElementById(`product_variant_thumbnail_${index}`)?.click()">
+                                            @click="openVariantThumbnailPicker(index)">
                                             <i class="bi bi-upload"></i>
                                         </button>
-                                        <input type="file" class="d-none" :id="`product_variant_thumbnail_${index}`"
-                                            accept="image/*" @change="handleVariationThumbnailChange(index, $event)">
                                         <div x-show="row.thumbnailPreview" class="position-relative">
                                             <img :src="row.thumbnailPreview" alt="" class="img-thumbnail"
                                                 style="max-width: 60px; max-height: 60px; object-fit: cover;">

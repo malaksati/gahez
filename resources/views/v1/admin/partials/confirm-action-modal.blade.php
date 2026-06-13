@@ -9,7 +9,7 @@
                 <div class="mb-3">
                     <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
                 </div>
-                <p class="mb-0 fw-semibold" data-order-confirm-message></p>
+                <p class="mb-0 fw-semibold" style="white-space: pre-line" data-order-confirm-message></p>
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('messages.Cancel') }}</button>

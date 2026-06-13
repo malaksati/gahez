@@ -121,7 +121,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">{{ __('messages.Points history') }}</h6>
                     @if ($customer->pointTransactions->count() > 0)
@@ -166,6 +166,60 @@
                         <div class="p-4 text-center text-muted">
                             <i class="bi bi-star fs-2 d-block mb-2 text-opacity-50"></i>
                             {{ __('messages.No point transactions yet.') }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ __('messages.Wallet history') }}</h6>
+                    @if ($customer->walletTransactions->count() > 0)
+                        <span class="badge bg-secondary">{{ $customer->walletTransactions->count() }}</span>
+                    @endif
+                </div>
+                <div class="card-body p-0">
+                    @if ($customer->walletTransactions->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{{ __('messages.Date') }}</th>
+                                        <th>{{ __('messages.Type') }}</th>
+                                        <th class="text-end">{{ __('messages.Wallet') }}</th>
+                                        <th class="text-end">{{ __('messages.Balance after') }}</th>
+                                        <th>{{ __('messages.Notes') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($customer->walletTransactions as $tx)
+                                        <tr>
+                                            <td class="small text-muted">{{ $tx->created_at->format('M d, Y H:i') }}</td>
+                                            <td>
+                                                @if ($tx->type === 'addition')
+                                                    <span class="badge bg-success">{{ __('messages.Addition') }}</span>
+                                                @else
+                                                    <span class="badge bg-danger">{{ __('messages.Subtraction') }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-end {{ $tx->type === 'addition' ? 'text-success' : 'text-danger' }}">
+                                                {{ $tx->type === 'addition' ? '+' : '-' }}{{ format_local_number((float) $tx->amount, 2) }}
+                                                {{ display_currency() }}
+                                            </td>
+                                            <td class="text-end">
+                                                {{ format_local_number((float) $tx->balance_after, 2) }}
+                                                {{ display_currency() }}
+                                            </td>
+                                            <td class="small text-muted">{{ $tx->notes ?? '—' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-wallet2 fs-2 d-block mb-2 text-opacity-50"></i>
+                            {{ __('messages.No wallet transactions yet.') }}
                         </div>
                     @endif
                 </div>

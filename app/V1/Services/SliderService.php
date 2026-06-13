@@ -16,9 +16,9 @@ class SliderService
         protected SliderRepository $sliders,
     ) {}
 
-    public function getAllSliders(): Collection
+    public function getAllSliders(?string $type = null): Collection
     {
-        return $this->sliders->getAllSliders();
+        return $this->sliders->getAllSliders($type);
     }
 
     public function getPaginatedSliders(int $perPage = 15): LengthAwarePaginator

@@ -5,8 +5,10 @@ namespace App\V1\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\V1\Http\Requests\Api\StoreSliderRequest;
 use App\V1\Http\Requests\Api\UpdateSliderRequest;
+use App\V1\Http\Requests\Rules\SliderValidation;
 use App\V1\Http\Resources\Api\SliderResource;
 use App\V1\Services\SliderService;
+use Illuminate\Http\Request;
 
 class SliderController extends Controller
 {
@@ -14,10 +16,12 @@ class SliderController extends Controller
         protected SliderService $sliderService,
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
+        $validated = $request->validate(SliderValidation::apiIndexFilter());
+
         return SliderResource::collection(
-            $this->sliderService->getAllSliders()
+            $this->sliderService->getAllSliders($validated['type'] ?? null)
         );
     }
 

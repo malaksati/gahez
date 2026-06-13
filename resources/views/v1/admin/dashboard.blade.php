@@ -15,17 +15,6 @@
 
 @section('content')
     <div class="dashboard-page">
-        <div class="dashboard-hero card border-0 shadow-sm mb-4">
-            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
-                <div>
-                    <h2 class="dashboard-hero__title h5 mb-1">{{ __('messages.Analytics overview') }}</h2>
-                    <p class="dashboard-hero__period mb-0">
-                        <i class="bi bi-calendar3 me-1"></i>{{ $charts['period_label'] }}
-                    </p>
-                </div>
-                <span class="badge text-bg-light border">{{ __('messages.Last 30 days') }}</span>
-            </div>
-        </div>
 
         <div class="dashboard-kpi-grid mb-4">
             @foreach ($stats as $stat)
@@ -245,7 +234,17 @@
                 </div>
             </div>
         </div>
-
+        <div class="dashboard-hero card border-0 shadow-sm mb-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
+                <div>
+                    <h2 class="dashboard-hero__title h5 mb-1">{{ __('messages.Analytics overview') }}</h2>
+                    <p class="dashboard-hero__period mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>{{ $charts['period_label'] }}
+                    </p>
+                </div>
+                <span class="badge text-bg-light border">{{ __('messages.Last 30 days') }}</span>
+            </div>
+        </div>
         <div class="row g-3 mb-4">
             <div class="col-lg-6">
                 <div class="card gahez-chart-card border-0 shadow-sm h-100">

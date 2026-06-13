@@ -28,7 +28,7 @@ class NewOrderForAdminNotification extends Notification
         return [
             'title' => __('messages.New order'),
             'message' => __('messages.A new order #:id has been placed.', ['id' => $this->order->id]),
-            'url' => route('v1.admin.orders.edit', $this->order),
+            'url' => route('v1.admin.orders.show', $this->order),
             'order_id' => $this->order->id,
         ];
     }

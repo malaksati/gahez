@@ -64,6 +64,30 @@
                 @enderror
             </div>
 
+            @if ($isEdit)
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label">{{ __('messages.Phone') }}</label>
+                        <input type="text" name="phone" id="phone"
+                            class="form-control @error('phone') is-invalid @enderror"
+                            value="{{ old('phone', $admin->phone) }}" autocomplete="tel">
+                        @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="birthdate" class="form-label">{{ __('messages.Birthdate') }}</label>
+                        <input type="date" name="birthdate" id="birthdate"
+                            class="form-control @error('birthdate') is-invalid @enderror"
+                            value="{{ old('birthdate', $admin->birthdate?->format('Y-m-d')) }}"
+                            max="{{ now()->subDay()->format('Y-m-d') }}">
+                        @error('birthdate')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            @endif
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="password" class="form-label">

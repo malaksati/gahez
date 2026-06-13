@@ -109,10 +109,17 @@ class TicketService
     {
         return DB::transaction(function () use ($ticketId, $messageData) {
             $ticket = $this->tickets->getTicketById($ticketId);
+            $senderType = $messageData['sender_type'] ?? 'user';
 
             if ($ticket->status === 'closed') {
                 throw ValidationException::withMessages([
-                    'message' => ['This ticket is closed. Change the status before sending a message.'],
+                    'message' => [__('messages.This ticket is closed. Change the status to reply.')],
+                ]);
+            }
+
+            if ($senderType === 'user' && $ticket->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'message' => [__('messages.Ticket messages only allowed when pending')],
                 ]);
             }
 
@@ -121,13 +128,13 @@ class TicketService
 
             $message = TicketMessage::query()->create([
                 'ticket_id' => $ticketId,
-                'sender_type' => $messageData['sender_type'] ?? 'user',
+                'sender_type' => $senderType,
                 'sender_id' => $messageData['sender_id'],
                 'message' => $messageData['message'],
                 'attachments' => $attachments !== [] ? $attachments : null,
             ]);
 
-            if (in_array($ticket->status, ['resolved', 'closed'], true)) {
+            if ($senderType !== 'user' && $ticket->status === 'resolved') {
                 $ticket->update(['status' => 'pending']);
             }
 

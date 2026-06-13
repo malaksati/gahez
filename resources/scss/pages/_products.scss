@@ -22,6 +22,8 @@
         margin: 0 auto 0.5rem;
         font-weight: 600;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
       }
 
       .step-title {
@@ -58,8 +60,8 @@
         content: '';
         position: absolute;
         top: 20px;
-        left: 60%;
-        right: -40%;
+        inset-inline-start: 60%;
+        inset-inline-end: -40%;
         height: 2px;
         background: var(--bs-border-color);
         z-index: 0;
@@ -82,6 +84,40 @@
 
   .form-control {
     background-color: var(--bs-body-bg);
+  }
+}
+
+.product-table-toggle-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.product-table-toggle-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 4.5rem;
+
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+}
+
+.product-table-toggle-switch {
+  display: flex;
+  justify-content: center;
+  padding-left: 0;
+  margin-bottom: 0;
+  min-height: auto;
+
+  .form-check-input {
+    float: none;
+    margin-left: 0;
   }
 }
 

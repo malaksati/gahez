@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Web\Admin;
 
 use App\V1\Http\Requests\Rules\BranchValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
 
 class UpdateBranchRequest extends AdminFormRequest
@@ -21,5 +22,10 @@ class UpdateBranchRequest extends AdminFormRequest
     public function messages(): array
     {
         return (new \App\V1\Http\Requests\Api\UpdateBranchRequest)->messages();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

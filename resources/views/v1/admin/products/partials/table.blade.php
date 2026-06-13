@@ -19,9 +19,9 @@
                     <th>{{ __('messages.Price') }}</th>
                     <th>{{ __('messages.Stock') }}</th>
                     <th>{{ __('messages.Type') }}</th>
-                    <th>{{ __('messages.Status') }}</th>
-                    <th>{{ __('messages.Featured') }}</th>
-                    <th>{{ __('messages.Approved') }}</th>
+                    <th class="product-table-toggle-col">{{ __('messages.Status') }}</th>
+                    <th class="product-table-toggle-col">{{ __('messages.Featured') }}</th>
+                    <th class="product-table-toggle-col">{{ __('messages.Approved') }}</th>
                     <th>{{ __('messages.Created') }}</th>
                     <th class="text-end">{{ __('messages.Actions') }}</th>
                 </tr>
@@ -29,10 +29,12 @@
             <tbody>
                 @foreach ($products as $product)
                     @php
-                        $nameLocale = $product->getTranslation('name', $locale, false) ?: $product->getTranslation('name', 'en');
+                        $displayName = $locale === 'ar'
+                            ? ($product->getTranslation('name', 'ar', false) ?: $product->getTranslation('name', 'en'))
+                            : ($product->getTranslation('name', 'en', false) ?: $product->getTranslation('name', 'ar'));
                         $brandName = $product->displayBrandName($locale) ?? '';
                         $searchText = mb_strtolower(implode(' ', array_filter([
-                            $nameLocale,
+                            $displayName,
                             $product->getTranslation('name', 'en'),
                             $product->getTranslation('name', 'ar'),
                             $product->sku,
@@ -43,17 +45,13 @@
                         <td>
                             <img
                                 src="{{ $product->thumbnail }}"
-                                alt="{{ $nameLocale }}"
+                                alt="{{ $displayName }}"
                                 class="img-thumbnail"
                                 style="width: 50px; height: 50px; object-fit: cover;"
                             >
                         </td>
                         <td>
-                            <strong>{{ $nameLocale }}</strong>
-                            <br>
-                            <small class="text-muted">
-                                {{ $product->getTranslation('name', 'en') }} / {{ $product->getTranslation('name', 'ar') }}
-                            </small>
+                            @include('v1.admin.partials.translatable-name-stack', ['model' => $product])
                         </td>
                         @if (! empty($showCategoriesColumn))
                             <td>
@@ -105,58 +103,61 @@
                                 <span class="badge bg-secondary">{{ __('messages.Simple') }}</span>
                             @endif
                         </td>
-                        <td>
-                            <div class="form-check form-switch d-inline-block">
-                                <input
-                                    class="form-check-input toggle-active-btn"
-                                    type="checkbox"
-                                    id="toggleActive{{ $product->id }}"
-                                    data-toggle-url="{{ route('v1.admin.products.toggle-active', $product) }}"
-                                    @checked($product->is_active)
-                                >
-                                <label class="form-check-label" for="toggleActive{{ $product->id }}">
-                                    @if ($product->is_active)
-                                        <span class="badge bg-success">{{ __('messages.Active') }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">{{ __('messages.Inactive') }}</span>
-                                    @endif
-                                </label>
+                        <td class="product-table-toggle-col">
+                            <div class="product-table-toggle-cell">
+                                <div class="form-check form-switch product-table-toggle-switch">
+                                    <input
+                                        class="form-check-input toggle-active-btn"
+                                        type="checkbox"
+                                        id="toggleActive{{ $product->id }}"
+                                        data-toggle-url="{{ route('v1.admin.products.toggle-active', $product) }}"
+                                        aria-label="{{ __('messages.Status') }}"
+                                        @checked($product->is_active)
+                                    >
+                                </div>
+                                @if ($product->is_active)
+                                    <span class="badge bg-success">{{ __('messages.Active') }}</span>
+                                @else
+                                    <span class="badge bg-secondary">{{ __('messages.Inactive') }}</span>
+                                @endif
                             </div>
                         </td>
-                        <td>
-                            <div class="form-check form-switch d-inline-block">
-                                <input
-                                    class="form-check-input toggle-featured-btn"
-                                    type="checkbox"
-                                    id="toggleFeatured{{ $product->id }}"
-                                    data-toggle-url="{{ route('v1.admin.products.toggle-featured', $product) }}"
-                                    @checked($product->is_featured)
-                                >
-                                <label class="form-check-label" for="toggleFeatured{{ $product->id }}">
-                                    @if ($product->is_featured)
-                                        <span class="badge bg-warning text-dark">{{ __('messages.Featured') }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">{{ __('messages.No') }}</span>
-                                    @endif
-                                </label>
+                        <td class="product-table-toggle-col">
+                            <div class="product-table-toggle-cell">
+                                <div class="form-check form-switch product-table-toggle-switch">
+                                    <input
+                                        class="form-check-input toggle-featured-btn"
+                                        type="checkbox"
+                                        id="toggleFeatured{{ $product->id }}"
+                                        data-toggle-url="{{ route('v1.admin.products.toggle-featured', $product) }}"
+                                        aria-label="{{ __('messages.Featured') }}"
+                                        @checked($product->is_featured)
+                                    >
+                                </div>
+                                @if ($product->is_featured)
+                                    <span class="badge bg-warning text-dark">{{ __('messages.Featured') }}</span>
+                                @else
+                                    <span class="badge bg-secondary">{{ __('messages.No') }}</span>
+                                @endif
                             </div>
                         </td>
-                        <td>
-                            <div class="form-check form-switch d-inline-block">
-                                <input
-                                    class="form-check-input toggle-approved-btn"
-                                    type="checkbox"
-                                    id="toggleApproved{{ $product->id }}"
-                                    data-toggle-url="{{ route('v1.admin.products.toggle-approved', $product) }}"
-                                    @checked($product->is_approved)
-                                >
-                                <label class="form-check-label" for="toggleApproved{{ $product->id }}">
-                                    @if ($product->is_approved)
-                                        <span class="badge bg-success">{{ __('messages.Approved') }}</span>
-                                    @else
-                                        <span class="badge bg-danger">{{ __('messages.Pending') }}</span>
-                                    @endif
-                                </label>
+                        <td class="product-table-toggle-col">
+                            <div class="product-table-toggle-cell">
+                                <div class="form-check form-switch product-table-toggle-switch">
+                                    <input
+                                        class="form-check-input toggle-approved-btn"
+                                        type="checkbox"
+                                        id="toggleApproved{{ $product->id }}"
+                                        data-toggle-url="{{ route('v1.admin.products.toggle-approved', $product) }}"
+                                        aria-label="{{ __('messages.Approved') }}"
+                                        @checked($product->is_approved)
+                                    >
+                                </div>
+                                @if ($product->is_approved)
+                                    <span class="badge bg-success">{{ __('messages.Approved') }}</span>
+                                @else
+                                    <span class="badge bg-danger">{{ __('messages.Pending') }}</span>
+                                @endif
                             </div>
                         </td>
                         <td>
@@ -182,7 +183,7 @@
                                     type="button"
                                     class="btn btn-outline-danger delete-product-btn"
                                     title="{{ __('messages.Delete') }}"
-                                    data-product-name="{{ $nameLocale }}"
+                                    data-product-name="{{ $displayName }}"
                                     data-delete-url="{{ route('v1.admin.products.destroy', $product) }}"
                                 >
                                     <i class="bi bi-trash"></i>

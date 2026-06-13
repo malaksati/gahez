@@ -2,7 +2,9 @@
     $locale = app()->getLocale();
 @endphp
 
-<div class="accordion mb-4" id="categoriesAccordion">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-0">
+        <div class="accordion" id="categoriesAccordion">
     @foreach ($categorySections as $section)
         @php
             $root = $section['root'];
@@ -52,13 +54,14 @@
             'createLabel' => __('messages.New category'),
         ])
     @endif
-</div>
-
-@if ($rootCategories->hasPages())
-    <div class="mt-4">
-        {{ $rootCategories->withQueryString()->links() }}
+        </div>
     </div>
-@endif
+    @if ($rootCategories->total() > 0)
+        <div class="card-footer bg-white border-top py-3 px-3">
+            {{ $rootCategories->onEachSide(1)->withQueryString()->links() }}
+        </div>
+    @endif
+</div>
 
 @if ($orphanCategories->isNotEmpty())
     <div class="accordion mb-4" id="orphanCategoriesAccordion">

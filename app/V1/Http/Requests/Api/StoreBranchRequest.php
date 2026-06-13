@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Api;
 
 use App\V1\Http\Requests\Rules\BranchValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 
 class StoreBranchRequest extends ApiFormRequest
 {
@@ -29,5 +30,10 @@ class StoreBranchRequest extends ApiFormRequest
             'address.required' => 'Please enter the branch address.',
             'latitude.required' => 'Please provide a latitude for the branch.',
         ]);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

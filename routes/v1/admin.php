@@ -10,9 +10,9 @@ use App\V1\Http\Controllers\Web\Admin\CouponController;
 use App\V1\Http\Controllers\Web\Admin\CustomerController;
 use App\V1\Http\Controllers\Web\Admin\DashboardController;
 use App\V1\Http\Controllers\Web\Admin\DataTransferBatchController;
+use App\V1\Http\Controllers\Web\Admin\GoalController;
 use App\V1\Http\Controllers\Web\Admin\HelpController;
 use App\V1\Http\Controllers\Web\Admin\NotificationController;
-use App\V1\Http\Controllers\Web\Admin\GoalController;
 use App\V1\Http\Controllers\Web\Admin\OfferController;
 use App\V1\Http\Controllers\Web\Admin\OrderController;
 use App\V1\Http\Controllers\Web\Admin\OrderRefundRequestController;
@@ -42,6 +42,7 @@ Route::middleware('permission:view dashboard')->group(function () {
 // Notifications (available to all admins)
 Route::get('notifications/feed', [NotificationController::class, 'feed'])->name('notifications.feed');
 Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 Route::get('notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
 Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
 Route::get('data-transfer/batches/{batch}/status', [DataTransferBatchController::class, 'status'])->name('data-transfer.batches.status');

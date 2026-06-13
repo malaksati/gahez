@@ -13,7 +13,7 @@ final class BranchValidation
             'address' => ['required', 'string', 'max:500'],
             'latitude' => ['required', 'string', 'max:32'],
             'longitude' => ['required', 'string', 'max:32'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => PhoneValidation::rules(),
             'is_active' => ['sometimes', 'boolean'],
         ]);
     }
@@ -27,7 +27,7 @@ final class BranchValidation
             'address' => ['sometimes', 'string', 'max:500'],
             'latitude' => ['sometimes', 'string', 'max:32'],
             'longitude' => ['sometimes', 'string', 'max:32'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => PhoneValidation::rules(),
             'is_active' => ['sometimes', 'boolean'],
         ]);
     }

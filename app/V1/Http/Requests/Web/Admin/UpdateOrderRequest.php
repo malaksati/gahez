@@ -2,6 +2,7 @@
 
 namespace App\V1\Http\Requests\Web\Admin;
 
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
 use App\V1\Services\OrderService;
 use Illuminate\Validation\Rule;
@@ -31,9 +32,9 @@ class UpdateOrderRequest extends AdminFormRequest
             ],
             'notes' => ['nullable', 'string', 'max:2000'],
             'customer_name' => ['nullable', 'string', 'max:255'],
-            'customer_phone' => ['nullable', 'string', 'max:50'],
+            'customer_phone' => PhoneValidation::rules(),
             'shipping_name' => ['nullable', 'string', 'max:255'],
-            'shipping_phone' => ['nullable', 'string', 'max:50'],
+            'shipping_phone' => PhoneValidation::rules(),
             'shipping_address' => ['nullable', 'string', 'max:1000'],
             'shipping_city' => ['nullable', 'string', 'max:255'],
             'shipping_state' => ['nullable', 'string', 'max:255'],
@@ -50,6 +51,11 @@ class UpdateOrderRequest extends AdminFormRequest
             'status.required' => 'Order status is required.',
             'status.in' => 'Invalid order status.',
         ]);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['customer_phone', 'shipping_phone']);
     }
 
     public function withValidator($validator)

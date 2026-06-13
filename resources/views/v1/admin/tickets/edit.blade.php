@@ -7,7 +7,8 @@
         'resolved' => 'success',
         default => 'secondary',
     };
-    $badges = '<span class="badge bg-'.$statusBadge.' text-capitalize">'.e(__('messages.'.$ticket->status)).'</span>';
+    $badges = '<span class="badge bg-'.$statusBadge.' text-capitalize">'.e(__('messages.'.$ticket->status)).'</span>'
+        .' '.view('v1.admin.tickets.partials.type-badge', ['type' => $ticket->type])->render();
 @endphp
 
 @section('title', __('messages.Edit ticket'))
@@ -64,6 +65,9 @@
                                 —
                             @endif
                         </dd>
+
+                        <dt class="col-sm-4 text-muted mt-3">{{ __('messages.Type') }}</dt>
+                        <dd class="col-sm-8 mt-3">@include('v1.admin.tickets.partials.type-badge', ['type' => $ticket->type])</dd>
 
                         <dt class="col-sm-4 text-muted mt-3">{{ __('messages.Messages') }}</dt>
                         <dd class="col-sm-8">
@@ -122,6 +126,20 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="type" class="form-label">{{ __('messages.Type') }}</label>
+                        <select id="type" name="type" class="form-select @error('type') is-invalid @enderror" required>
+                            @foreach (\App\Models\Ticket::types() as $ticketType)
+                                <option value="{{ $ticketType }}" @selected(old('type', $ticket->type) === $ticketType)>
+                                    {{ \App\Models\Ticket::typeLabel($ticketType) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label for="description" class="form-label">{{ __('messages.Description') }}</label>
                         <textarea id="description"
                             name="description"
@@ -146,7 +164,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text mt-2">
-                            <i class="bi bi-info-circle me-1"></i>{{ __('messages.This ticket is closed. Change the status to reply.') }}
+                            <i class="bi bi-info-circle me-1"></i>{{ __('messages.Ticket status hint') }}
                         </div>
                     </div>
                 </div>

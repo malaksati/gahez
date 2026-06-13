@@ -4,6 +4,7 @@ namespace App\V1\Http\Requests\Api;
 
 use App\Models\Address;
 use App\V1\Http\Requests\Rules\AddressValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 
 class UpdateAddressRequest extends ApiFormRequest
 {
@@ -33,5 +34,10 @@ class UpdateAddressRequest extends ApiFormRequest
     public function messages(): array
     {
         return $this->mergeMessages([]);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

@@ -91,4 +91,52 @@ class SupportChatTest extends TestCase
         $this->assertSame('closed', $support->status);
         $this->assertNotNull($support->closed_at);
     }
+
+    public function test_admin_viewing_chat_marks_customer_messages_as_read(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $admin->assignRole('super-admin');
+        $admin->givePermissionTo('manage support-chats');
+
+        $customer = User::factory()->create(['role' => 'user']);
+        $support = Support::factory()->create(['user_id' => $customer->id]);
+
+        $message = $support->messages()->create([
+            'sender_type' => 'user',
+            'sender_id' => $customer->id,
+            'message' => 'Need help',
+            'read_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('v1.admin.support-chats.show', $support))
+            ->assertOk();
+
+        $message->refresh();
+        $this->assertNotNull($message->read_at);
+    }
+
+    public function test_admin_polling_messages_marks_customer_messages_as_read(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $admin->assignRole('super-admin');
+        $admin->givePermissionTo('manage support-chats');
+
+        $customer = User::factory()->create(['role' => 'user']);
+        $support = Support::factory()->create(['user_id' => $customer->id]);
+
+        $message = $support->messages()->create([
+            'sender_type' => 'user',
+            'sender_id' => $customer->id,
+            'message' => 'Follow up',
+            'read_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->getJson(route('v1.admin.support-chats.messages.index', $support))
+            ->assertOk();
+
+        $message->refresh();
+        $this->assertNotNull($message->read_at);
+    }
 }

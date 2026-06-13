@@ -1,6 +1,6 @@
 # Project progress
 
-Gahez is a Laravel 13 e-commerce platform with an **admin panel** and **customer API**.
+Gahez Akeed is a Laravel 13 e-commerce platform with an **admin panel** and **customer API**.
 
 **Stack:** PHP 8.3, Sanctum, Spatie Permission, Spatie Translatable, Maatwebsite Excel, Redis-ready queues.
 
@@ -15,18 +15,16 @@ Gahez is a Laravel 13 e-commerce platform with an **admin panel** and **customer
 │  Customer app   │────▶│  /api/v1         │────▶│  Services       │
 │  (mobile/web)   │     │  Sanctum auth    │     │  app/V1/        │
 └─────────────────┘     └──────────────────┘     └─────────────────┘
-┌─────────────────┐              │                        │
-│  Driver app     │──────────────┘                        ▼
-└─────────────────┘                              ┌─────────────────┐
-┌─────────────────┐     ┌──────────────────┐     │  Models / DB    │
-│  Admin panel    │────▶│  /admin          │────▶│  Migrations     │
-│  Session auth   │     │  Spatie perms    │     └─────────────────┘
-└─────────────────┘     └──────────────────┘
+                                 │                        │
+┌─────────────────┐              │                        ▼
+│  Admin panel    │────▶│  /admin          │────▶│  Models / DB    │
+│  Session auth   │     │  Spatie perms    │     │  Migrations     │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
 ```
 
 | Surface | URL prefix | Auth |
 |---------|------------|------|
-| Customer & driver API | `/api/v1` | Sanctum bearer token |
+| Customer API | `/api/v1` | Sanctum bearer token |
 | Admin panel | `/admin` | Session + `admin\|super-admin` role |
 | API docs (LaRecipe) | `/docs` | Public |
 | Public site | `/` | Guest |
@@ -59,7 +57,7 @@ Gahez is a Laravel 13 e-commerce platform with an **admin panel** and **customer
 | Products (simple & variable, SKU, images, `sort_order`) | ✅ | ✅ public read |
 | Brands, branches | ✅ | ✅ public read |
 | Variants & variant options | ✅ | — |
-| Sliders | ✅ | ✅ public read |
+| Sliders (optional `type` filter) | ✅ | ✅ public read |
 | Product import/export (Excel) | ✅ | — |
 | Quick variant/option creation | ✅ | — |
 | Product approve / featured / active toggles | ✅ | — |
@@ -77,13 +75,18 @@ Gahez is a Laravel 13 e-commerce platform with an **admin panel** and **customer
 | Variable products require `variant_id` | ✅ |
 | Offer-aware line pricing (%, fixed, BOGO, category BOGO) | ✅ |
 | `max_discounted_quantity` — extra units at full price | ✅ |
-| Checkout preview (totals, zone, gifts) | ✅ |
+| Checkout preview (`GET /cart/checkout-preview` + cart `meta`) | ✅ |
+| Weekday shipping + fast shipping option | ✅ |
+| Cart minimums (line count, subtotal) | ✅ |
+| Free delivery from active `free_delivery` offers only | ✅ |
 | Apply coupon to cart | ✅ |
 | Wishlist toggle | ✅ |
 
 Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, `full_price_quantity`, and `subtotal` with offers applied.
 
-**Key files:** `CartItemController`, `CartItemService`, `OfferService`, `CouponService`, `WishlistController`
+**Shipping rules:** Standard shipping excludes today; fast shipping is today only and adds the configured extra fee. `POST /orders` requires `shipping_day` and optional `is_fast_shipping`.
+
+**Key files:** `CartItemController`, `CartItemService`, `CheckoutSettingsService`, `OfferService`, `CouponService`, `WishlistController`
 
 ---
 
@@ -93,14 +96,16 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 |---------|-------|-----|
 | Place order (clears cart) | Manual create | ✅ |
 | Order list / detail / invoice | ✅ | ✅ |
-| Status & payment status updates | ✅ | — |
+| Edit order (pending / processing only) | ✅ | — |
+| Status & payment status updates (show page) | ✅ | — |
+| Invoice shows shipping day + fast shipping | ✅ | — |
 | Cancel, pay, reorder | — | ✅ |
 | Refund requests — **accept/reject on index** | ✅ | ✅ submit |
-| Order & delivery ratings | — | ✅ |
+| Order ratings | — | ✅ |
 | Wallet payment | — | ✅ |
 | COD marked paid on delivered | ✅ auto | — |
 
-**Key files:** `OrderController`, `OrderService`, `OrderRefundRequestController`, `DeliveryAssignmentService`
+**Key files:** `OrderController`, `OrderService`, `OrderRefundRequestController`
 
 ---
 
@@ -117,20 +122,19 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 
 ---
 
-### 6. Delivery
+### 6. Checkout & shipping settings
 
 | Feature | Admin | API |
 |---------|-------|-----|
-| Delivery zones (fees, geo) | ✅ | — |
-| Drivers CRUD, wallet, shift assign | ✅ | — |
-| Shifts CRUD | ✅ | ✅ driver subscribe |
-| Auto / manual assignment | ✅ | — |
-| Driver assignments (in-transit, delivered) | — | ✅ |
-| Become-a-driver application — accept/reject | ✅ | ✅ |
-| Delivery expected time slots | — | ✅ |
-| Google Maps directions (optional) | ✅ | — |
+| Standard shipping fee | ✅ Settings | ✅ preview |
+| Fast shipping extra fee | ✅ Settings | ✅ preview |
+| Cart minimum line count / subtotal | ✅ Settings | ✅ preview |
+| Weekday selection at checkout | — | ✅ `shipping_day` |
+| Free delivery threshold from offers | — | ✅ |
 
-**Key files:** `DeliveryAssignmentService`, `ZoneService`, `ShiftService`, `AssignmentController`
+Configured in **Settings → Checkout and shipping**. No separate driver mobile API is registered in `routes/v1/api.php`.
+
+**Key files:** `CheckoutSettingsService`, `SettingsController`, `SettingService`
 
 ---
 
@@ -139,9 +143,12 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 | Feature | Admin | API |
 |---------|-------|-----|
 | In-app notification inbox | ✅ | ✅ |
-| **Live admin feed** (500ms poll + toasts) | ✅ | — |
-| Mark read / mark all read | ✅ | ✅ |
-| Order lifecycle alerts (assigned, in-transit, delivered) | ✅ | ✅ |
+| **Live admin feed** (poll + toasts) | ✅ | — |
+| Toast / dropdown click marks read + navigates | ✅ | — |
+| Mark all as read (index page) | ✅ | ✅ |
+| New order alert → order **show** page | ✅ | — |
+| Product report submitted alert | ✅ (`manage product-reports`) | — |
+| Refund request submitted alert | ✅ (`manage refunds`) | — |
 | Offer/coupon promotions | Trigger | ✅ |
 | Birthday rewards (scheduled) | Settings | ✅ |
 | Email (when user has email) | — | ✅ |
@@ -152,29 +159,27 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 
 ---
 
-### 8. Settings & store theme
+### 8. Settings & branding
 
 | Feature | Admin | API |
 |---------|-------|-----|
 | App name, currency, logo | ✅ | ✅ `GET /store/config` |
-| Store theme (colors, layouts, font) | ✅ | ✅ |
+| Checkout & shipping fees / cart limits | ✅ | ✅ (via cart preview) |
 | Security settings | ✅ | — |
 | Help page content | ✅ | — |
 
-**Key files:** `ThemeController`, `StoreConfigController`, `SettingService`
+**Key files:** `StoreConfigController`, `SettingService`, `SettingsController`
 
 ---
 
-### 9. Plans & wallet
+### 9. Wallet & goals
 
 | Feature | Admin | API |
 |---------|-------|-----|
-| Subscription plans | ✅ | ✅ list |
-| Plan subscribe | — | ✅ |
 | Customer wallet history | — | ✅ |
-| Driver wallet history | Admin | ✅ |
+| Customer goals (gamification) | ✅ | ✅ `GET /goals` |
 
-**Key files:** `PlanController`, `WalletTransactionController`, `PointService`
+**Key files:** `GoalController`, `WalletTransactionController`, `PointService`
 
 ---
 
@@ -183,7 +188,7 @@ Cart items expose `billable_quantity`, `bonus_quantity`, `discounted_quantity`, 
 | Feature | Admin | API |
 |---------|-------|-----|
 | **Support chats** (real-time threads) | ✅ assign, status, reply | ✅ CRUD + messages |
-| Support tickets + messages | ✅ | ✅ |
+| Support tickets (`complaint` / `recommendation`) | ✅ filter + edit type | ✅ required `type` on create |
 | **Ticket / chat file attachments** (multipart) | ✅ reply | ✅ create + reply |
 | Product ratings | ✅ visibility | ✅ submit |
 | Product reports | ✅ workflow | ✅ submit |
@@ -216,7 +221,7 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 | Feature | Status |
 |---------|--------|
 | Full database seeders | ✅ |
-| Feature & unit tests (~28 test files) | ✅ |
+| Feature & unit tests (~49 test files) | ✅ |
 | API documentation (`/docs`, `docs/API.md`) | ✅ |
 | Apidog / OpenAPI collection | ✅ `docs/apidog/` |
 
@@ -227,7 +232,6 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 | Super admin | `super-admin@gmail.com` |
 | Admin | `admin@gmail.com` |
 | Customer | `customer1@gmail.com` |
-| Driver | `driver1@gmail.com` |
 
 ---
 
@@ -235,19 +239,19 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 
 | Area | Delivered |
 |------|-----------|
-| **Offers in cart** | BOGO bonus qty, billable vs discounted units, category BOGO pricing, checkout gifts |
+| **App branding** | Default name **Gahez Akeed** (`config`, settings, seeders) |
+| **Weekday shipping** | `shipping_day`, `is_fast_shipping`, checkout preview shipping options |
+| **Free delivery** | Only from active `free_delivery` offers (no hardcoded threshold) |
+| **Cart limits** | Min line count / subtotal in settings + preview `meta` |
+| **Tickets** | Types: `complaint`, `recommendation` (API + admin) |
+| **Admin notifications** | Mark read on toast/dropdown click; mark all on index |
+| **Admin alerts** | New product reports, new refund requests (permission-gated) |
+| **Orders admin** | Edit only `pending` / `processing`; invoice shipping day + fast badge |
+| **Offers in cart** | BOGO bonus qty, billable vs discounted units, category BOGO pricing |
 | **Cart API** | `PUT/PATCH /cart/items/{cartItem}`, JSON body for quantity updates |
 | **Refund requests** | Admin accept/reject on index; wallet refund on approve |
 | **Ticket attachments** | Multipart upload API + admin; `UploadStorage` for Windows/Laragon |
-| **Admin live notifications** | Feed polling + toast popups (replaces SSE) |
-| **Delivery** | COD paid on delivered, zone shipping fee fallback, shift subscribe API |
-| **Catalog ordering** | `sort_order` on products & categories (blank auto-appends) |
-| **Delivery module** | Zones, shifts, assignments, driver API, ratings |
-| **Notifications** | Customer inbox API, offer/coupon broadcasts |
-| **Store theme** | Admin-only theme → `GET /store/config` |
-| **Birthday rewards** | Birthdate on profile, scheduled coupons/gifts |
-| **LaRecipe docs** | Browsable `/docs` API reference |
-| **Import/export** | Queued Excel transfer for catalog entities |
+| **Admin live notifications** | Feed polling + toast popups |
 | **Support chats** | Customer API + admin inbox; multipart attachments |
 | **Admin UX** | Theme/locale pill toggles; warm `gahez-50` light surfaces; dark orange/brown palette |
 | **Arabic numerals** | `format_local_number`, `@num`, Arabic-Indic digits in admin + `trans()` |
@@ -259,7 +263,7 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 
 - Push notifications (FCM/APNs) — not implemented
 - Auto-generated OpenAPI from code (Scribe) — manual collection in `docs/apidog/`
-- Google Maps API key in `config/services.php` — optional; haversine fallback when unset
+- Driver mobile API — not registered in current `routes/v1/api.php`
 
 ---
 

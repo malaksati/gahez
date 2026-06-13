@@ -3,6 +3,7 @@
 namespace App\V1\Services;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
@@ -22,7 +23,7 @@ class AdminUserService
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -35,7 +36,7 @@ class AdminUserService
     /**
      * Users that can be promoted to admin (not already admin or super-admin).
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     * @return Collection<int, User>
      */
     public function getLinkableUsers()
     {
@@ -93,6 +94,8 @@ class AdminUserService
         $updateData = [
             'name' => $data['name'],
             'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'birthdate' => $data['birthdate'] ?? null,
         ];
 
         if (! empty($data['password'])) {
@@ -127,7 +130,7 @@ class AdminUserService
     /**
      * Get all available permissions.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAllPermissions()
     {

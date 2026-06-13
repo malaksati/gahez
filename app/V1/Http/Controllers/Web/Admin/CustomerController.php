@@ -56,7 +56,7 @@ class CustomerController extends AdminController
         $customer->load([
             'addresses',
             'pointTransactions' => fn ($query) => $query->latest()->limit(50),
-            'walletTransactions' => fn ($query) => $query->latest()->limit(20),
+            'walletTransactions' => fn ($query) => $query->latest()->limit(50),
         ]);
 
         return view('v1.admin.customers.show', [

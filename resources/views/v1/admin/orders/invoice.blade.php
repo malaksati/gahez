@@ -310,7 +310,9 @@
 
             <div class="header">
                 @if ($appLogo)
-                    @php($logoSrc = empty($asPdf) ? storage_public_url($appLogo) : storage_public_path($appLogo))
+                    @php
+                        $logoSrc = empty($asPdf) ? storage_public_url($appLogo) : storage_public_path($appLogo);
+                    @endphp
                     @if ($logoSrc)
                         <img src="{{ $logoSrc }}" alt="" class="logo">
                     @endif
@@ -318,7 +320,6 @@
                 <h1 class="title">{{ __('messages.Invoice') }}</h1>
             </div>
 
-            {{-- ... keeps rest of your content intact ... --}}
             <table class="info-table">
                 <tr>
                     <td>
@@ -342,6 +343,21 @@
                                 class="ltr">{{ $order->address->phone ?? (($order->shipping_address_snapshot['phone'] ?? null) ?: ($order->customer_phone ?? ($order->user->phone ?? '—'))) }}</span></span>
                     </td>
                 </tr>
+                @if ($order->shipping_day || $order->is_fast_shipping)
+                    <tr>
+                        <td>
+                            @if ($order->shipping_day)
+                                <strong>{{ __('messages.Shipping day') }}:</strong>
+                                <span class="muted">{{ __('messages.weekday_'.$order->shipping_day) }}</span>
+                            @endif
+                        </td>
+                        <td class="col-end">
+                            @if ($order->is_fast_shipping)
+                                <strong>{{ __('messages.Fast shipping') }}</strong>
+                            @endif
+                        </td>
+                    </tr>
+                @endif
             </table>
 
             @include('v1.admin.orders.partials.payment-invoice-details', ['order' => $order])
@@ -442,7 +458,15 @@
                     </tr>
                 @endif
                 <tr class="totals-line-muted">
-                    <td class="totals-label">{{ __('messages.Shipping') }}</td>
+                    <td class="totals-label">
+                        {{ __('messages.Shipping') }}
+                        @if ($order->is_fast_shipping)
+                            <span class="muted">({{ __('messages.Fast shipping') }})</span>
+                        @endif
+                        @if ($order->shipping_day)
+                            <span class="muted"> · {{ __('messages.weekday_'.$order->shipping_day) }}</span>
+                        @endif
+                    </td>
                     <td class="totals-value"><span
                             class="ltr">{{ format_local_number((float) $order->total_shipping, 2) }}
                             {{ $currency }}</span></td>

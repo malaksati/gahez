@@ -82,6 +82,22 @@ class SupportRepository
     }
 
     /**
+     * Mark messages from the other party as read for the given viewer.
+     *
+     * @param  'user'|'admin'  $readerType
+     */
+    public function markMessagesAsRead(int $supportId, string $readerType): int
+    {
+        $senderTypeToMark = $readerType === 'admin' ? 'user' : 'admin';
+
+        return SupportMessage::query()
+            ->where('support_id', $supportId)
+            ->where('sender_type', $senderTypeToMark)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function create(array $data): Support

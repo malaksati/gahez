@@ -2,6 +2,7 @@
 
 namespace App\V1\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutSettingsService
@@ -36,12 +37,50 @@ class CheckoutSettingsService
         return round(max(0, (float) setting('cart_min_subtotal', 0)), 2);
     }
 
+    public function todayWeekday(): string
+    {
+        return strtolower(Carbon::now()->englishDayOfWeek);
+    }
+
     /**
      * @return list<array{value: string, label: string}>
      */
     public function weekdays(): array
     {
-        return collect(self::WEEKDAYS)
+        return $this->mapWeekdays(self::WEEKDAYS);
+    }
+
+    /**
+     * Standard shipping: any weekday except today.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public function standardWeekdays(): array
+    {
+        $today = $this->todayWeekday();
+
+        return $this->mapWeekdays(
+            array_values(array_filter(self::WEEKDAYS, fn (string $day) => $day !== $today)),
+        );
+    }
+
+    /**
+     * Fast shipping: today only (same-day delivery).
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public function fastWeekdays(): array
+    {
+        return $this->mapWeekdays([$this->todayWeekday()]);
+    }
+
+    /**
+     * @param  list<string>  $days
+     * @return list<array{value: string, label: string}>
+     */
+    protected function mapWeekdays(array $days): array
+    {
+        return collect($days)
             ->map(fn (string $day) => [
                 'value' => $day,
                 'label' => __('messages.weekday_'.$day),
@@ -54,16 +93,29 @@ class CheckoutSettingsService
      */
     public function shippingPayload(bool $qualifiesForFreeDelivery = false): array
     {
-        $base = $qualifiesForFreeDelivery ? 0.0 : $this->baseShippingFee();
-        $extra = $qualifiesForFreeDelivery ? 0.0 : $this->fastShippingExtraFee();
+        $configuredBase = $this->baseShippingFee();
+        $configuredExtra = $this->fastShippingExtraFee();
+        $effectiveBase = $qualifiesForFreeDelivery ? 0.0 : $configuredBase;
+        $effectiveExtra = $qualifiesForFreeDelivery ? 0.0 : $configuredExtra;
+        $standardWeekdays = $this->standardWeekdays();
+        $fastWeekdays = $this->fastWeekdays();
 
         return [
-            'weekdays' => $this->weekdays(),
-            'base_fee' => $base,
-            'fast_shipping_extra_fee' => $extra,
+            'weekdays' => $standardWeekdays,
+            'base_fee' => $configuredBase,
+            'fast_shipping_extra_fee' => $configuredExtra,
+            'free_delivery_applied' => $qualifiesForFreeDelivery,
             'options' => [
-                ['type' => 'standard', 'total_fee' => $base],
-                ['type' => 'fast', 'total_fee' => round($base + $extra, 2)],
+                [
+                    'type' => 'standard',
+                    'weekdays' => $standardWeekdays,
+                    'total_fee' => $effectiveBase,
+                ],
+                [
+                    'type' => 'fast',
+                    'weekdays' => $fastWeekdays,
+                    'total_fee' => round($effectiveBase + $effectiveExtra, 2),
+                ],
             ],
         ];
     }
@@ -129,6 +181,28 @@ class CheckoutSettingsService
         if (! in_array($day, self::WEEKDAYS, true)) {
             throw ValidationException::withMessages([
                 'shipping_day' => [__('messages.Invalid shipping day.')],
+            ]);
+        }
+
+        return $day;
+    }
+
+    public function assertValidShippingDayForCheckout(string $day, bool $isFastShipping): string
+    {
+        $day = $this->assertValidShippingDay($day);
+        $today = $this->todayWeekday();
+
+        if ($isFastShipping && $day !== $today) {
+            throw ValidationException::withMessages([
+                'shipping_day' => [__('messages.Fast shipping requires today as shipping day', [
+                    'day' => __('messages.weekday_'.$today),
+                ])],
+            ]);
+        }
+
+        if (! $isFastShipping && $day === $today) {
+            throw ValidationException::withMessages([
+                'shipping_day' => [__('messages.Standard shipping cannot use today as shipping day')],
             ]);
         }
 

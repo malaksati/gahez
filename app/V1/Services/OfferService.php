@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Offer;
 use App\Models\OfferRewardProduct;
 use App\Models\Product;
+use App\Models\ProductUnit;
 use App\Models\ProductVariant;
 use App\V1\Repositories\OfferRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -252,7 +253,7 @@ class OfferService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \App\Models\CartItem>  $cartItems
+     * @param  \Illuminate\Support\Collection<int, CartItem>  $cartItems
      * @return array<int, array{
      *     billable_quantity: int,
      *     unit_price: float,
@@ -320,7 +321,7 @@ class OfferService
         Product $product,
         ?ProductVariant $variant,
         int $totalQuantity,
-        ?\App\Models\ProductUnit $productUnit = null,
+        ?ProductUnit $productUnit = null,
     ): array {
         $totalQuantity = max(0, $totalQuantity);
         $basePrice = (float) ($productUnit?->final_price ?? $variant?->price ?? $product->price);
@@ -391,7 +392,7 @@ class OfferService
         ];
     }
 
-    public function resolveFreeDeliveryThreshold(): float
+    public function resolveFreeDeliveryThreshold(): ?float
     {
         $offer = $this->getValidOffers()
             ->where('type', 'free_delivery')
@@ -403,12 +404,18 @@ class OfferService
             return (float) $offer->min_cart_amount;
         }
 
-        return 50.0;
+        return null;
     }
 
     public function qualifiesForFreeDelivery(float $subtotal): bool
     {
-        return $subtotal >= $this->resolveFreeDeliveryThreshold();
+        $threshold = $this->resolveFreeDeliveryThreshold();
+
+        if ($threshold === null) {
+            return false;
+        }
+
+        return $subtotal >= $threshold;
     }
 
     public function resolveThresholdGiftOffer(float $cartSubtotal): ?Offer
@@ -526,7 +533,7 @@ class OfferService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \App\Models\CartItem>  $eligibleItems
+     * @param  \Illuminate\Support\Collection<int, CartItem>  $eligibleItems
      * @param  array<int, array<string, mixed>>  $linePricings
      */
     protected function applyCategoryBogoToLines(Offer $offer, \Illuminate\Support\Collection $eligibleItems, array &$linePricings): void

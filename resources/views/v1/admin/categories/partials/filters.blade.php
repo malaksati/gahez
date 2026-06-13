@@ -40,6 +40,16 @@
                     <option value="name_desc" @selected(request('sort') === 'name_desc')>{{ __('messages.Name Z-A') }}</option>
                 </select>
             </div>
+            <div class="col-md-1">
+                <label class="form-label small mb-1">{{ __('messages.Per page') }}</label>
+                <select name="per_page" class="form-select form-select-sm">
+                    @foreach ([5, 10, 20, 50, 100] as $perPageOption)
+                        <option value="{{ $perPageOption }}" @selected((int) request('per_page', 20) === $perPageOption)>
+                            {{ $perPageOption }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
                 <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i>{{ __('messages.Apply filters') }}</button>
                 <a href="{{ route('v1.admin.categories.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('messages.Reset') }}</a>

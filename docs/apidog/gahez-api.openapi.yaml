@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: Gahez E-Commerce API
-  description: REST API v1 for customer mobile/web app. Sanctum bearer auth. Payment methods cash_on_delivery and wallet only.
+  title: Gahez Akeed E-Commerce API
+  description: REST API v1 for Gahez Akeed customer mobile/web app. Sanctum bearer auth. Payment methods cash_on_delivery and wallet only.
   version: 1.0.0
   contact:
-    name: Gahez
+    name: Gahez Akeed
 
 servers:
   - url: http://gahez.test/api/v1
@@ -383,7 +383,7 @@ paths:
       tags: [Cart]
       summary: Checkout preview
       responses:
-        '200': { description: Totals, gifts, free delivery eligibility }
+        '200': { description: Totals, gifts, cart limits, shipping options, free delivery eligibility }
 
   /cart/apply-coupon:
     post:
@@ -650,8 +650,11 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [subject, description]
+              required: [type, subject, description]
               properties:
+                type:
+                  type: string
+                  enum: [complaint, recommendation]
                 subject: { type: string }
                 description: { type: string }
                 attachments:
@@ -664,7 +667,11 @@ paths:
           application/json:
             schema:
               type: object
+              required: [type, subject, description]
               properties:
+                type:
+                  type: string
+                  enum: [complaint, recommendation]
                 subject: { type: string }
                 description: { type: string }
       responses:
@@ -832,9 +839,14 @@ components:
 
     CheckoutInput:
       type: object
-      required: [address_id, payment_method]
+      required: [address_id, shipping_day]
       properties:
         address_id: { type: integer }
+        shipping_day:
+          type: string
+          enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+          example: thursday
+        is_fast_shipping: { type: boolean, default: false }
         payment_method:
           type: string
           enum: [cash_on_delivery, wallet]

@@ -5,6 +5,7 @@ namespace App\V1\Repositories;
 use App\Models\Category;
 use App\V1\Repositories\Concerns\AppliesInsensitiveSearch;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,7 @@ class CategoryRepository
     public function getAllCategoriesOrdered(): Collection
     {
         return Category::with(['parent', 'children'])
+            ->withCount('products')
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
@@ -28,6 +30,7 @@ class CategoryRepository
     public function getOrphanCategories(): Collection
     {
         return Category::with(['parent', 'children'])
+            ->withCount('products')
             ->whereNotNull('parent_id')
             ->whereDoesntHave('parent')
             ->orderBy('sort_order')
@@ -35,9 +38,11 @@ class CategoryRepository
             ->get();
     }
 
-    public function getPaginatedRootCategories(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function getPaginatedRootCategories(int $perPage = 20, array $filters = []): LengthAwarePaginator
     {
-        $query = Category::query()->whereNull('parent_id');
+        $query = Category::query()
+            ->withCount('products')
+            ->whereNull('parent_id');
 
         if (! empty($filters['search'])) {
             $search = (string) $filters['search'];
@@ -66,7 +71,7 @@ class CategoryRepository
 
         $this->applyCategorySort($query, (string) ($filters['sort'] ?? 'sort_order'));
 
-        return $query->paginate($perPage);
+        return $query->paginate($perPage)->withQueryString();
     }
 
     public function resolveRootAncestorId(int $categoryId): int
@@ -141,7 +146,7 @@ class CategoryRepository
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Category>  $query
+     * @param  Builder<Category>  $query
      */
     protected function applyCategorySort($query, string $sort): void
     {

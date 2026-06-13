@@ -145,7 +145,11 @@
                 <h6 class="mb-0">{{ __('messages.Address') }}</h6>
             </div>
             <div class="card-body py-4">
-                @include('v1.admin.customers.partials.address-fields', ['primaryAddress' => $primaryAddress])
+                @include('v1.admin.customers.partials.address-fields', [
+                    'primaryAddress' => $primaryAddress,
+                    'addresses' => $isEdit ? $customer->addresses : collect(),
+                    'isEdit' => $isEdit,
+                ])
             </div>
         </div>
     </div>

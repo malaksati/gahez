@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // Gahez brand palette (orange)
-$gahez-50: #fef6e7;
+$gahez-50: #fffaf0;
 $gahez-100: #fde4b6;
 $gahez-200: #fcd792;
 $gahez-300: #fac461;
@@ -14,7 +14,7 @@ $gahez-600: #faad28;
 $gahez-700: #b0770d;
 $gahez-800: #885c0a;
 $gahez-900: #684608;
-$gahez-950: #4a3306;
+$gahez-950: #3c2c0c;
 
 // Brand Colors
 $primary: $gahez-600;
@@ -168,4 +168,4 @@ $dark-primary: $primary;
   --box-shadow: #{$box-shadow};
   --box-shadow-sm: #{$box-shadow-sm};
   --box-shadow-lg: #{$box-shadow-lg};
-} 
+}

@@ -162,6 +162,11 @@
   --reports-sidebar-title-size: 1.5rem;
   --reports-sidebar-desc-size: 1rem;
   --reports-sidebar-icon-size: 1.125rem;
+
+  &--sticky {
+    top: calc(var(--header-height, 64px) + 0.5rem);
+    z-index: 1;
+  }
 }
 
 .reports-sidebar-links {

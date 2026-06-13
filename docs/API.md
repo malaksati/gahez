@@ -1,4 +1,4 @@
-# Gahez E-Commerce API
+# Gahez Akeed E-Commerce API
 
 > Browsable version: visit `/docs` in the app (powered by LaRecipe).
 
@@ -150,7 +150,7 @@ GET /store/config
 {
   "success": true,
   "data": {
-    "app_name": "Gahez",
+    "app_name": "Gahez Akeed",
     "currency": "EGP",
     "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }
@@ -245,6 +245,8 @@ GET /sliders
 GET /offers
 ```
 
+**Sliders query:** `type` — `home`, `category`, `brand`, `offer`, `product`, `coupon`, `goal`, `support_chat`, or `ticket`. Example: `GET /sliders?type=home`
+
 ---
 
 # Authenticated — Customer
@@ -300,7 +302,7 @@ POST /notifications/mark-all-read
     {
       "id": "uuid",
       "type": "offer_promotion",
-      "title": "New offer at Gahez",
+      "title": "New offer at Gahez Akeed",
       "message": "New offer: 15% off Apples",
       "data": {
         "offer_id": 1,
@@ -423,7 +425,33 @@ Supports product offers (%, fixed, BOGO) and category-level BOGO offers.
 
 ### Cart index `meta`
 
-Includes `subtotal`, `total_quantity`, `coupon`, `gift_offer`, `qualifies_for_free_delivery`, `order_discount`, etc.
+Includes `subtotal`, `total_quantity`, `coupon`, `gift_offer`, `qualifies_for_free_delivery`, `free_delivery_threshold`, `cart_limits`, `shipping`, `order_discount`, etc.
+
+### Checkout preview
+
+```http
+GET /cart/checkout-preview
+```
+
+Returns the same checkout fields as cart `meta` (gifts, free delivery, cart limits, shipping options) without listing cart lines:
+
+| Field | Description |
+|-------|-------------|
+| `cart_subtotal` | Cart subtotal after offer line pricing |
+| `free_delivery_threshold` | From active `free_delivery` offer, or `null` |
+| `qualifies_for_free_delivery` | Cart subtotal meets offer threshold |
+| `gift_offer` | Threshold gift offer + `reward_products` when eligible |
+| `cart_limits` | `min_line_count`, `min_subtotal`, `can_checkout`, etc. |
+| `shipping` | `base_fee`, `fast_shipping_extra_fee`, `free_delivery_applied`, `weekdays`, `options` |
+
+**Shipping `options`:**
+
+| `type` | Weekdays | Fee |
+|--------|----------|-----|
+| `standard` | All weekdays **except today** | `base_fee` (0 when free delivery applies) |
+| `fast` | **Today only** | `base_fee` + `fast_shipping_extra_fee` |
+
+Configured fees are always shown in the preview; `free_delivery_applied` indicates whether fees are waived at checkout.
 
 ---
 
@@ -438,6 +466,8 @@ POST /orders
 ```json
 {
   "address_id": 1,
+  "shipping_day": "thursday",
+  "is_fast_shipping": false,
   "payment_method": "cash_on_delivery",
   "coupon_code": "WELCOME10",
   "use_wallet": false,
@@ -454,6 +484,8 @@ POST /orders
 | Field | Description |
 |-------|-------------|
 | `address_id` | Required. Customer address. |
+| `shipping_day` | Required. One of `monday` … `sunday`. |
+| `is_fast_shipping` | Optional boolean. Fast = today only; standard cannot use today. |
 | `payment_method` | `cash_on_delivery` or `wallet` (optional at checkout; defaults apply) |
 | `use_wallet` | Apply wallet balance (not with COD) |
 | `gift_offer_id` / `gift_product_id` | Threshold gift selection |
@@ -555,6 +587,7 @@ Content-Type: multipart/form-data
 
 | Field | Type | Rules |
 |-------|------|-------|
+| `type` | string | required — `complaint` or `recommendation` |
 | `subject` | string | required, max 255 |
 | `description` | string | required |
 | `attachments[0]` | file | optional |
@@ -647,9 +680,9 @@ const api = async (path, options = {}) => {
 
 1. `GET /products`, `GET /categories/tree`
 2. `POST /cart/{product_id}`
-3. `GET /cart/checkout-preview`
+3. `GET /cart/checkout-preview` — shipping options, cart limits, gifts
 4. `POST /addresses` (if none)
-5. `POST /orders`
+5. `POST /orders` — include `shipping_day` and optional `is_fast_shipping`
 6. `GET /notifications` for status updates
 
 ### 5. Queue / email
@@ -675,6 +708,12 @@ Import the Apidog/Postman collection from `docs/apidog/gahez-api.postman_collect
 
 | Feature | Notes |
 |---------|-------|
+| App name | Default **Gahez Akeed** (`GET /store/config`, settings) |
+| Weekday shipping | `shipping_day`, `is_fast_shipping`, preview `shipping.options` |
+| Free delivery | Active `free_delivery` offers only; `free_delivery_applied` in preview |
+| Ticket types | `complaint`, `recommendation` on `POST /tickets` |
+| Admin notifications | Mark read on click; mark all; product report / refund alerts |
+| Orders admin | Edit only `pending` / `processing`; invoice shipping day |
 | Store config | `GET /store/config` — app name, currency, logo |
 | Customer notifications | `GET /notifications` |
 | Offer/coupon promos | Admin bell button → customer inbox |
@@ -700,11 +739,12 @@ Session auth at `/admin`. Permission-gated routes in `routes/v1/admin.php`.
 
 | Module | Permission | Highlights |
 |--------|------------|------------|
-| Orders | `manage orders` | Create, status, payment, invoice |
-| Refund requests | `manage refunds` | Accept/reject on index |
-| Tickets | `manage tickets` | Messages + attachments |
+| Orders | `manage orders` | Show/edit (pending/processing), status on show, invoice |
+| Refund requests | `manage refunds` | Accept/reject on index; live alert |
+| Tickets | `manage tickets` | Types, messages + attachments |
+| Product reports | `manage product-reports` | Workflow; live alert on submit |
 | Offers / coupons | respective | Notify-all-customers button |
-| Notifications | all admins | Inbox + live feed toasts |
+| Notifications | all admins | Inbox, mark all read, live feed toasts |
 
 ---
 

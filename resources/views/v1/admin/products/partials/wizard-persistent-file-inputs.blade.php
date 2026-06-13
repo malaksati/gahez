@@ -1,5 +1,5 @@
 {{-- File inputs live outside x-show steps so browsers include them on submit (display:none omits files). --}}
-<div class="wizard-persistent-file-inputs visually-hidden" aria-hidden="true">
+<div class="wizard-persistent-file-inputs visually-hidden" aria-hidden="true" x-ref="persistentFileInputs">
     <input type="file" x-ref="thumbnailInput" id="thumbnail" name="thumbnail" accept="image/*"
         @change="handleThumbnailChange($event)">
 
@@ -8,7 +8,7 @@
 
     <template x-for="(row, index) in productVariants" :key="row._key ?? index">
         <input type="file"
-            :id="`product_variant_thumbnail_${index}`"
+            :data-variant-thumbnail-index="index"
             :name="`product_variants[${index}][thumbnail]`"
             accept="image/*"
             @change="handleVariationThumbnailChange(index, $event)">

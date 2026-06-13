@@ -30,6 +30,14 @@
             </div>
         </div>
         <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    @include('v1.admin.partials.show-field', [
+                        'label' => __('messages.Slider type'),
+                        'value' => \App\Models\Slider::typeLabel($slider->type),
+                    ])
+                </div>
+            </div>
             @include('v1.admin.partials.show-timestamps', ['model' => $slider])
         </div>
     </div>

@@ -3,19 +3,24 @@
 @section('title', __('messages.Notifications'))
 @section('subtitle', __('messages.Your recent alerts and updates'))
 
-@section('page-actions')
-    @if (auth()->user()->unreadNotifications()->count() > 0)
-        <form method="POST" action="{{ route('v1.admin.notifications.mark-all-read') }}">
-            @csrf
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-check2-all me-1"></i>{{ __('messages.Mark all as read') }}
-            </button>
-        </form>
-    @endif
-@endsection
-
 @section('content')
     <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-semibold">{{ __('messages.All notifications') }}</span>
+                @if ($unreadCount > 0)
+                    <span class="badge bg-danger rounded-pill">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                @endif
+            </div>
+            @if ($unreadCount > 0)
+                <form method="POST" action="{{ route('v1.admin.notifications.mark-all-read') }}" class="mb-0">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-check2-all me-1"></i>{{ __('messages.Mark all as read') }}
+                    </button>
+                </form>
+            @endif
+        </div>
         <div class="list-group list-group-flush">
             @forelse ($notifications as $notification)
                 <a

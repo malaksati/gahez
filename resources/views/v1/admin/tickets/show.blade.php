@@ -14,7 +14,8 @@
         'resolved' => 'success',
         default => 'secondary',
     };
-    $badges = '<span class="badge bg-'.$statusBadge.' text-capitalize">'.e(__('messages.'.$ticket->status)).'</span>';
+    $badges = '<span class="badge bg-'.$statusBadge.' text-capitalize">'.e(__('messages.'.$ticket->status)).'</span>'
+        .' '.view('v1.admin.tickets.partials.type-badge', ['type' => $ticket->type])->render();
     $canReply = $ticket->status !== 'closed';
 @endphp
 
@@ -44,6 +45,9 @@
 
                         <dt class="col-sm-3 text-muted mt-3">{{ __('messages.Subject') }}</dt>
                         <dd class="col-sm-9 mt-3"><strong>{{ $ticket->subject }}</strong></dd>
+
+                        <dt class="col-sm-3 text-muted mt-3">{{ __('messages.Type') }}</dt>
+                        <dd class="col-sm-9 mt-3">@include('v1.admin.tickets.partials.type-badge', ['type' => $ticket->type])</dd>
 
                         <dt class="col-sm-3 text-muted mt-3">{{ __('messages.Description') }}</dt>
                         <dd class="col-sm-9 mt-3">

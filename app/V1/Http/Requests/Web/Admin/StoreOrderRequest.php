@@ -2,8 +2,10 @@
 
 namespace App\V1\Http\Requests\Web\Admin;
 
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
 use App\V1\Services\OrderService;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -14,6 +16,8 @@ class StoreOrderRequest extends AdminFormRequest
         if ($this->input('customer_type') === 'existing' && $this->filled('address_id')) {
             $this->merge(['address_mode' => 'existing']);
         }
+
+        PhoneValidation::prepareRequest($this, ['customer_phone', 'address_phone']);
     }
 
     public function authorize(): bool
@@ -22,7 +26,7 @@ class StoreOrderRequest extends AdminFormRequest
     }
 
     /**
-     * @return array<string, list<string|\Illuminate\Contracts\Validation\ValidationRule>>
+     * @return array<string, list<string|ValidationRule>>
      */
     public function rules(): array
     {
@@ -47,7 +51,7 @@ class StoreOrderRequest extends AdminFormRequest
         } else {
             $rules['customer_name'] = ['required', 'string', 'max:255'];
             $rules['customer_email'] = ['nullable', 'string', 'email', 'max:255', 'unique:users,email'];
-            $rules['customer_phone'] = ['nullable', 'string', 'max:255', 'unique:users,phone'];
+            $rules['customer_phone'] = [...PhoneValidation::rules(), 'unique:users,phone'];
         }
 
         $addressMode = $this->input('address_mode');
@@ -64,7 +68,7 @@ class StoreOrderRequest extends AdminFormRequest
             $rules['address'] = ['required', 'string', 'max:500'];
             $rules['latitude'] = ['required', 'string', 'max:32'];
             $rules['longitude'] = ['required', 'string', 'max:32'];
-            $rules['address_phone'] = ['nullable', 'string', 'max:50'];
+            $rules['address_phone'] = PhoneValidation::rules();
             $rules['city'] = ['nullable', 'string', 'max:120'];
             $rules['state'] = ['nullable', 'string', 'max:120'];
         } elseif ($addressMode === 'existing') {

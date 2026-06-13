@@ -58,11 +58,15 @@
                 <a href="{{ route('v1.admin.products.edit', $product) }}" class="btn btn-primary">
                     <i class="bi bi-pencil me-1"></i>{{ __('messages.Edit product') }}
                 </a>
-                <form action="{{ route('v1.admin.products.destroy', $product) }}" method="POST"
-                    data-confirm-message="{{ __('messages.Are you sure you want to delete?') }}">
+                <form action="{{ route('v1.admin.products.destroy', $product) }}" method="POST" id="product-show-delete-form">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-outline-danger">
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger"
+                        data-order-confirm-submit
+                        data-confirm-message="{{ e(__('messages.Are you sure you want to delete?')) }}"
+                    >
                         <i class="bi bi-trash me-1"></i>{{ __('messages.Delete') }}
                     </button>
                 </form>

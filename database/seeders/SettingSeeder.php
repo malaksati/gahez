@@ -10,7 +10,7 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            ['key' => 'app_name', 'value' => 'Gahez', 'type' => 'string'],
+            ['key' => 'app_name', 'value' => 'Gahez Akeed', 'type' => 'string'],
             ['key' => 'currency', 'value' => 'EGP', 'type' => 'string'],
             ['key' => 'cashback_percentage', 'value' => '5', 'type' => 'number'],
             ['key' => 'point_to_value', 'value' => '10', 'type' => 'number'],

@@ -6,6 +6,7 @@
                 <tr>
                     <th>{{ __('messages.ID') }}</th>
                     <th>{{ __('messages.Subject') }}</th>
+                    <th>{{ __('messages.Type') }}</th>
                     <th>{{ __('messages.Customer') }}</th>
                     <th>{{ __('messages.Status') }}</th>
                     <th>{{ __('messages.Messages') }}</th>
@@ -30,6 +31,7 @@
                                 <i class="bi bi-paperclip text-muted ms-1" title="{{ __('messages.Attachments') }}"></i>
                             @endif
                         </td>
+                        <td>@include('v1.admin.tickets.partials.type-badge', ['type' => $ticket->type])</td>
                         <td>{{ $ticket->user?->name ?? '—' }}</td>
                         <td>
                             <span class="badge bg-{{ $statusBadge }} text-capitalize">

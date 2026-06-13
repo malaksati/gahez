@@ -28,6 +28,8 @@ class StoreSliderRequest extends ApiFormRequest
             'image.required' => 'Please upload a slider image.',
             'image.image' => 'The slider file must be an image.',
             'image.max' => 'The slider image may not be larger than 4 MB.',
+            'type.required' => 'Please select a slider type.',
+            'type.in' => 'The slider type must be one of: home, category, brand, offer, product, coupon, goal, support_chat, ticket.',
         ]);
     }
 }

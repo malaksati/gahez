@@ -11,6 +11,7 @@
                     <th>{{ __('messages.Image') }}</th>
                     <th>{{ __('messages.Name') }}</th>
                     <th>{{ __('messages.Sort order') }}</th>
+                    <th>{{ __('messages.Products') }}</th>
                     @unless ($sectioned)
                         <th>{{ __('messages.Parent category') }}</th>
                     @endunless
@@ -23,37 +24,41 @@
             <tbody>
                 @foreach ($categories as $category)
                     @php
-                        $nameLocale = $category->getTranslation('name', $locale, false) ?: $category->getTranslation('name', 'en');
+                        $locale = app()->getLocale();
+                        $displayName = $locale === 'ar'
+                            ? ($category->getTranslation('name', 'ar', false) ?: $category->getTranslation('name', 'en'))
+                            : ($category->getTranslation('name', 'en', false) ?: $category->getTranslation('name', 'ar'));
                         $childrenCount = $category->relationLoaded('children') ? $category->children->count() : 0;
                         $depth = (int) ($category->tree_depth ?? 0);
+                        $childArrow = $depth > 0
+                            ? '<span class="text-muted '.($locale === 'ar' ? 'ms-1' : 'me-1').'">'.($locale === 'ar' ? '↲' : '↳').'</span>'
+                            : null;
+                        $childrenBadge = $childrenCount > 0
+                            ? '<span class="badge bg-info text-dark ms-2">'.$childrenCount.' '.__('messages.subcategories').'</span>'
+                            : null;
                     @endphp
                     <tr data-category-row="{{ $category->id }}">
                         <td>
                             <img
                                 src="{{ $category->image }}"
-                                alt="{{ $nameLocale }}"
+                                alt="{{ $displayName }}"
                                 class="img-thumbnail"
                                 style="width: 50px; height: 50px; object-fit: cover;"
                             >
                         </td>
                         <td>
                             <div style="padding-inline-start: {{ $depth * 1.25 }}rem;">
-                                @if ($depth > 0)
-                                    <span class="text-muted me-1">↳</span>
-                                @endif
-                                <strong>{{ $nameLocale }}</strong>
-                                @if ($childrenCount > 0)
-                                    <span class="badge bg-info text-dark ms-2">
-                                        {{ $childrenCount }} {{ __('messages.subcategories') }}
-                                    </span>
-                                @endif
-                                <br>
-                                <small class="text-muted" dir="rtl">
-                                    {{ $category->getTranslation('name', 'ar') }}
-                                </small>
+                                @include('v1.admin.partials.translatable-name-stack', [
+                                    'model' => $category,
+                                    'prefix' => $childArrow,
+                                    'suffix' => $childrenBadge,
+                                ])
                             </div>
                         </td>
                         <td class="text-muted">{{ $category->sort_order ?: '—' }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ $category->products_count }}</span>
+                        </td>
                         @unless ($sectioned)
                             <td>
                                 @if ($category->parent)
@@ -100,7 +105,7 @@
                                     type="button"
                                     class="btn btn-outline-danger delete-category-btn"
                                     title="{{ __('messages.Delete') }}"
-                                    data-category-name="{{ $nameLocale }}"
+                                    data-category-name="{{ $displayName }}"
                                     data-delete-url="{{ route('v1.admin.categories.destroy', $category) }}"
                                     data-has-children="{{ $childrenCount > 0 ? 'true' : 'false' }}"
                                     data-children-count="{{ $childrenCount }}"

@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "gahez-api-v1",
-    "name": "Gahez API v1",
+    "name": "Gahez Akeed API v1",
     "description": "Customer REST API. Import into Apidog via Postman Collection.\n\nDemo: customer1@gmail.com / 12345678",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -206,7 +206,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"address_id\": {{addressId}},\n  \"payment_method\": \"cash_on_delivery\",\n  \"use_wallet\": false,\n  \"notes\": \"Leave at door\"\n}"
+              "raw": "{\n  \"address_id\": {{addressId}},\n  \"shipping_day\": \"thursday\",\n  \"is_fast_shipping\": false,\n  \"payment_method\": \"cash_on_delivery\",\n  \"use_wallet\": false,\n  \"notes\": \"Leave at door\"\n}"
             },
             "url": "{{baseUrl}}/orders"
           }

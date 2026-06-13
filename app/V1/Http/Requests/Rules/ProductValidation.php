@@ -2,7 +2,9 @@
 
 namespace App\V1\Http\Requests\Rules;
 
+use App\Models\Product;
 use App\V1\DataTransfer\Support\ImportRelationResolver;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 
 final class ProductValidation
@@ -40,20 +42,20 @@ final class ProductValidation
             TranslatableRules::field('description', max: 5000),
             self::adminProductUnits(),
             [
-            'type' => ['required', Rule::in(['simple', 'variable'])],
-            'sku' => ['required', 'string', 'max:100', 'unique:products,sku'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:products,slug'],
-            'is_in_stock' => ['sometimes', 'boolean'],
-            'discount' => ['nullable', 'numeric', 'min:0'],
-            'discount_type' => ['nullable', Rule::in(['percentage', 'fixed'])],
-            'is_active' => ['sometimes', 'boolean'],
-            'is_featured' => ['sometimes', 'boolean'],
-            'is_new' => ['sometimes', 'boolean'],
-            'is_approved' => ['sometimes', 'boolean'],
-            'is_bookable' => ['sometimes', 'boolean'],
-            'brand_id' => ['required', 'integer', 'exists:brands,id'],
-            'category_ids' => ['sometimes', 'array'],
-            'category_ids.*' => ['integer', 'exists:categories,id'],
+                'type' => ['required', Rule::in(['simple', 'variable'])],
+                'sku' => self::productSkuRules(),
+                'slug' => ['nullable', 'string', 'max:255', 'unique:products,slug'],
+                'is_in_stock' => ['sometimes', 'boolean'],
+                'discount' => ['nullable', 'numeric', 'min:0'],
+                'discount_type' => ['nullable', Rule::in(['percentage', 'fixed'])],
+                'is_active' => ['sometimes', 'boolean'],
+                'is_featured' => ['sometimes', 'boolean'],
+                'is_new' => ['sometimes', 'boolean'],
+                'is_approved' => ['sometimes', 'boolean'],
+                'is_bookable' => ['sometimes', 'boolean'],
+                'brand_id' => ['required', 'integer', 'exists:brands,id'],
+                'category_ids' => ['sometimes', 'array'],
+                'category_ids.*' => ['integer', 'exists:categories,id'],
             ],
         );
     }
@@ -83,7 +85,7 @@ final class ProductValidation
             'product_variants.*.is_active' => ['sometimes', 'boolean'],
             'product_variants.*.option_ids' => ['required_with:product_variants', 'array', 'min:1'],
             'product_variants.*.option_ids.*' => ['integer', 'exists:variant_options,id'],
-            'product_variants.*.thumbnail' => ['nullable', 'image', 'max:5120'],
+            'product_variants.*.thumbnail' => self::adminImageUploadRule(),
         ];
     }
 
@@ -101,9 +103,9 @@ final class ProductValidation
         }
 
         return [
-            'thumbnail' => ['nullable', 'image', 'max:5120'],
+            'thumbnail' => self::adminImageUploadRule(),
             'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:5120'],
+            'images.*' => self::adminImageUploadRule(),
             'existing_images' => ['nullable', 'array'],
             'existing_images.*' => ['integer', 'exists:product_images,id'],
             'related_products' => ['nullable', 'array'],
@@ -122,7 +124,7 @@ final class ProductValidation
             self::adminProductUnits(),
             [
                 'type' => ['sometimes', Rule::in(['simple', 'variable'])],
-                'sku' => ['sometimes', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($productId)],
+                'sku' => self::productSkuRules($productId, required: false),
                 'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($productId)],
                 'is_in_stock' => ['sometimes', 'boolean'],
                 'discount' => ['nullable', 'numeric', 'min:0'],
@@ -213,5 +215,87 @@ final class ProductValidation
         }
 
         return $rules;
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    public static function adminImageUploadRule(): array
+    {
+        return [
+            'nullable',
+            'file',
+            'max:5120',
+            static function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! $value instanceof UploadedFile) {
+                    return;
+                }
+
+                if (! $value->isValid()) {
+                    $fail(__('validation.uploaded', ['attribute' => $attribute]));
+
+                    return;
+                }
+
+                if (ProductValidation::isAllowedAdminImageUpload($value)) {
+                    return;
+                }
+
+                $fail(__('The :attribute must be a file of type: jpg, jpeg, png, gif, webp, bmp.'));
+            },
+        ];
+    }
+
+    public static function isAllowedAdminImageUpload(UploadedFile $file): bool
+    {
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+
+        if (in_array(strtolower($file->getClientOriginalExtension()), $allowedExtensions, true)) {
+            return true;
+        }
+
+        $allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/bmp',
+            'image/x-ms-bmp',
+            'application/octet-stream',
+        ];
+
+        $mime = strtolower((string) $file->getMimeType());
+
+        if (in_array($mime, $allowedMimes, true) && @getimagesize($file->getRealPath()) !== false) {
+            return true;
+        }
+
+        $clientMime = strtolower((string) $file->getClientMimeType());
+
+        if (in_array($clientMime, $allowedMimes, true) && @getimagesize($file->getRealPath()) !== false) {
+            return true;
+        }
+
+        return @getimagesize($file->getRealPath()) !== false;
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    public static function productSkuRules(?int $ignoreProductId = null, bool $required = true): array
+    {
+        $rules = [
+            'string',
+            'max:100',
+            static function (string $attribute, mixed $value, \Closure $fail) use ($ignoreProductId): void {
+                if (Product::isSkuTaken(trim((string) $value), $ignoreProductId)) {
+                    $fail(__('messages.This SKU is already in use.'));
+                }
+            },
+        ];
+
+        return $required
+            ? array_merge(['required'], $rules)
+            : array_merge(['sometimes'], $rules);
     }
 }

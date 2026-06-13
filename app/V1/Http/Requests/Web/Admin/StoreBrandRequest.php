@@ -12,7 +12,10 @@ class StoreBrandRequest extends AdminFormRequest
      */
     public function rules(): array
     {
-        return BrandValidation::store();
+        $rules = BrandValidation::store();
+        $rules['image'] = ['nullable', 'image', 'max:2048'];
+
+        return $rules;
     }
 
     /**

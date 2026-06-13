@@ -23,11 +23,16 @@ class NotificationController extends AdminController
 
     public function index(Request $request): View
     {
-        $notifications = $request->user()
+        $user = $request->user();
+
+        $notifications = $user
             ->notifications()
             ->paginate(20);
 
-        return view('v1.admin.notifications.index', compact('notifications'));
+        return view('v1.admin.notifications.index', [
+            'notifications' => $notifications,
+            'unreadCount' => $user->unreadNotifications()->count(),
+        ]);
     }
 
     public function show(Request $request, string $notification): RedirectResponse
@@ -38,6 +43,18 @@ class NotificationController extends AdminController
         $url = $item->data['url'] ?? route('v1.admin.notifications.index');
 
         return redirect()->to($url);
+    }
+
+    public function markAsRead(Request $request, string $notification): JsonResponse
+    {
+        $item = $request->user()->notifications()->where('id', $notification)->firstOrFail();
+        $item->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.Notification marked as read.'),
+            'unread_count' => $request->user()->unreadNotifications()->count(),
+        ]);
     }
 
     public function markAllRead(Request $request): RedirectResponse|JsonResponse

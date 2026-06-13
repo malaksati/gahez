@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,21 @@ class LoginRequest extends FormRequest
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $login = $this->input('login');
+
+        if (! is_string($login) || filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $normalized = PhoneValidation::normalize($login);
+
+        if ($normalized !== null) {
+            $this->merge(['login' => $normalized]);
+        }
     }
 
     public function authenticate(): void

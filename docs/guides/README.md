@@ -1,6 +1,6 @@
 # Developer guides
 
-Markdown guides for the Gahez project. Browsable copies are also at **`/docs`** (LaRecipe reads from `resources/docs/1.0/`).
+Markdown guides for the Gahez Akeed project. Browsable copies are also at **`/docs`** (LaRecipe reads from `resources/docs/1.0/`).
 
 > **Keep in sync:** When updating a guide, update both `docs/guides/` and `resources/docs/1.0/` copies where they mirror each other.
 

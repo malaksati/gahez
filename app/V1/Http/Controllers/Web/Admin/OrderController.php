@@ -4,7 +4,9 @@ namespace App\V1\Http\Controllers\Web\Admin;
 
 use App\Models\Address;
 use App\Models\Order;
+use App\Models\OrderRating;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\V1\Http\Requests\Web\Admin\StoreOrderRequest;
 use App\V1\Http\Requests\Web\Admin\UpdateOrderPaymentStatusRequest;
@@ -46,7 +48,7 @@ class OrderController extends AdminController
 
         if ($request->has('show_all')) {
             unset($filters['status']);
-        } elseif (!isset($filters['status']) || $filters['status'] === '') {
+        } elseif (! isset($filters['status']) || $filters['status'] === '') {
             $filters['status'] = 'pending,processing,ready_for_delivery,shipped';
         }
 
@@ -164,7 +166,7 @@ class OrderController extends AdminController
             foreach ($validated['items'] as $item) {
                 $product = Product::query()->findOrFail($item['product_id']);
                 $variant = ! empty($item['variant_id'])
-                    ? \App\Models\ProductVariant::query()->find($item['variant_id'])
+                    ? ProductVariant::query()->find($item['variant_id'])
                     : null;
 
                 $order->items()->create([
@@ -197,15 +199,21 @@ class OrderController extends AdminController
 
         return view('v1.admin.orders.show', [
             'order' => $order,
-            'orderRating' => \App\Models\OrderRating::where('order_id', $order->id)->first(),
+            'orderRating' => OrderRating::where('order_id', $order->id)->first(),
         ]);
     }
 
-    public function edit(Order $order): View
+    public function edit(Order $order): View|RedirectResponse
     {
         $order = $this->orders->getOrderById($order->id);
 
         abort_if($order === null, 404);
+
+        if (! $this->orderIsEditable($order)) {
+            return redirect()
+                ->route('v1.admin.orders.show', $order)
+                ->with('error', __('messages.Order can only be edited when pending or processing.'));
+        }
 
         return view('v1.admin.orders.edit', [
             'order' => $order,
@@ -214,6 +222,12 @@ class OrderController extends AdminController
 
     public function update(UpdateOrderRequest $request, Order $order): RedirectResponse
     {
+        if (! $this->orderIsEditable($order)) {
+            return redirect()
+                ->route('v1.admin.orders.show', $order)
+                ->with('error', __('messages.Order can only be edited when pending or processing.'));
+        }
+
         $validated = $request->validated();
 
         if (isset($validated['status']) && $validated['status'] !== $order->status) {
@@ -239,8 +253,8 @@ class OrderController extends AdminController
                 $this->orders->logOrderEvent($order, 'customer_info_updated', null, null, auth()->id());
             }
 
-            if (!empty($validated['remove_address'])) {
-                if (!empty($order->shipping_address_snapshot)) {
+            if (! empty($validated['remove_address'])) {
+                if (! empty($order->shipping_address_snapshot)) {
                     $this->orders->logOrderEvent($order, 'address_removed', null, null, auth()->id());
                 }
                 $validated['shipping_address_snapshot'] = null;
@@ -374,5 +388,10 @@ class OrderController extends AdminController
             'max_total',
             'sort',
         ]);
+    }
+
+    protected function orderIsEditable(Order $order): bool
+    {
+        return in_array($order->status, ['pending', 'processing'], true);
     }
 }

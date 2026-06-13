@@ -32,7 +32,7 @@ class ProductService
         return $this->products->getAllProducts();
     }
 
-    public function getPaginatedProducts(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function getPaginatedProducts(int $perPage = 20, array $filters = []): LengthAwarePaginator
     {
         return $this->products->getPaginatedProducts($perPage, $filters);
     }
@@ -54,8 +54,12 @@ class ProductService
         $maxNumber = Product::withTrashed()
             ->where('sku', 'like', 'PRD-%')
             ->pluck('sku')
-            ->map(static function (string $sku): ?int {
-                return preg_match('/^PRD-(\d{4})$/', $sku, $matches) ? (int) $matches[1] : null;
+            ->map(static function (?string $sku): ?int {
+                if ($sku === null || ! preg_match('/^PRD-(\d+)$/', $sku, $matches)) {
+                    return null;
+                }
+
+                return (int) $matches[1];
             })
             ->filter()
             ->max();
@@ -63,7 +67,7 @@ class ProductService
         $nextNumber = max(1, ((int) $maxNumber) + 1);
         $candidate = sprintf('PRD-%04d', $nextNumber);
 
-        while (Product::withTrashed()->where('sku', $candidate)->exists()) {
+        while (Product::isSkuTaken($candidate)) {
             $nextNumber++;
             $candidate = sprintf('PRD-%04d', $nextNumber);
         }
@@ -94,6 +98,7 @@ class ProductService
     public function getNewProducts(int $limit = 10): Collection
     {
         return $this->products->getNewProducts($limit);
+
     }
 
     public function getProductsByCategory(int $categoryId): Collection
@@ -104,12 +109,33 @@ class ProductService
     public function create(array $data): Product
     {
         return DB::transaction(function () use ($data) {
-            if (empty($data['sku'])) {
+            $sku = trim((string) ($data['sku'] ?? ''));
+
+            if ($sku === '') {
                 $data['sku'] = $this->generateNextSimpleSku();
+            } else {
+                $data['sku'] = $sku;
             }
 
-            if (! empty($data['slug'])) {
-                $data['slug'] = Product::ensureUniqueSlug((string) $data['slug']);
+            $attempts = 0;
+            while (Product::isSkuTaken($data['sku']) && $attempts < 100) {
+                if (! preg_match('/^PRD-\d{4}$/', (string) $data['sku'])) {
+                    throw ValidationException::withMessages([
+                        'sku' => [__('messages.This SKU is already in use.')],
+                    ]);
+                }
+
+                $data['sku'] = $this->generateNextSimpleSku();
+                $attempts++;
+            }
+
+            $slug = trim((string) ($data['slug'] ?? ''));
+
+            if ($slug === '') {
+                $slugSource = (string) ($data['name']['en'] ?? $data['name']['ar'] ?? $data['sku'] ?? 'product');
+                $data['slug'] = Product::ensureUniqueSlug($slugSource);
+            } else {
+                $data['slug'] = Product::ensureUniqueSlug($slug);
             }
 
             return $this->products->create($data);
@@ -343,6 +369,7 @@ class ProductService
 
                     if ($lockedOrder->payment_status === 'paid') {
                         $this->cancelAndRefundOrderToWallet($lockedOrder);
+
                         continue;
                     }
 

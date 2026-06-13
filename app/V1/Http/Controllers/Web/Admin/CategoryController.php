@@ -24,7 +24,9 @@ class CategoryController extends AdminController
             'search', 'status', 'featured', 'parent_id', 'sort',
         ]);
 
-        $rootCategories = $this->categories->getPaginatedCategorySections(15, $filters);
+        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+
+        $rootCategories = $this->categories->getPaginatedCategorySections($perPage, $filters);
         $categoriesByParent = $this->categories->getCategoriesGroupedByParent();
         $orphanCategories = $this->categories->getOrphanCategories();
 
@@ -84,7 +86,10 @@ class CategoryController extends AdminController
 
     public function store(StoreCategoryRequest $request): RedirectResponse
     {
-        $this->categories->create($request->validated());
+        $this->categories->create(
+            $request->safe()->except(['image', 'remove_image']),
+            $request->file('image'),
+        );
 
         return $this->redirectWithSuccess('v1.admin.categories.index', 'Category created successfully.');
     }
@@ -108,7 +113,12 @@ class CategoryController extends AdminController
 
     public function update(UpdateCategoryRequest $request, Category $category): RedirectResponse
     {
-        $this->categories->update($category, $request->validated());
+        $this->categories->update(
+            $category,
+            $request->safe()->except(['image', 'remove_image']),
+            $request->file('image'),
+            $request->boolean('remove_image'),
+        );
 
         return $this->redirectWithSuccess('v1.admin.categories.index', 'Category updated successfully.');
     }

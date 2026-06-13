@@ -4,9 +4,10 @@ namespace App\V1\Repositories;
 
 use App\Models\Product;
 use App\V1\Repositories\Concerns\AppliesInsensitiveSearch;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProductRepository
 {
@@ -23,18 +24,19 @@ class ProductRepository
     {
         return $this->model::with(['categories', 'images', 'variants', 'variantValues'])->get();
     }
-    public function getPaginatedProducts(int $perPage = 15, array $filters = []): LengthAwarePaginator
+
+    public function getPaginatedProducts(int $perPage = 20, array $filters = []): LengthAwarePaginator
     {
         $with = ['brand', 'categories', 'images', 'variants', 'variantValues', 'productUnits.unit'];
         $query = $this->model::with($with);
         $this->applyAdminListFilters($query, $filters);
         $this->applyAdminListSort($query, (string) ($filters['sort'] ?? 'latest'));
 
-        return $query->paginate($perPage);
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Product>  $query
+     * @param  Builder<Product>  $query
      * @param  array<string, mixed>  $filters
      */
     public function applyAdminListFilters($query, array $filters): void
@@ -142,7 +144,7 @@ class ProductRepository
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Product>  $query
+     * @param  Builder<Product>  $query
      */
     public function applyAdminListSort($query, string $sort): void
     {
@@ -155,6 +157,7 @@ class ProductRepository
             default => $query->latest(),
         };
     }
+
     public function getProductById(int $id): Product
     {
         return $this->model::with([
@@ -166,6 +169,7 @@ class ProductRepository
             'ratings.user',
         ])->findOrFail($id);
     }
+
     public function getProductBySlug(string $slug): Product
     {
         return $this->model::with([
@@ -177,10 +181,12 @@ class ProductRepository
             'ratings.user',
         ])->where('slug', $slug)->firstOrFail();
     }
+
     public function getActiveProducts(): Collection
     {
         return $this->model::with(['categories', 'images'])->approved()->active()->get();
     }
+
     public function getFeaturedProducts(): Collection
     {
         return Product::featured()
@@ -189,6 +195,7 @@ class ProductRepository
             ->with(['categories', 'images'])
             ->get();
     }
+
     public function getNewProducts(int $limit = 10): Collection
     {
         return Product::new()
@@ -199,6 +206,7 @@ class ProductRepository
             ->limit($limit)
             ->get();
     }
+
     public function getProductsByCategory(int $categoryId): Collection
     {
         return Product::whereHas('categories', function ($q) use ($categoryId) {
@@ -209,14 +217,17 @@ class ProductRepository
             ->with(['images'])
             ->get();
     }
+
     public function create(array $data): Product
     {
         return $this->model->create($data);
     }
+
     public function update(Product $product, array $data): bool
     {
         return $product->update($data);
     }
+
     public function delete(Product $product): bool
     {
         /** @var Model $product */
@@ -224,14 +235,17 @@ class ProductRepository
 
         return (bool) $model->delete();
     }
+
     public function forceDelete(Product $product): bool
     {
         return $product->forceDelete();
     }
+
     public function restore(Product $product): bool
     {
         return $product->restore();
     }
+
     public function search(string $search): Collection
     {
         $term = '%'.trim($search).'%';
@@ -246,19 +260,21 @@ class ProductRepository
             ->with(['categories', 'images'])
             ->get();
     }
+
     public function syncCategories(Product $product, array $categoryIds): void
     {
         $product->categories()->sync($categoryIds);
     }
+
     public function attachCategory(Product $product, int $categoryId): void
     {
         if (! $product->categories()->where('categories.id', $categoryId)->exists()) {
             $product->categories()->attach($categoryId);
         }
     }
+
     public function detachCategory(Product $product, int $categoryId): void
     {
         $product->categories()->detach($categoryId);
     }
-
 }

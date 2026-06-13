@@ -21,12 +21,21 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
+            @if ($brand->getRawOriginal('image'))
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <img src="{{ asset('storage/'.$brand->getRawOriginal('image')) }}" alt="{{ $name }}"
+                            class="img-fluid rounded" style="max-height: 220px; object-fit: cover;">
+                    </div>
+                </div>
+            @endif
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">{{ __('messages.Brand information') }}</h5>
                     <div class="row g-3">
                         @include('v1.admin.partials.show-field', ['label' => __('messages.Name').' ('.__('messages.English').')', 'value' => e($brand->getTranslation('name', 'en') ?: '—')])
                         @include('v1.admin.partials.show-field', ['label' => __('messages.Name').' ('.__('messages.Arabic').')', 'value' => e($brand->getTranslation('name', 'ar') ?: '—'), 'dir' => 'rtl'])
+                        @include('v1.admin.partials.show-field', ['label' => __('messages.Products'), 'value' => (string) $brand->products_count])
                     </div>
                 </div>
             </div>

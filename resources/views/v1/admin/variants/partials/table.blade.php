@@ -14,15 +14,26 @@
             </thead>
             <tbody>
                 @foreach ($variants as $variant)
+                    @php
+                        $displayName = $locale === 'ar'
+                            ? ($variant->getTranslation('name', 'ar', false) ?: $variant->getTranslation('name', 'en'))
+                            : ($variant->getTranslation('name', 'en', false) ?: $variant->getTranslation('name', 'ar'));
+                    @endphp
                     <tr>
                         <td>
-                            <strong>{{ $variant->getTranslation('name', $locale, false) ?: $variant->getTranslation('name', 'en') }}</strong>
+                            @include('v1.admin.partials.translatable-name-stack', ['model' => $variant])
                         </td>
                         <td>
                             @if ($variant->options->isNotEmpty())
                                 <span class="badge bg-info text-dark">{{ $variant->options->count() }}</span>
                                 <small class="text-muted d-block">
-                                    {{ $variant->options->take(3)->map(fn ($opt) => $opt->getTranslation('name', $locale, false) ?: $opt->getTranslation('name', 'en'))->implode(', ') }}
+                                    {{ $variant->options->take(3)->map(function ($opt) use ($locale) {
+                                        if ($locale === 'ar') {
+                                            return $opt->getTranslation('name', 'en', false) ?: $opt->getTranslation('name', 'ar');
+                                        }
+
+                                        return $opt->getTranslation('name', 'ar', false) ?: $opt->getTranslation('name', 'en');
+                                    })->implode(', ') }}
                                     @if ($variant->options->count() > 3)
                                         …
                                     @endif

@@ -29,7 +29,7 @@ class SliderController extends AdminController
 
     public function store(StoreSliderRequest $request): RedirectResponse
     {
-        $data = [];
+        $data = $request->validated();
         $this->sliders->applyImageUpload($data, $request->file('image'));
 
         $this->sliders->create($data);
@@ -53,7 +53,14 @@ class SliderController extends AdminController
 
     public function update(UpdateSliderRequest $request, Slider $slider): RedirectResponse
     {
-        $data = [];
+        $data = $request->validated();
+        unset($data['remove_image']);
+
+        if ($request->boolean('remove_image') && ! $request->hasFile('image')) {
+            $this->sliders->deleteStoredImage($slider->image);
+            $data['image'] = null;
+        }
+
         $this->sliders->applyImageUpload($data, $request->file('image'), $slider->image);
 
         if ($data !== []) {

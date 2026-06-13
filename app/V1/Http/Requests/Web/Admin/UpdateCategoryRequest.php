@@ -12,7 +12,20 @@ class UpdateCategoryRequest extends AdminFormRequest
      */
     public function rules(): array
     {
-        return CategoryValidation::update();
+        $rules = CategoryValidation::update();
+        $rules['image'] = ['nullable', 'image', 'max:2048'];
+        $rules['remove_image'] = ['sometimes', 'boolean'];
+
+        return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->boolean('is_active'),
+            'is_featured' => $this->boolean('is_featured'),
+            'remove_image' => $this->boolean('remove_image'),
+        ]);
     }
 
     /**

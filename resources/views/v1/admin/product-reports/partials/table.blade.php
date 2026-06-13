@@ -64,20 +64,28 @@
                                     <div class="d-flex flex-wrap gap-1 justify-content-end">
                                         @if ($status !== 'reviewed')
                                             <form action="{{ route('v1.admin.product-reports.update-status', [$report, 'reviewed']) }}"
-                                                  method="POST"
-                                                  onsubmit="return confirm(@json(__('messages.Confirm mark report as reviewed?')))">
+                                                  method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-success">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    data-order-confirm-submit
+                                                    data-confirm-message="{{ e(__('messages.Confirm mark report as reviewed?')) }}"
+                                                >
                                                     <i class="bi bi-check2-circle me-1"></i>{{ __('messages.Mark as reviewed') }}
                                                 </button>
                                             </form>
                                         @endif
                                         @if ($status !== 'ignored')
                                             <form action="{{ route('v1.admin.product-reports.update-status', [$report, 'ignored']) }}"
-                                                  method="POST"
-                                                  onsubmit="return confirm(@json(__('messages.Confirm ignore this report?')))">
+                                                  method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    data-order-confirm-submit
+                                                    data-confirm-message="{{ e(__('messages.Confirm ignore this report?')) }}"
+                                                >
                                                     <i class="bi bi-slash-circle me-1"></i>{{ __('messages.Ignore') }}
                                                 </button>
                                             </form>

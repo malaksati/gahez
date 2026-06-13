@@ -264,9 +264,10 @@ class OfferServiceTest extends TestCase
         $this->assertSame(40.0, $this->offers->resolveFreeDeliveryThreshold());
     }
 
-    public function test_resolve_free_delivery_threshold_defaults_to_fifty_without_offer(): void
+    public function test_resolve_free_delivery_threshold_is_null_without_offer(): void
     {
-        $this->assertSame(50.0, $this->offers->resolveFreeDeliveryThreshold());
+        $this->assertNull($this->offers->resolveFreeDeliveryThreshold());
+        $this->assertFalse($this->offers->qualifiesForFreeDelivery(100));
     }
 
     public function test_qualifies_for_free_delivery_when_subtotal_meets_threshold(): void
@@ -372,4 +373,3 @@ class OfferServiceTest extends TestCase
         $this->assertCount(1, $preview['gift_offer']['reward_products']);
     }
 }
-

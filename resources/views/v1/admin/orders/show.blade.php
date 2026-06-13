@@ -306,9 +306,11 @@
                     <a href="{{ route('v1.admin.orders.invoice', $order) }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-receipt me-1"></i>{{ __('messages.Invoice') }}
                     </a>
-                    <a href="{{ route('v1.admin.orders.edit', $order) }}" class="btn btn-outline-primary btn-sm ms-2">
-                        <i class="bi bi-pencil me-1"></i>{{ __('messages.Edit order') }}
-                    </a>
+                    @if (in_array($order->status, ['pending', 'processing'], true))
+                        <a href="{{ route('v1.admin.orders.edit', $order) }}" class="btn btn-outline-primary btn-sm ms-2">
+                            <i class="bi bi-pencil me-1"></i>{{ __('messages.Edit order') }}
+                        </a>
+                    @endif
                 </div>
             </div>
 

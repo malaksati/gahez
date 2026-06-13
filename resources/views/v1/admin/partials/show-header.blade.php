@@ -37,7 +37,13 @@
                 </a>
             @endif
             @if ($destroyRoute)
-                <button type="submit" form="{{ $deleteFormId }}" class="btn btn-outline-danger">
+                <button
+                    type="button"
+                    form="{{ $deleteFormId }}"
+                    class="btn btn-outline-danger"
+                    data-order-confirm-submit
+                    data-confirm-message="{{ e($destroyConfirm) }}"
+                >
                     <i class="bi bi-trash me-1"></i>{{ __('messages.Delete') }}
                 </button>
             @endif
@@ -54,7 +60,6 @@
         action="{{ $destroyRoute }}"
         method="POST"
         class="d-none"
-        data-confirm-message="{{ $destroyConfirm }}"
     >
         @csrf
         @method('DELETE')

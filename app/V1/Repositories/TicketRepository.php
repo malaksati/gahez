@@ -5,7 +5,6 @@ namespace App\V1\Repositories;
 use App\Models\Ticket;
 use App\V1\Repositories\Concerns\AppliesInsensitiveSearch;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class TicketRepository
@@ -13,14 +12,17 @@ class TicketRepository
     use AppliesInsensitiveSearch;
 
     protected $model;
+
     public function __construct(Ticket $ticket)
     {
         $this->model = $ticket;
     }
+
     public function getAllTickets(): Collection
     {
         return $this->model->with(['user', 'messages'])->latest()->all();
     }
+
     public function getPaginatedTickets(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         $query = $this->model->with(['user'])->withCount('messages');
@@ -31,6 +33,10 @@ class TicketRepository
 
         if (isset($filters['status']) && $filters['status'] !== '') {
             $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['type']) && $filters['type'] !== '') {
+            $query->where('type', $filters['type']);
         }
 
         if (isset($filters['user_id']) && $filters['user_id'] !== '') {
@@ -54,6 +60,7 @@ class TicketRepository
 
         return $query->paginate($perPage);
     }
+
     public function getTicketById(int $id): Ticket
     {
         return $this->model
@@ -63,30 +70,37 @@ class TicketRepository
             ])
             ->findOrFail($id);
     }
+
     public function getTicketsByUser(int $userId): Collection
     {
         return $this->model->with(['user', 'messages'])->where('user_id', $userId)->latest()->get();
     }
+
     public function getPendingTickets(): Collection
     {
         return $this->model->with(['user', 'messages'])->pending()->latest()->get();
     }
+
     public function getResolvedTickets(): Collection
     {
         return $this->model->with(['user', 'messages'])->resolved()->latest()->get();
     }
+
     public function getClosedTickets(): Collection
     {
         return $this->model->with(['user', 'messages'])->closed()->latest()->get();
     }
+
     public function getOpenTickets(): Collection
     {
         return $this->model->with(['user', 'messages'])->open()->latest()->get();
     }
+
     public function create(array $data): Ticket
     {
         return $this->model->create($data);
     }
+
     public function update(int $id, array $ticketData): ?Ticket
     {
         $ticket = $this->model->findOrFail($id);
@@ -98,6 +112,7 @@ class TicketRepository
 
         return null;
     }
+
     public function delete(int $id): ?bool
     {
         $ticket = $this->model->findOrFail($id);
@@ -105,6 +120,7 @@ class TicketRepository
 
         return (bool) $ticket->delete();
     }
+
     public function forceDelete(int $id): ?bool
     {
         $ticket = $this->model->findOrFail($id);
@@ -112,11 +128,13 @@ class TicketRepository
             $ticket->whenHas('messages', function ($query) {
                 $query->delete();
             });
+
             return $ticket->forceDelete();
         }
 
         return null;
     }
+
     public function restore(int $id): ?bool
     {
         $ticket = $this->model->findOrFail($id);

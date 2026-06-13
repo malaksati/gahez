@@ -84,4 +84,52 @@ class ProfileApiTest extends TestCase
         $registeredUser = User::query()->where('email', 'birthday@example.com')->first();
         $this->assertSame('1988-12-01', $registeredUser?->birthdate?->toDateString());
     }
+
+    public function test_register_normalizes_local_phone_to_plus_twenty_format(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register', [
+            'name' => 'Phone User',
+            'phone' => '01012345678',
+            'password' => 'Password1!',
+            'password_confirmation' => 'Password1!',
+        ]);
+
+        $response->assertCreated();
+
+        $this->assertDatabaseHas('users', [
+            'phone' => '+201012345678',
+        ]);
+    }
+
+    public function test_register_rejects_invalid_egypt_phone(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register', [
+            'name' => 'Phone User',
+            'phone' => '50001111',
+            'password' => 'Password1!',
+            'password_confirmation' => 'Password1!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['phone']);
+    }
+
+    public function test_profile_update_normalizes_phone_to_plus_twenty_format(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'phone' => '+201000111111',
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson('/api/v1/profile', [
+            'phone' => '01098765432',
+        ]);
+
+        $response->assertOk();
+
+        $user->refresh();
+        $this->assertSame('+201098765432', $user->phone);
+    }
 }

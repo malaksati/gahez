@@ -116,4 +116,72 @@ class SupportChatTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('meta.per_page', 2);
     }
+
+    public function test_customer_viewing_chat_marks_admin_messages_as_read(): void
+    {
+        $customer = User::factory()->create(['role' => 'user']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $support = Support::factory()->create(['user_id' => $customer->id]);
+
+        $message = $support->messages()->create([
+            'sender_type' => 'admin',
+            'sender_id' => $admin->id,
+            'message' => 'We are checking your order',
+            'read_at' => null,
+        ]);
+
+        Sanctum::actingAs($customer);
+
+        $this->getJson('/api/v1/support-chats/'.$support->id)
+            ->assertOk();
+
+        $message->refresh();
+        $this->assertNotNull($message->read_at);
+    }
+
+    public function test_customer_fetching_messages_marks_admin_messages_as_read(): void
+    {
+        $customer = User::factory()->create(['role' => 'user']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $support = Support::factory()->create(['user_id' => $customer->id]);
+
+        $message = $support->messages()->create([
+            'sender_type' => 'admin',
+            'sender_id' => $admin->id,
+            'message' => 'Reply from support',
+            'read_at' => null,
+        ]);
+
+        Sanctum::actingAs($customer);
+
+        $response = $this->getJson('/api/v1/support-chats/'.$support->id.'/messages');
+
+        $response->assertOk()
+            ->assertJsonPath('data.0.read_at', fn ($value) => $value !== null)
+            ->assertJsonPath('data.0.is_read', true)
+            ->assertJsonPath('data.0.read_by_type', 'user');
+
+        $message->refresh();
+        $this->assertNotNull($message->read_at);
+    }
+
+    public function test_customer_read_does_not_mark_own_messages(): void
+    {
+        $customer = User::factory()->create(['role' => 'user']);
+        $support = Support::factory()->create(['user_id' => $customer->id]);
+
+        $message = $support->messages()->create([
+            'sender_type' => 'user',
+            'sender_id' => $customer->id,
+            'message' => 'My question',
+            'read_at' => null,
+        ]);
+
+        Sanctum::actingAs($customer);
+
+        $this->getJson('/api/v1/support-chats/'.$support->id.'/messages')->assertOk();
+
+        $message->refresh();
+        $this->assertNull($message->read_at);
+    }
 }

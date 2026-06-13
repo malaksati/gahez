@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 
 class SupportChatController extends AdminController
 {
@@ -50,6 +51,8 @@ class SupportChatController extends AdminController
     {
         $this->authorize('view', $support);
 
+        $this->supportChats->markMessagesAsRead($support->id, 'admin');
+
         return view('v1.admin.support-chats.show', [
             'support' => $this->supportChats->getById($support->id),
             'messages' => $this->supportChats->getPaginatedMessages($support->id, 50),
@@ -60,6 +63,8 @@ class SupportChatController extends AdminController
     public function messages(Request $request, Support $support): JsonResponse
     {
         $this->authorize('view', $support);
+
+        $this->supportChats->markMessagesAsRead($support->id, 'admin');
 
         $perPage = min((int) $request->integer('per_page', 50), 100);
 
@@ -119,7 +124,7 @@ class SupportChatController extends AdminController
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, User>
+     * @return Collection<int, User>
      */
     protected function adminOptions()
     {

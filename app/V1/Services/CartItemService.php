@@ -6,6 +6,7 @@ use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductUnit;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\V1\Repositories\CartItemRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -139,7 +140,9 @@ class CartItemService
         $subtotal = $this->calculateCartSubtotal($userId);
         $lineCount = $this->getCartLineCount($userId);
         $preview = $this->offers->buildCheckoutPreview($userId, $subtotal);
-        $qualifiesForFreeDelivery = (bool) ($preview['qualifies_for_free_delivery'] ?? false);
+        $appliedCoupon = $this->getAppliedCoupon($userId);
+        $qualifiesForFreeDelivery = (bool) ($preview['qualifies_for_free_delivery'] ?? false)
+            || ($appliedCoupon && $appliedCoupon->grantsFreeDelivery());
 
         return array_merge($preview, [
             'cart_limits' => $this->checkoutSettings->cartLimits($subtotal, $lineCount),
@@ -312,7 +315,7 @@ class CartItemService
         $required = $absolute ? $quantity : ($existingQuantity + $quantity);
 
         if ((int) $stockTarget->stock < $required) {
-            $name = $stockTarget instanceof \App\Models\ProductVariant
+            $name = $stockTarget instanceof ProductVariant
                 ? ($stockTarget->getTranslation('name', app()->getLocale(), false)
                     ?: $stockTarget->getTranslation('name', 'en', false)
                     ?: $stockTarget->sku)

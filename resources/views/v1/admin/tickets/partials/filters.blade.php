@@ -12,6 +12,17 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <label class="form-label small mb-1">{{ __('messages.Type') }}</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">{{ __('messages.All') }}</option>
+                    @foreach (\App\Models\Ticket::types() as $ticketType)
+                        <option value="{{ $ticketType }}" @selected(request('type') === $ticketType)>
+                            {{ \App\Models\Ticket::typeLabel($ticketType) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label small mb-1">{{ __('messages.From') }}</label>
                 <input type="date" name="from_date" class="form-control form-control-sm" value="{{ request('from_date') }}">
             </div>

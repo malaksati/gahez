@@ -54,6 +54,7 @@
                     chart: {
                         background: chartBg,
                         foreColor: labelColor,
+                        rtl: isRtl,
                     },
                     grid: {
                         borderColor: gridColor,
@@ -94,6 +95,7 @@
                 zoom: { enabled: false },
                 background: chartBg,
                 foreColor: labelColor,
+                rtl: isRtl,
             },
             dataLabels: { enabled: false },
             grid: {
@@ -101,7 +103,10 @@
                 strokeDashArray: 4,
                 xaxis: { lines: { show: false } },
                 yaxis: { lines: { show: true } },
-                padding: { left: 8, right: 8 },
+                padding: {
+                    left: isRtl ? 12 : 8,
+                    right: isRtl ? 8 : 12,
+                },
             },
             tooltip: {
                 theme: isDark ? 'dark' : 'light',
@@ -245,12 +250,24 @@
                         horizontal: true,
                     },
                 },
+                grid: {
+                    ...baseChartOptions.grid,
+                    padding: {
+                        left: isRtl ? 16 : 120,
+                        right: isRtl ? 120 : 16,
+                    },
+                },
                 xaxis: {
                     categories: charts.top_products.labels,
                     labels: { style: { colors: labelColor } },
                 },
                 yaxis: {
-                    labels: { style: { colors: labelColor } },
+                    opposite: isRtl,
+                    labels: {
+                        align: isRtl ? 'right' : 'left',
+                        maxWidth: 150,
+                        style: { colors: labelColor },
+                    },
                 },
             });
         }

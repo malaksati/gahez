@@ -5,7 +5,7 @@
 
 @section('content')
 
-    <form action="{{ route('v1.admin.categories.store') }}" method="POST" class="card card-body">
+    <form action="{{ route('v1.admin.categories.store') }}" method="POST" enctype="multipart/form-data" class="card card-body">
         @include('v1.admin.categories._form')
     </form>
 @endsection

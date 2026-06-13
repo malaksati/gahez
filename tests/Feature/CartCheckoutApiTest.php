@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\Address;
 use App\Models\Branch;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\User;
+use App\V1\Services\CheckoutSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\Sanctum;
 use Tests\Support\CreatesOfferFixtures;
 use Tests\TestCase;
@@ -15,8 +18,14 @@ use Tests\TestCase;
 class CartCheckoutApiTest extends TestCase
 {
     use CreatesOfferFixtures;
-
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow('2026-06-10 12:00:00');
+    }
 
     public function test_customer_can_add_product_to_cart_via_api(): void
     {
@@ -57,7 +66,7 @@ class CartCheckoutApiTest extends TestCase
             'is_bookable' => true,
             'brand_id' => $product->brand_id,
         ]);
-        $variant = \App\Models\ProductVariant::query()->create([
+        $variant = ProductVariant::query()->create([
             'product_id' => $otherProduct->id,
             'sku' => 'VAR-API-TEST-1',
             'slug' => 'var-api-test-1',
@@ -213,16 +222,50 @@ class CartCheckoutApiTest extends TestCase
 
         $response = $this->postJson('/api/v1/orders', $this->orderPayload($address, [
             'is_fast_shipping' => true,
+            'shipping_day' => 'wednesday',
         ]));
 
         $response->assertCreated()
             ->assertJsonPath('data.total_shipping', '15.00')
             ->assertJsonPath('data.is_fast_shipping', true)
-            ->assertJsonPath('data.fast_shipping_fee', 10);
+            ->assertJsonPath('data.fast_shipping_fee', 10)
+            ->assertJsonPath('data.shipping_day', 'wednesday');
+    }
+
+    public function test_fast_shipping_rejects_shipping_day_other_than_today(): void
+    {
+        [$user, $product, $address] = $this->createCheckoutFixtures(productPrice: 20, quantity: 1);
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
+
+        $this->postJson('/api/v1/orders', $this->orderPayload($address, [
+            'is_fast_shipping' => true,
+            'shipping_day' => 'thursday',
+        ]))->assertUnprocessable()
+            ->assertJsonValidationErrors(['shipping_day']);
+    }
+
+    public function test_standard_shipping_rejects_today_as_shipping_day(): void
+    {
+        [$user, $product, $address] = $this->createCheckoutFixtures(productPrice: 20, quantity: 1);
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 1])->assertSuccessful();
+
+        $this->postJson('/api/v1/orders', $this->orderPayload($address, [
+            'is_fast_shipping' => false,
+            'shipping_day' => 'wednesday',
+        ]))->assertUnprocessable()
+            ->assertJsonValidationErrors(['shipping_day']);
     }
 
     public function test_cart_preview_includes_limits_and_shipping_options(): void
     {
+        Carbon::setTestNow('2026-06-10 12:00:00');
+
         [$user, $product] = $this->createCustomerWithProduct(price: 10);
 
         Setting::query()->updateOrCreate(
@@ -249,7 +292,13 @@ class CartCheckoutApiTest extends TestCase
             ->assertJsonPath('meta.cart_limits.min_line_count', 3)
             ->assertJsonPath('meta.cart_limits.can_checkout', false)
             ->assertJsonPath('meta.shipping.base_fee', 5)
-            ->assertJsonCount(7, 'meta.shipping.weekdays');
+            ->assertJsonPath('meta.shipping.free_delivery_applied', false)
+            ->assertJsonCount(6, 'meta.shipping.weekdays')
+            ->assertJsonPath('meta.shipping.options.0.type', 'standard')
+            ->assertJsonCount(6, 'meta.shipping.options.0.weekdays')
+            ->assertJsonPath('meta.shipping.options.1.type', 'fast')
+            ->assertJsonCount(1, 'meta.shipping.options.1.weekdays')
+            ->assertJsonPath('meta.shipping.options.1.weekdays.0.value', 'wednesday');
     }
 
     public function test_checkout_fails_when_cart_is_empty(): void
@@ -298,10 +347,16 @@ class CartCheckoutApiTest extends TestCase
      */
     protected function orderPayload(Address $address, array $overrides = []): array
     {
+        $checkoutSettings = app(CheckoutSettingsService::class);
+        $today = $checkoutSettings->todayWeekday();
+        $standardDay = collect(CheckoutSettingsService::WEEKDAYS)
+            ->first(fn (string $day) => $day !== $today) ?? $today;
+
         return array_merge([
             'address_id' => $address->id,
             'payment_method' => 'cash_on_delivery',
-            'shipping_day' => 'monday',
+            'shipping_day' => $standardDay,
+            'is_fast_shipping' => false,
         ], $overrides);
     }
 
@@ -322,7 +377,7 @@ class CartCheckoutApiTest extends TestCase
             'latitude' => '29.3',
             'longitude' => '47.9',
             'name' => 'Customer',
-            'phone' => '50000000',
+            'phone' => '+201000000000',
             'is_default' => true,
             'is_active' => true,
         ]);

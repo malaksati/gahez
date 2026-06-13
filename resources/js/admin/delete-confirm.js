@@ -1,3 +1,5 @@
+import { confirmWithModal } from './confirm-modal';
+
 export function buildDeleteConfirmMessage({
     name = '',
     confirmText = 'Delete this item?',
@@ -19,7 +21,7 @@ export function buildDeleteConfirmMessage({
     return message;
 }
 
-export function confirmDelete({
+export async function confirmDelete({
     name = '',
     labels = {},
     extraText = '',
@@ -33,5 +35,5 @@ export function confirmDelete({
         extraText,
     });
 
-    return window.confirm(message);
+    return await confirmWithModal(message);
 }

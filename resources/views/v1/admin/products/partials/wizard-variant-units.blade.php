@@ -31,6 +31,7 @@
                     </button>
                 </div>
             </div>
+            <div x-show="catalogUnitError" x-cloak class="alert alert-danger small mt-2 py-2" x-text="catalogUnitError"></div>
         </div>
     </div>
 
@@ -75,17 +76,13 @@
                         <td>
                             <select class="form-select form-select-sm"
                                 :name="`product_units[${index}][unit_id]`"
-                                data-unit-select
                                 x-model="row.unit_id"
                                 @change="refreshVariantUnitRowSku(index)"
                                 required>
                                 <option value="">{{ __('messages.Select unit') }}</option>
-                                @foreach ($catalogUnits as $catalogUnit)
-                                    <option value="{{ (string) $catalogUnit->id }}">
-                                        {{ $catalogUnit->getTranslation('name', app()->getLocale())
-                                            ?: $catalogUnit->getTranslation('name', 'en') }}
-                                    </option>
-                                @endforeach
+                                <template x-for="unit in catalogUnits" :key="`variant_catalog_unit_${unit.id}`">
+                                    <option :value="unit.id" x-text="unit.name"></option>
+                                </template>
                             </select>
                         </td>
                         <td>

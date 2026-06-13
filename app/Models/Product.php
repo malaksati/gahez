@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\HasOptionalStock;
 use App\Factories\ProductPriceStockFactory;
+use App\Models\Concerns\HasOptionalStock;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 
 class Product extends Model
@@ -85,6 +85,20 @@ class Product extends Model
         }
 
         return $candidate;
+    }
+
+    public static function isSkuTaken(string $sku, ?int $ignoreProductId = null): bool
+    {
+        $sku = trim($sku);
+
+        if ($sku === '') {
+            return false;
+        }
+
+        return static::withTrashed()
+            ->where('sku', $sku)
+            ->when($ignoreProductId, fn (Builder $query) => $query->where('id', '!=', $ignoreProductId))
+            ->exists();
     }
 
     protected $casts = [

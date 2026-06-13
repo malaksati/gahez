@@ -19,7 +19,9 @@ class BrandController extends AdminController
 
     public function index(Request $request): View|Response
     {
-        $brands = $this->brands->getPaginatedBrands(15, $this->listFilters($request, [
+        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+
+        $brands = $this->brands->getPaginatedBrands($perPage, $this->listFilters($request, [
             'search', 'sort',
         ]));
 
@@ -39,13 +41,18 @@ class BrandController extends AdminController
 
     public function store(StoreBrandRequest $request): RedirectResponse
     {
-        $this->brands->create($request->validated());
+        $this->brands->create(
+            $request->safe()->except(['image', 'remove_image']),
+            $request->file('image'),
+        );
 
         return $this->redirectWithSuccess('v1.admin.brands.index', 'Brand created successfully.');
     }
 
     public function show(Brand $brand): View
     {
+        $brand->loadCount('products');
+
         return view('v1.admin.brands.show', [
             'brand' => $brand,
         ]);
@@ -60,7 +67,12 @@ class BrandController extends AdminController
 
     public function update(UpdateBrandRequest $request, Brand $brand): RedirectResponse
     {
-        $this->brands->update($brand, $request->validated());
+        $this->brands->update(
+            $brand,
+            $request->safe()->except(['image', 'remove_image']),
+            $request->file('image'),
+            $request->boolean('remove_image'),
+        );
 
         return $this->redirectWithSuccess('v1.admin.brands.index', 'Brand updated successfully.');
     }

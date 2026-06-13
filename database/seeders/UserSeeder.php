@@ -50,7 +50,7 @@ class UserSeeder extends Seeder
             ['email' => 'customer1@gmail.com'],
             [
                 'name' => 'Customer1',
-                'phone' => '50001111',
+                'phone' => '+201000111111',
                 'password' => Hash::make('12345678'),
                 'role' => 'user',
                 'is_active' => true,

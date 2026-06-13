@@ -43,15 +43,25 @@
                             <td class="small text-muted">{{ $refundRequest->created_at?->format('M d, Y H:i') }}</td>
                             <td class="text-end">
                                 @if ($refundRequest->status === 'pending')
-                                    <form method="POST" action="{{ route('v1.admin.order-refund-requests.approve', $refundRequest) }}" class="d-inline refund-request-approve-form">
+                                    <form method="POST" action="{{ route('v1.admin.order-refund-requests.approve', $refundRequest) }}" class="d-inline">
                                         @csrf
-                                        <button type="button" class="btn btn-sm btn-success refund-request-approve-btn">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-success"
+                                            data-order-confirm-submit
+                                            data-confirm-message="{{ e(__('messages.Approve this refund request?') . "\n\n" . __('messages.The order will be refunded to the customer.')) }}"
+                                        >
                                             <i class="bi bi-check2 me-1"></i>{{ __('messages.Accept') }}
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ route('v1.admin.order-refund-requests.reject', $refundRequest) }}" class="d-inline refund-request-reject-form">
+                                    <form method="POST" action="{{ route('v1.admin.order-refund-requests.reject', $refundRequest) }}" class="d-inline">
                                         @csrf
-                                        <button type="button" class="btn btn-sm btn-outline-danger refund-request-reject-btn">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-order-confirm-submit
+                                            data-confirm-message="{{ e(__('messages.Reject this refund request?') . "\n\n" . __('messages.The customer will be notified that the refund was rejected.')) }}"
+                                        >
                                             <i class="bi bi-x-lg me-1"></i>{{ __('messages.Reject') }}
                                         </button>
                                     </form>

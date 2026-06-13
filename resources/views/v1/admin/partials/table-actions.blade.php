@@ -44,9 +44,11 @@
     @endif
     @if ($destroyUrl)
         <button
-            type="submit"
+            type="button"
             form="{{ $deleteFormId }}"
             class="btn btn-outline-danger"
+            data-order-confirm-submit
+            data-confirm-message="{{ e($confirmMessage) }}"
             data-bs-toggle="tooltip"
             title="{{ __('messages.Delete') }}"
         >
@@ -54,24 +56,12 @@
         </button>
     @endif
 </div>
-@if ($notifyUrl)
-    <form
-        id="{{ $notifyFormId }}"
-        action="{{ $notifyUrl }}"
-        method="POST"
-        class="d-none"
-        data-confirm-message="{{ __('messages.Send notification to all customers?') }}"
-    >
-        @csrf
-    </form>
-@endif
 @if ($destroyUrl)
     <form
         id="{{ $deleteFormId }}"
         action="{{ $destroyUrl }}"
         method="POST"
         class="d-none"
-        data-confirm-message="{{ $confirmMessage }}"
     >
         @csrf
         @method('DELETE')

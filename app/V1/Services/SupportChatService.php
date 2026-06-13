@@ -46,6 +46,18 @@ class SupportChatService
     }
 
     /**
+     * @param  'user'|'admin'  $readerType
+     */
+    public function markMessagesAsRead(int $supportId, string $readerType): int
+    {
+        if (! in_array($readerType, ['user', 'admin'], true)) {
+            return 0;
+        }
+
+        return $this->supports->markMessagesAsRead($supportId, $readerType);
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function createConversation(int $userId, array $data): Support

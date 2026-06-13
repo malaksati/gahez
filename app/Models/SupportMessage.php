@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\SupportMessageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupportMessage extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupportMessageFactory> */
+    /** @use HasFactory<SupportMessageFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -48,5 +49,19 @@ class SupportMessage extends Model
             ->map(fn (string $path) => asset('storage/'.ltrim($path, '/')))
             ->values()
             ->all();
+    }
+
+    /**
+     * Who read this message: the opposite party of the sender.
+     *
+     * @return 'user'|'admin'|null
+     */
+    public function readByType(): ?string
+    {
+        if ($this->read_at === null) {
+            return null;
+        }
+
+        return $this->sender_type === 'admin' ? 'user' : 'admin';
     }
 }

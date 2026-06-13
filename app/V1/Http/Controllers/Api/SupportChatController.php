@@ -43,6 +43,8 @@ class SupportChatController extends Controller
     {
         $this->authorize('view', $support);
 
+        $this->supportChats->markMessagesAsRead($support->id, 'user');
+
         return new SupportChatResource(
             $this->supportChats->getById($support->id),
         );
@@ -51,6 +53,8 @@ class SupportChatController extends Controller
     public function messages(Request $request, Support $support)
     {
         $this->authorize('view', $support);
+
+        $this->supportChats->markMessagesAsRead($support->id, 'user');
 
         $perPage = (int) $request->integer('per_page', 30);
 

@@ -3,8 +3,9 @@
 @php
     $currentLocale = app()->getLocale();
     $isArabic = str_starts_with($currentLocale, 'ar');
-    $enUrl = route('locale.switch', ['locale' => 'en']);
-    $arUrl = route('locale.switch', ['locale' => 'ar']);
+    $redirect = request()->getRequestUri();
+    $enUrl = route('locale.switch', ['locale' => 'en', 'redirect' => $redirect]);
+    $arUrl = route('locale.switch', ['locale' => 'ar', 'redirect' => $redirect]);
 @endphp
 
 <button

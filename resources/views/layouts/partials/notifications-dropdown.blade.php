@@ -28,7 +28,9 @@
         @forelse ($recentNotifications as $notification)
             <li data-notification-item data-notification-id="{{ $notification->id }}">
                 <a
-                    href="{{ route('v1.admin.notifications.show', $notification->id) }}"
+                    href="{{ $notification->data['url'] ?? route('v1.admin.notifications.show', $notification->id) }}"
+                    data-notification-link
+                    data-notification-id="{{ $notification->id }}"
                     @class(['dropdown-item py-2', 'fw-semibold' => $notification->read_at === null])
                 >
                     <div class="small text-muted">{{ $notification->created_at?->diffForHumans() }}</div>

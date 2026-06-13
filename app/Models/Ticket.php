@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
-    protected $fillable = ['user_id', 'subject', 'description', 'status', 'attachments'];
+    public const TYPE_COMPLAINT = 'complaint';
+
+    public const TYPE_RECOMMENDATION = 'recommendation';
+
+    protected $fillable = ['user_id', 'type', 'subject', 'description', 'status', 'attachments'];
 
     protected $casts = [
         'attachments' => 'array',
@@ -40,6 +44,35 @@ class Ticket extends Model
     public function scopeOpen($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function types(): array
+    {
+        return [
+            self::TYPE_COMPLAINT,
+            self::TYPE_RECOMMENDATION,
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function typeLabels(): array
+    {
+        return [
+            self::TYPE_COMPLAINT => __('messages.ticket_type_complaint'),
+            self::TYPE_RECOMMENDATION => __('messages.ticket_type_recommendation'),
+        ];
+    }
+
+    public static function typeLabel(?string $type): string
+    {
+        $type = $type ?: self::TYPE_COMPLAINT;
+
+        return self::typeLabels()[$type] ?? ucfirst(str_replace('_', ' ', $type));
     }
 
     public function getAttachmentsPathAttribute()

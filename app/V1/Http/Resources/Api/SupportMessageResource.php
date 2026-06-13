@@ -17,7 +17,9 @@ class SupportMessageResource extends JsonResource
             'sender' => new UserResource($this->whenLoaded('sender')),
             'message' => $this->message,
             'attachments' => $this->when($this->attachments, fn () => $this->attachmentUrls()),
+            'is_read' => $this->read_at !== null,
             'read_at' => $this->read_at?->toIso8601String(),
+            'read_by_type' => $this->readByType(),
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
         ];

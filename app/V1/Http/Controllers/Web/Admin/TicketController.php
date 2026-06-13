@@ -21,7 +21,7 @@ class TicketController extends AdminController
     public function index(Request $request): View|Response
     {
         $tickets = $this->tickets->getPaginatedTickets(15, $this->listFilters($request, [
-            'search', 'status', 'from_date', 'to_date', 'sort',
+            'search', 'status', 'type', 'from_date', 'to_date', 'sort',
         ]));
 
         return $this->adminListResponse(

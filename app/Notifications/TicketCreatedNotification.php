@@ -27,7 +27,10 @@ class TicketCreatedNotification extends Notification
     {
         return [
             'title' => __('messages.New ticket'),
-            'message' => __('messages.New support ticket: :subject', ['subject' => $this->ticket->subject]),
+            'message' => __('messages.New :type ticket: :subject', [
+                'type' => Ticket::typeLabel($this->ticket->type),
+                'subject' => $this->ticket->subject,
+            ]),
             'url' => route('v1.admin.tickets.show', $this->ticket),
             'ticket_id' => $this->ticket->id,
         ];

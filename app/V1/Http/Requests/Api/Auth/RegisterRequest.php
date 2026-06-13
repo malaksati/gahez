@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Api\Auth;
 
 use App\Models\User;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -29,9 +30,7 @@ class RegisterRequest extends FormRequest
             ],
             'phone' => [
                 'required_without:email',
-                'nullable',
-                'string',
-                'max:255',
+                ...PhoneValidation::rules(),
                 Rule::unique(User::class),
             ],
             'password' => ['required', 'string', Password::defaults(), 'confirmed'],
@@ -52,5 +51,17 @@ class RegisterRequest extends FormRequest
                 'birthdate' => null,
             ]);
         }
+
+        PhoneValidation::prepareRequest($this, ['phone']);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => PhoneValidation::message(),
+        ];
     }
 }

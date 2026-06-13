@@ -29,10 +29,15 @@
                         <i class="bi bi-pencil me-1"></i>{{ __('messages.Edit') }}
                     </a>
                     @if (!$admin->hasRole('super-admin') && $admin->id !== auth()->id())
-                        <form action="{{ route('v1.admin.admin-users.destroy', $admin) }}" method="POST" data-confirm-message="{{ __('messages.Are you sure you want to delete?') }}">
+                        <form action="{{ route('v1.admin.admin-users.destroy', $admin) }}" method="POST" id="admin-user-delete-form">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                data-order-confirm-submit
+                                data-confirm-message="{{ e(__('messages.Are you sure you want to delete?')) }}"
+                            >
                                 <i class="bi bi-trash me-1"></i>{{ __('messages.Delete') }}
                             </button>
                         </form>

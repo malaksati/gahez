@@ -53,10 +53,14 @@
                                 <td class="text-end">
                                     <form action="{{ route('v1.admin.product-ratings.toggle-visibility', $rating) }}"
                                           method="POST"
-                                          class="d-inline"
-                                          onsubmit="return confirm(@json($rating->is_visible ? __('messages.Confirm hide this rating?') : __('messages.Confirm show this rating?')))">
+                                          class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm {{ ! $rating->is_visible ? 'btn-success' : 'btn-danger' }}">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm {{ ! $rating->is_visible ? 'btn-success' : 'btn-danger' }}"
+                                            data-order-confirm-submit
+                                            data-confirm-message="{{ e($rating->is_visible ? __('messages.Confirm hide this rating?') : __('messages.Confirm show this rating?')) }}"
+                                        >
                                             @if ($rating->is_visible)
                                                 <i class="bi bi-eye-slash me-1"></i>{{ __('messages.Hide') }}
                                             @else

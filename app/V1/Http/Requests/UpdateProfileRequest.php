@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests;
 
 use App\Models\User;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -32,9 +33,7 @@ class UpdateProfileRequest extends FormRequest
             ],
             'phone' => [
                 'sometimes',
-                'nullable',
-                'string',
-                'max:255',
+                ...PhoneValidation::rules(),
                 Rule::unique(User::class)->ignore($userId),
             ],
             'password' => ['nullable', 'string', Password::defaults(), 'confirmed'],
@@ -76,5 +75,17 @@ class UpdateProfileRequest extends FormRequest
                 'birthdate' => null,
             ]);
         }
+
+        PhoneValidation::prepareRequest($this, ['phone']);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => PhoneValidation::message(),
+        ];
     }
 }

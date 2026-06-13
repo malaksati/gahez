@@ -18,14 +18,15 @@ class BrandRepository
     {
         $this->model = $brand;
     }
+
     public function getAllBrands(): Collection
     {
         return $this->model::query()->get();
     }
 
-    public function getPaginatedBrands(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    public function getPaginatedBrands(int $perPage = 20, array $filters = []): LengthAwarePaginator
     {
-        $query = $this->model::query();
+        $query = $this->model::query()->withCount('products');
 
         if (! empty($filters['search'])) {
             $this->applyTranslatableNameSearch($query, (string) $filters['search']);
@@ -42,18 +43,22 @@ class BrandRepository
 
         return $query->paginate($perPage)->withQueryString();
     }
+
     public function getBrandById(int $id): Brand
     {
         return $this->model::query()->findOrFail($id);
     }
+
     public function create(array $data): Brand
     {
         return $this->model::query()->create($data);
     }
+
     public function update(Brand $brand, array $data): bool
     {
         return (bool) $brand->update($data);
     }
+
     public function delete(Brand $brand): bool
     {
         /** @var Model $brand */
@@ -61,14 +66,17 @@ class BrandRepository
 
         return (bool) $model->delete();
     }
+
     public function forceDelete(Brand $brand): bool
     {
         return (bool) $brand->forceDelete();
     }
+
     public function restore(Brand $brand): bool
     {
         return (bool) $brand->restore();
     }
+
     public function search(string $search): Collection
     {
         return $this->model::query()->where('name', 'like', "%{$search}%")->get();

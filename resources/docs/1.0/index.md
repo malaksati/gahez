@@ -1,9 +1,9 @@
-- ## Gahez API
+- ## Gahez Akeed API
     - [Overview](/{{route}}/{{version}}/overview)
     - [Authentication](/{{route}}/{{version}}/authentication)
     - [Public endpoints](/{{route}}/{{version}}/public-endpoints)
     - [Customer API](/{{route}}/{{version}}/customer-api)
-    - [Delivery driver API](/{{route}}/{{version}}/delivery-api)
+    - [Shipping & checkout](/{{route}}/{{version}}/delivery-api)
     - [Frontend integration](/{{route}}/{{version}}/integration)
     - [Testing & changelog](/{{route}}/{{version}}/testing)
 - ## Developer guides

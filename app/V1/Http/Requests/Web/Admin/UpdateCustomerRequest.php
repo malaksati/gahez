@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Web\Admin;
 
 use App\V1\Http\Requests\Rules\AddressValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use App\V1\Http\Requests\Web\AdminFormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -27,9 +28,7 @@ class UpdateCustomerRequest extends AdminFormRequest
                 Rule::unique('users')->ignore($this->route('customer')),
             ],
             'phone' => [
-                'nullable',
-                'string',
-                'max:255',
+                ...PhoneValidation::rules(),
                 Rule::unique('users')->ignore($this->route('customer')),
             ],
             'password' => ['nullable', 'confirmed', Password::defaults()],
@@ -83,5 +82,8 @@ class UpdateCustomerRequest extends AdminFormRequest
             'is_verified' => $this->boolean('is_verified'),
             'remove_image' => $this->boolean('remove_image'),
         ]);
+
+        PhoneValidation::prepareRequest($this, ['phone']);
+        PhoneValidation::prepareNested($this, 'address', 'phone');
     }
 }

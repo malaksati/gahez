@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Web;
 
 use App\V1\Http\Requests\Rules\AddressValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 
 class StoreAddressRequest extends AdminFormRequest
 {
@@ -20,5 +21,10 @@ class StoreAddressRequest extends AdminFormRequest
     public function messages(): array
     {
         return (new \App\V1\Http\Requests\Api\StoreAddressRequest)->messages();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

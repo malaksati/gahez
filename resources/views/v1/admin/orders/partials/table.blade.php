@@ -11,7 +11,7 @@
                     <th>{{ __('messages.Status') }}</th>
                     <th>{{ __('messages.Payment') }}</th>
                     <th>{{ __('messages.Total') }}</th>
-                    <th>{{ __('messages.Delivery Time') }}</th>
+                    <th>{{ __('messages.Shipping day') }}</th>
                     <th>{{ __('messages.Date') }}</th>
                     <th>{{ __('messages.Activity') }}</th>
                     <th class="text-end" style="width: 100px;">{{ __('messages.Actions') }}</th>
@@ -44,7 +44,16 @@
                             @endif
                         </td>
                         <td><strong>{{ format_local_number((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
-                        <td><div class="small text-muted">{{ $order->delivery_expected_time ?? '—' }}</div></td>
+                        <td>
+                            @if ($order->shipping_day)
+                                <div class="small">{{ __('messages.weekday_'.$order->shipping_day) }}</div>
+                                @if ($order->is_fast_shipping)
+                                    <span class="badge bg-info text-dark">{{ __('messages.Fast shipping') }}</span>
+                                @endif
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td class="small text-muted">{{ $order->created_at?->format('M d, Y H:i') }}</td>
                         <td>@include('v1.admin.orders.partials.order-log-summary', ['order' => $order])</td>
                         <td class="text-end">

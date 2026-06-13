@@ -13,10 +13,10 @@ class BranchSeeder extends Seeder
             ['id' => 1],
             [
                 'name' => ['en' => 'Main Branch', 'ar' => 'الفرع الرئيسي'],
-                'address' => 'Salmiya, Kuwait',
-                'latitude' => '29.3375',
-                'longitude' => '48.0758',
-                'phone' => '22223333',
+                'address' => 'Nasr City, Cairo, Egypt',
+                'latitude' => '30.0444',
+                'longitude' => '31.2357',
+                'phone' => '+201012345678',
                 'is_active' => true,
             ],
         );

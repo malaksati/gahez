@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -29,9 +30,7 @@ class RegisterRequest extends FormRequest
             ],
             'phone' => [
                 'required_without:email',
-                'nullable',
-                'string',
-                'max:255',
+                ...PhoneValidation::rules(),
                 Rule::unique(User::class),
             ],
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -45,5 +44,7 @@ class RegisterRequest extends FormRequest
                 'email' => strtolower($this->input('email')),
             ]);
         }
+
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

@@ -1,6 +1,6 @@
 # Apidog import guide
 
-Import the Gahez API into [Apidog](https://www.apidog.com/) using either file below.
+Import the Gahez Akeed API into [Apidog](https://www.apidog.com/) using either file below.
 
 ## Files
 
@@ -48,7 +48,7 @@ Use **form-data** body type when attaching files:
 
 | Endpoint | Fields |
 |----------|--------|
-| `POST /tickets` | `subject`, `description`, `attachments[0]` (file) |
+| `POST /tickets` | `type`, `subject`, `description`, `attachments[0]` (file) |
 | `POST /tickets/{id}/messages` | `message`, `attachments[0]` (file) |
 | `POST /support-chats` | `subject`, `message`, `attachments[0]` (file) |
 | `POST /support-chats/{id}/messages` | `message`, `attachments[0]` (file) |
@@ -59,11 +59,12 @@ Allowed file types: jpeg, png, jpg, gif, webp, pdf, doc, docx (max 5 MB).
 
 Requires `php artisan storage:link` for attachment URLs to work in responses.
 
-## Cart tips
+## Cart & checkout tips
 
 - Send `quantity` and `variant_id` in **JSON body** for `PUT /cart/{product_id}`
 - Prefer `PUT /cart/items/{cartItemId}` with `{ "quantity": N }` for updates
 - Simple products: omit `variant_id` or pass `null`
+- `POST /orders` requires `shipping_day`; use `is_fast_shipping: true` for same-day delivery (today only)
 
 ## Updating the collection
 

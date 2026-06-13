@@ -84,7 +84,7 @@
         </div>
 
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm reports-sidebar sticky-lg-top" style="top: 1rem;">
+            <div class="card border-0 shadow-sm reports-sidebar sticky-lg-top reports-sidebar--sticky">
                 <div class="card-header bg-white border-bottom">
                     <h2 class="h6 mb-0">{{ __('messages.All reports') }}</h2>
                 </div>

@@ -1,6 +1,6 @@
-# Gahez E-Commerce API
+# Gahez Akeed E-Commerce API
 
-REST API for the customer mobile/web app and delivery driver app.
+REST API for the customer mobile/web app.
 
 ---
 
@@ -23,7 +23,7 @@ http://gahez.test/api/v1
 <a name="quick-start"></a>
 ## Quick start
 
-1. Load store theme: `GET /store/config`
+1. Load store config: `GET /store/config` (app name, currency, logo)
 2. Register or login: `POST /auth/register` → verify → `POST /auth/login`
 3. Send `Authorization: Bearer {token}` on protected routes
 4. Optional: `Accept-Language: en` or `ar` for translated messages

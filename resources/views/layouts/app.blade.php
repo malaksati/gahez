@@ -28,6 +28,7 @@
         @auth
         window.__adminNotifications = {
             feedUrl: @json(route('v1.admin.notifications.feed')),
+            markReadUrl: @json(route('v1.admin.notifications.read', ['notification' => '__ID__'])),
             labels: {
                 notification: @json(__('messages.Notification')),
                 newNotification: @json(__('messages.New notification')),

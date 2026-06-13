@@ -3,6 +3,7 @@
 namespace App\V1\Http\Requests\Api;
 
 use App\V1\Http\Requests\Rules\AddressValidation;
+use App\V1\Http\Requests\Rules\PhoneValidation;
 
 class StoreAddressRequest extends ApiFormRequest
 {
@@ -30,5 +31,10 @@ class StoreAddressRequest extends ApiFormRequest
             'longitude.required' => 'Please provide a longitude.',
             'name.required' => 'Please enter a label for this address (e.g. Home).',
         ]);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        PhoneValidation::prepareRequest($this, ['phone']);
     }
 }

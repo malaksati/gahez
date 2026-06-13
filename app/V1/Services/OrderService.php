@@ -14,6 +14,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Notifications\NewOrderForAdminNotification;
+use App\Notifications\OrderStatusUpdatedNotification;
 use App\V1\Repositories\OrderRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -146,7 +147,10 @@ class OrderService
             $freeDelivery = $this->offers->qualifiesForFreeDelivery($subTotal)
                 || ($coupon && $coupon->grantsFreeDelivery());
             $isFastShipping = filter_var($data['is_fast_shipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
-            $shippingDay = $this->checkoutSettings->assertValidShippingDay($data['shipping_day'] ?? '');
+            $shippingDay = $this->checkoutSettings->assertValidShippingDayForCheckout(
+                $data['shipping_day'] ?? '',
+                $isFastShipping,
+            );
             $shippingBreakdown = $this->checkoutSettings->computeShipping($isFastShipping, $freeDelivery);
             $totalShipping = $shippingBreakdown['total_shipping'];
 
@@ -947,13 +951,12 @@ class OrderService
 
             // Notify Customer
             if ($order->user) {
-                $order->user->notify(new \App\Notifications\OrderStatusUpdatedNotification($order));
+                $order->user->notify(new OrderStatusUpdatedNotification($order));
             }
 
             if ($status === 'delivered') {
                 $this->points->awardCashbackForDeliveredOrder($order);
                 $this->goals->evaluateGoalsForDeliveredOrder($order);
-                $this->notifications->notifyAdmins(new \App\Notifications\OrderDeliveredAdminNotification($order));
             }
 
             return $order;

@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\CartItem;
+use App\Models\ProductVariant;
 use App\V1\Services\CartItemService;
 use App\V1\Services\OfferService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 use Tests\Support\CreatesOfferFixtures;
 use Tests\TestCase;
 
@@ -106,6 +108,11 @@ class OfferCartTest extends TestCase
 
         $this->createOffer($bogoProduct, ['type' => 'bogo', 'value' => 1]);
         $this->createThresholdGiftOffer(50, [$gift->id]);
+        $this->createOffer(null, [
+            'type' => 'free_delivery',
+            'value' => 0,
+            'min_cart_amount' => 50,
+        ]);
 
         $this->cartItems->addOrIncrement($user->id, $bogoProduct, null, 1);
         $this->cartItems->addOrIncrement($user->id, $regularProduct, null, 1);
@@ -165,7 +172,7 @@ class OfferCartTest extends TestCase
         $user = $this->createUser();
         $product = $this->createProduct(['price' => 1.75]);
         $otherProduct = $this->createProduct(['price' => 4.75, 'type' => 'variable']);
-        $variant = \App\Models\ProductVariant::query()->create([
+        $variant = ProductVariant::query()->create([
             'product_id' => $otherProduct->id,
             'sku' => 'OTHER-VAR',
             'slug' => 'other-var',
@@ -176,11 +183,11 @@ class OfferCartTest extends TestCase
             'is_in_stock' => true,
         ]);
 
-        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $this->expectException(ValidationException::class);
 
         try {
             $this->cartItems->addOrIncrement($user->id, $product, $variant->id, 1);
-        } catch (\Illuminate\Validation\ValidationException $exception) {
+        } catch (ValidationException $exception) {
             $this->assertArrayHasKey('variant_id', $exception->errors());
 
             throw $exception;

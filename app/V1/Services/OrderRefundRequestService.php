@@ -4,6 +4,7 @@ namespace App\V1\Services;
 
 use App\Models\Order;
 use App\Models\OrderRefundRequest;
+use App\Notifications\OrderRefundRequestSubmittedAdminNotification;
 use App\V1\Repositories\OrderRefundRequestRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ class OrderRefundRequestService
     public function __construct(
         protected OrderRefundRequestRepository $refundRequests,
         protected OrderService $orders,
+        protected NotificationService $notifications,
     ) {}
 
     public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
@@ -128,13 +130,20 @@ class OrderRefundRequestService
             ]);
         }
 
-        return OrderRefundRequest::query()->create([
+        $refundRequest = OrderRefundRequest::query()->create([
             'order_id' => $order->id,
             'user_id' => $userId,
             'status' => 'pending',
             'reason' => $reason,
             'details' => $details,
         ]);
+
+        $this->notifications->notifyAdminsWithPermission(
+            'manage refunds',
+            new OrderRefundRequestSubmittedAdminNotification($refundRequest),
+        );
+
+        return $refundRequest;
     }
 
     protected function syncOrderRefundStatus(OrderRefundRequest $refundRequest): void

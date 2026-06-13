@@ -16,7 +16,24 @@ class LocaleController extends Controller
         session(['locale' => $locale]);
 
         return redirect()
-            ->back(fallback: route('home'))
+            ->to($this->redirectTarget($request))
             ->withCookie(cookie()->forever('locale', $locale));
+    }
+
+    protected function redirectTarget(Request $request): string
+    {
+        $redirect = $request->query('redirect');
+
+        if (is_string($redirect) && str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
+            return $redirect;
+        }
+
+        $previous = url()->previous();
+
+        if (is_string($previous) && $previous !== '') {
+            return $previous;
+        }
+
+        return route('home');
     }
 }

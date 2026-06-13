@@ -12,7 +12,11 @@ class UpdateBrandRequest extends AdminFormRequest
      */
     public function rules(): array
     {
-        return BrandValidation::update();
+        $rules = BrandValidation::update();
+        $rules['image'] = ['nullable', 'image', 'max:2048'];
+        $rules['remove_image'] = ['sometimes', 'boolean'];
+
+        return $rules;
     }
 
     /**

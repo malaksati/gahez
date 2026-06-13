@@ -96,6 +96,7 @@
 
 // Enhanced Pagination (admin lists — compact controls)
 [data-admin-list-results] .pagination,
+[data-admin-list-results] .card-footer .pagination,
 .import-export-main .card-footer .pagination {
   margin-bottom: 0;
 
@@ -104,6 +105,11 @@
     font-size: 0.875rem;
     line-height: 1.25;
   }
+}
+
+[data-admin-list-results] .card-footer {
+  display: flex;
+  justify-content: center;
 }
 
 .pagination {

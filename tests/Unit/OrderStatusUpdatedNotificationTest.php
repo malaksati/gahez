@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\OrderStatusUpdatedNotification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,7 @@ class OrderStatusUpdatedNotificationTest extends TestCase
     {
         $user = User::factory()->create([
             'role' => 'user',
-            'phone' => '50001111',
+            'phone' => '+201000111111',
             'phone_verified_at' => now(),
             'email' => 'customer@example.com',
         ]);
@@ -32,11 +33,11 @@ class OrderStatusUpdatedNotificationTest extends TestCase
 
     public function test_notification_implements_should_queue(): void
     {
-        $user = User::factory()->create(['role' => 'user', 'phone' => '50001111']);
+        $user = User::factory()->create(['role' => 'user', 'phone' => '+201000111111']);
         $order = $this->createOrder($user);
         $notification = new OrderStatusUpdatedNotification($order);
 
-        $this->assertInstanceOf(\Illuminate\Contracts\Queue\ShouldQueue::class, $notification);
+        $this->assertInstanceOf(ShouldQueue::class, $notification);
     }
 
     protected function createOrder(User $user, string $status = 'pending'): Order
@@ -45,7 +46,7 @@ class OrderStatusUpdatedNotificationTest extends TestCase
             'user_id' => $user->id,
             'customer_name' => $user->name,
             'customer_email' => $user->email,
-            'customer_phone' => $user->phone ?? '50001111',
+            'customer_phone' => $user->phone ?? '+201000111111',
             'sub_total' => 10,
             'total_shipping' => 0,
             'total' => 10,

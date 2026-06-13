@@ -4,6 +4,7 @@
             <thead class="table-light">
                 <tr>
                     <th>{{ __('messages.ID') }}</th>
+                    <th>{{ __('messages.Type') }}</th>
                     <th>{{ __('messages.Image') }}</th>
                     <th>{{ __('messages.Created at') }}</th>
                     <th>{{ __('messages.Updated at') }}</th>
@@ -14,6 +15,9 @@
                 @foreach ($sliders as $slider)
                     <tr>
                         <td>{{ $slider->id }}</td>
+                        <td>
+                            <span class="badge text-bg-secondary">{{ \App\Models\Slider::typeLabel($slider->type) }}</span>
+                        </td>
                         <td>
                             @if ($slider->image)
                                 <img src="{{ asset('storage/'.$slider->image) }}" alt="" class="rounded" height="48" style="object-fit: cover; max-width: 120px;">

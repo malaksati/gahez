@@ -21,6 +21,7 @@ import { initOrderCreate } from './admin/order-create';
 import { initLiveNotifications } from './admin/live-notifications';
 import { initAddressMapPickers } from './admin/address-map-picker';
 import { initSupportChatShow } from './admin/support-chat-show';
+import { initSliderForm } from './admin/slider-form';
 
 window.Alpine = Alpine;
 
@@ -158,9 +159,7 @@ document.addEventListener('alpine:init', () => {
             this.current = nextLocale;
             const url = nextLocale === 'ar' ? this.arUrl : this.enUrl;
 
-            window.setTimeout(() => {
-                window.location.href = url;
-            }, 420);
+            window.location.assign(url);
         },
     }));
 
@@ -396,6 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('[data-support-chat-show]')) {
         initSupportChatShow(window.__supportChatRealtime ?? {});
     }
+
+    initSliderForm();
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new Tooltip(el));
     document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new Popover(el));

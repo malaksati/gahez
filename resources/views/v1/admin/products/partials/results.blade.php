@@ -38,10 +38,9 @@
             ])
         @endif
     </div>
+    @if ($products->total() > 0)
+        <div class="card-footer bg-white border-top py-3 px-3">
+            {{ $products->onEachSide(1)->withQueryString()->links() }}
+        </div>
+    @endif
 </div>
-
-@if ($products->hasPages())
-    <div class="mt-3">
-        {{ $products->withQueryString()->links() }}
-    </div>
-@endif

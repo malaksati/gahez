@@ -19,13 +19,6 @@ After `php artisan db:seed`:
 | Email | `customer1@gmail.com` |
 | Password | `12345678` |
 
-**Delivery driver**
-
-| Field | Value |
-|-------|-------|
-| Email | `driver1@gmail.com` |
-| Password | `12345678` |
-
 **Super admin** (for manual admin testing)
 
 | Field | Value |
@@ -38,7 +31,13 @@ After `php artisan db:seed`:
 
 | Feature | Notes |
 |---------|-------|
-| Store theme (admin) | `GET /store/config` |
+| App branding | Default name **Gahez Akeed** |
+| Weekday shipping | `shipping_day`, `is_fast_shipping`, checkout preview |
+| Free delivery | Active `free_delivery` offers only |
+| Ticket types | `complaint`, `recommendation` |
+| Admin notifications | Mark read on click; mark all; report/refund alerts |
+| Orders admin | Edit pending/processing only; invoice shipping day |
+| Store config | `GET /store/config` — app name, currency, logo |
 | Customer notifications | `GET /notifications` |
 | Offer/coupon promos | Admin bell → customer inbox |
 | Birthdate on profile | `PATCH /profile` `birthdate` |
@@ -46,7 +45,6 @@ After `php artisan db:seed`:
 | Cart item update | `PUT/PATCH /cart/items/{id}` |
 | Ticket attachments | Multipart `attachments[0]` or `attachment[0]` |
 | Refund requests (admin) | Accept/reject on index |
-| Delivery shifts API | `GET /delivery/shifts`, subscribe |
 | Admin live notifications | Feed polling + toasts |
 | Product/category sort order | Admin `sort_order` (blank auto-appends) |
 | Product name sort filter | Admin list `name_asc` / `name_desc` |

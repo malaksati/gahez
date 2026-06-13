@@ -48,6 +48,7 @@
         'existingProductUnits' => old('product_units')
             ? array_values(old('product_units'))
             : $existingProductUnits,
+        'validationErrorKeys' => $errors->any() ? array_keys($errors->getMessages()) : [],
         'labels' => [
             'basic' => __('messages.Basic info'),
             'pricing' => __('messages.Pricing and stock'),
@@ -56,6 +57,7 @@
             'categories' => __('messages.Categories'),
             'images' => __('messages.Media'),
             'related' => __('messages.Related products'),
+            'completeRequiredSteps' => __('messages.Complete all required wizard steps before submitting'),
         ],
         'formData' => [
             'type' => old('type', $product?->type ?? 'simple'),
@@ -112,6 +114,11 @@
                 @endif
 
                 @include('v1.admin.products.partials.wizard-persistent-file-inputs')
+
+                <div x-show="validationMessage" x-cloak class="alert alert-warning mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span x-text="validationMessage"></span>
+                </div>
 
                 @if (! $isEdit)
                     <input type="hidden" name="slug" x-bind:value="formData.slug">

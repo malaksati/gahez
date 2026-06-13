@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-lg-7 col-xl-6">
+        <div class="col-lg-8 col-xl-7">
             <form action="{{ route('v1.admin.sliders.update', $slider) }}" method="POST" enctype="multipart/form-data" class="card border-0 shadow-sm">
                 @method('PUT')
                 @include('v1.admin.sliders._form')

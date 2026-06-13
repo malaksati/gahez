@@ -12,7 +12,18 @@ class StoreCategoryRequest extends AdminFormRequest
      */
     public function rules(): array
     {
-        return CategoryValidation::store();
+        $rules = CategoryValidation::store();
+        $rules['image'] = ['nullable', 'image', 'max:2048'];
+
+        return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->boolean('is_active'),
+            'is_featured' => $this->boolean('is_featured'),
+        ]);
     }
 
     /**
