@@ -273,7 +273,8 @@
 
                     <div class="mb-3">
                         <label for="shipping_cost" class="form-label">{{ __('messages.Shipping cost') }}</label>
-                        <input type="number" step="0.01" class="form-control" id="shipping_cost" name="shipping_cost" value="{{ old('shipping_cost', 0) }}">
+                        <input type="number" step="0.01" class="form-control" id="shipping_cost" name="shipping_cost" value="{{ old('shipping_cost') }}" placeholder="{{ __('messages.Leave blank to auto calculate') }}">
+                        <small class="text-muted">{{ __('messages.Admin order shipping auto hint') }}</small>
                     </div>
 
                     <div class="mb-3">

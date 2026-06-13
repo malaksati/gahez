@@ -151,7 +151,12 @@ class OrderService
                 $data['shipping_day'] ?? '',
                 $isFastShipping,
             );
-            $shippingBreakdown = $this->checkoutSettings->computeShipping($isFastShipping, $freeDelivery);
+            $shippingBreakdown = $this->checkoutSettings->computeShipping(
+                $isFastShipping,
+                $freeDelivery,
+                $address->latitude,
+                $address->longitude,
+            );
             $totalShipping = $shippingBreakdown['total_shipping'];
 
             $totalBeforeWallet = round(max(0, $subTotal - $couponDiscount + $totalShipping), 2);
@@ -170,7 +175,7 @@ class OrderService
 
             $order = $this->orders->create([
                 'user_id' => $userId,
-                'branch_id' => 1,
+                'branch_id' => $shippingBreakdown['branch_id'],
                 'customer_name' => $user->name,
                 'customer_email' => $user->email,
                 'customer_phone' => $address->phone ?? $user->phone,
@@ -217,6 +222,7 @@ class OrderService
                 $productUnit = $item->product_unit_id
                     ? ProductUnit::with('unit')->find($item->product_unit_id)
                     : null;
+                $itemPricing = $this->orderItemAmountsFromCartPricing($pricing, $quantity);
 
                 OrderItem::query()->create([
                     'order_id' => $order->id,
@@ -234,8 +240,8 @@ class OrderService
                     'variant_name_ar' => $variantNameAr ?: null,
                     'variant_sku' => $variant?->sku ?: null,
                     'quantity' => $quantity,
-                    'unit_price' => $pricing['unit_price'],
-                    'line_discount' => 0,
+                    'unit_price' => $itemPricing['unit_price'],
+                    'line_discount' => $itemPricing['line_discount'],
                     'is_gift' => false,
                     'note' => $this->resolveItemNote($data, $product->id, $variant?->id),
                 ]);
@@ -281,11 +287,6 @@ class OrderService
         });
     }
 
-    protected function resolveDefaultShippingFee(): float
-    {
-        return round((float) setting('shipping_price_per_km', 0), 2);
-    }
-
     protected function assertValidPaymentMethod(string $paymentMethod): void
     {
         if (! in_array($paymentMethod, self::PAYMENT_METHODS, true)) {
@@ -293,6 +294,24 @@ class OrderService
                 'payment_method' => [__('messages.The selected payment method is invalid.')],
             ]);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $pricing
+     * @return array{unit_price: float, line_discount: float}
+     */
+    protected function orderItemAmountsFromCartPricing(array $pricing, int $quantity): array
+    {
+        $originalSubtotal = (float) ($pricing['original_subtotal'] ?? 0);
+        $lineSubtotal = (float) ($pricing['line_subtotal'] ?? 0);
+        $lineDiscount = round(max(0, $originalSubtotal - $lineSubtotal), 2);
+        $billableQuantity = max(1, (int) ($pricing['billable_quantity'] ?? $quantity));
+        $unitPrice = round($originalSubtotal / $billableQuantity, 2);
+
+        return [
+            'unit_price' => $unitPrice,
+            'line_discount' => $lineDiscount,
+        ];
     }
 
     /**

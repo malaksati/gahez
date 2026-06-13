@@ -13,6 +13,7 @@ use App\V1\Http\Requests\Web\Admin\UpdateOrderPaymentStatusRequest;
 use App\V1\Http\Requests\Web\Admin\UpdateOrderRequest;
 use App\V1\Http\Requests\Web\Admin\UpdateOrderStatusRequest;
 use App\V1\Services\AddressService;
+use App\V1\Services\CheckoutSettingsService;
 use App\V1\Services\CustomerService;
 use App\V1\Services\OrderService;
 use Illuminate\Contracts\View\View;
@@ -29,6 +30,7 @@ class OrderController extends AdminController
         protected OrderService $orders,
         protected CustomerService $customers,
         protected AddressService $addresses,
+        protected CheckoutSettingsService $checkoutSettings,
     ) {}
 
     public function index(Request $request): View|string
@@ -136,11 +138,23 @@ class OrderController extends AdminController
                 $subTotal += $item['unit_price'] * $item['quantity'];
             }
 
-            $shippingCost = (float) ($validated['shipping_cost'] ?? 0);
+            $shippingInput = $validated['shipping_cost'] ?? null;
+            $shippingBreakdown = $this->checkoutSettings->computeShipping(
+                false,
+                false,
+                $address?->latitude,
+                $address?->longitude,
+            );
+
+            $shippingCost = ($shippingInput === null || $shippingInput === '')
+                ? $shippingBreakdown['total_shipping']
+                : (float) $shippingInput;
+
             $total = $subTotal + $shippingCost;
 
             $order = Order::create([
                 'user_id' => $user->id,
+                'branch_id' => $shippingBreakdown['branch_id'],
                 'address_id' => $address?->id,
                 'status' => $validated['status'],
                 'payment_status' => $validated['payment_status'],

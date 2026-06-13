@@ -123,6 +123,41 @@ class CartCheckoutApiTest extends TestCase
             ->assertJsonPath('meta.subtotal', 30);
     }
 
+    public function test_checkout_stores_line_discount_for_offer_pricing(): void
+    {
+        $user = $this->createUser();
+        $product = $this->createProduct(['price' => 150, 'sku' => 'APPLE-TEST-1KG', 'slug' => 'apple-test-1kg']);
+        $this->createOffer($product, [
+            'type' => 'percentage',
+            'value' => 15,
+            'max_discounted_quantity' => 5,
+        ]);
+        $this->setDefaultShippingFee(5);
+        $this->createMainBranch();
+        $address = $this->createAddressForUser($user);
+
+        Sanctum::actingAs($user);
+
+        $this->postJson("/api/v1/cart/{$product->id}", ['quantity' => 2])->assertSuccessful();
+
+        $response = $this->postJson('/api/v1/orders', $this->orderPayload($address));
+
+        $response->assertCreated()
+            ->assertJsonPath('data.order_discount', '45.00')
+            ->assertJsonPath('data.items.0.unit_price', 150)
+            ->assertJsonPath('data.items.0.line_discount', 45)
+            ->assertJsonPath('data.items.0.line_total', 255)
+            ->assertJsonPath('data.cashback_awarded_at', null);
+
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $response->json('data.id'),
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'unit_price' => 150,
+            'line_discount' => 45,
+        ]);
+    }
+
     public function test_customer_can_checkout_cart_and_create_order(): void
     {
         [$user, $product, $address] = $this->createCheckoutFixtures(productPrice: 20, quantity: 2);
@@ -360,22 +395,13 @@ class CartCheckoutApiTest extends TestCase
         ], $overrides);
     }
 
-    protected function setDefaultShippingFee(float $fee): void
-    {
-        Setting::query()->updateOrCreate(
-            ['key' => 'shipping_price_per_km'],
-            ['value' => (string) $fee, 'type' => 'number'],
-        );
-        setting_forget('shipping_price_per_km');
-    }
-
     protected function createAddressForUser(User $user): Address
     {
         return Address::query()->create([
             'user_id' => $user->id,
             'address' => 'Customer address',
-            'latitude' => '29.3',
-            'longitude' => '47.9',
+            'latitude' => '30.0561',
+            'longitude' => '31.3300',
             'name' => 'Customer',
             'phone' => '+201000000000',
             'is_default' => true,
@@ -383,11 +409,22 @@ class CartCheckoutApiTest extends TestCase
         ]);
     }
 
+    protected function setDefaultShippingFee(float $fee): void
+    {
+        Setting::query()->updateOrCreate(
+            ['key' => 'standard_shipping_fee'],
+            ['value' => (string) $fee, 'type' => 'number'],
+        );
+        setting_forget('standard_shipping_fee');
+    }
+
     protected function createMainBranch(): Branch
     {
         return Branch::query()->create([
             'name' => ['en' => 'Main Branch', 'ar' => 'الفرع الرئيسي'],
             'address' => 'Branch address',
+            'latitude' => '30.0444',
+            'longitude' => '31.2357',
             'is_active' => true,
         ]);
     }

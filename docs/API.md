@@ -1,4 +1,4 @@
-# Gahez Akeed E-Commerce API
+# Gahez Akid E-Commerce API
 
 > Browsable version: visit `/docs` in the app (powered by LaRecipe).
 
@@ -150,7 +150,7 @@ GET /store/config
 {
   "success": true,
   "data": {
-    "app_name": "Gahez Akeed",
+    "app_name": "Gahez Akid",
     "currency": "EGP",
     "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }
@@ -302,7 +302,7 @@ POST /notifications/mark-all-read
     {
       "id": "uuid",
       "type": "offer_promotion",
-      "title": "New offer at Gahez Akeed",
+      "title": "New offer at Gahez Akid",
       "message": "New offer: 15% off Apples",
       "data": {
         "offer_id": 1,
@@ -708,7 +708,7 @@ Import the Apidog/Postman collection from `docs/apidog/gahez-api.postman_collect
 
 | Feature | Notes |
 |---------|-------|
-| App name | Default **Gahez Akeed** (`GET /store/config`, settings) |
+| App name | Default **Gahez Akid** (`GET /store/config`, settings) |
 | Weekday shipping | `shipping_day`, `is_fast_shipping`, preview `shipping.options` |
 | Free delivery | Active `free_delivery` offers only; `free_delivery_applied` in preview |
 | Ticket types | `complaint`, `recommendation` on `POST /tickets` |

@@ -26,6 +26,7 @@ class SettingsController extends AdminController
                 'currency' => $request->validated('currency'),
                 'cashback_percentage' => $request->validated('cashback_percentage') ?? 0,
                 'point_to_value' => $request->validated('point_to_value') ?? 0,
+                'standard_shipping_fee' => $request->input('standard_shipping_fee'),
                 'shipping_price_per_km' => $request->validated('shipping_price_per_km') ?? setting('shipping_price_per_km', 0),
                 'cart_min_line_count' => $request->validated('cart_min_line_count') ?? setting('cart_min_line_count', 0),
                 'cart_min_subtotal' => $request->validated('cart_min_subtotal') ?? setting('cart_min_subtotal', 0),

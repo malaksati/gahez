@@ -2,6 +2,8 @@
 
 namespace App\V1\Services;
 
+use App\Models\Branch;
+use App\V1\Support\GeoDistance;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -17,7 +19,27 @@ class CheckoutSettingsService
         'sunday',
     ];
 
-    public function baseShippingFee(): float
+    public function usesDistanceBasedShipping(): bool
+    {
+        return $this->standardShippingFee() === null;
+    }
+
+    public function standardShippingFee(): ?float
+    {
+        $value = setting('standard_shipping_fee');
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (! is_numeric($value)) {
+            return null;
+        }
+
+        return round((float) $value, 2);
+    }
+
+    public function shippingPricePerKm(): float
     {
         return round((float) setting('shipping_price_per_km', 0), 2);
     }
@@ -42,7 +64,31 @@ class CheckoutSettingsService
         return strtolower(Carbon::now()->englishDayOfWeek);
     }
 
-    /**
+    public function resolveCheckoutBranch(?int $branchId = null): Branch
+    {
+        if ($branchId) {
+            $branch = Branch::query()
+                ->where('is_active', true)
+                ->find($branchId);
+
+            if ($branch) {
+                return $branch;
+            }
+        }
+
+        $branch = Branch::query()
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->first();
+
+        if ($branch) {
+            return $branch;
+        }
+
+        return Branch::query()->orderBy('id')->firstOrFail();
+    }
+
+  /**
      * @return list<array{value: string, label: string}>
      */
     public function weekdays(): array
@@ -88,23 +134,75 @@ class CheckoutSettingsService
             ->all();
     }
 
+    public function baseShippingFee(
+        mixed $addressLatitude = null,
+        mixed $addressLongitude = null,
+        ?int $branchId = null,
+    ): float {
+        $standardFee = $this->standardShippingFee();
+
+        if ($standardFee !== null) {
+            return $standardFee;
+        }
+
+        return $this->distanceBasedShippingFee($addressLatitude, $addressLongitude, $branchId);
+    }
+
+    public function distanceBasedShippingFee(
+        mixed $addressLatitude = null,
+        mixed $addressLongitude = null,
+        ?int $branchId = null,
+    ): float {
+        $branch = $this->resolveCheckoutBranch($branchId);
+        $distanceKm = $this->distanceKmToAddress($branch, $addressLatitude, $addressLongitude);
+
+        if ($distanceKm === null) {
+            return 0.0;
+        }
+
+        return round($distanceKm * $this->shippingPricePerKm(), 2);
+    }
+
+    public function distanceKmToAddress(
+        Branch $branch,
+        mixed $addressLatitude = null,
+        mixed $addressLongitude = null,
+    ): ?float {
+        return GeoDistance::kilometers(
+            GeoDistance::parseLatitude($branch->latitude),
+            GeoDistance::parseLongitude($branch->longitude),
+            GeoDistance::parseLatitude($addressLatitude),
+            GeoDistance::parseLongitude($addressLongitude),
+        );
+    }
+
     /**
      * @return array<string, mixed>
      */
-    public function shippingPayload(bool $qualifiesForFreeDelivery = false): array
-    {
-        $configuredBase = $this->baseShippingFee();
+    public function shippingPayload(
+        bool $qualifiesForFreeDelivery = false,
+        mixed $addressLatitude = null,
+        mixed $addressLongitude = null,
+        ?int $branchId = null,
+    ): array {
+        $configuredBase = $this->baseShippingFee($addressLatitude, $addressLongitude, $branchId);
         $configuredExtra = $this->fastShippingExtraFee();
         $effectiveBase = $qualifiesForFreeDelivery ? 0.0 : $configuredBase;
         $effectiveExtra = $qualifiesForFreeDelivery ? 0.0 : $configuredExtra;
         $standardWeekdays = $this->standardWeekdays();
         $fastWeekdays = $this->fastWeekdays();
+        $branch = $this->resolveCheckoutBranch($branchId);
+        $distanceKm = $this->distanceKmToAddress($branch, $addressLatitude, $addressLongitude);
 
         return [
             'weekdays' => $standardWeekdays,
             'base_fee' => $configuredBase,
             'fast_shipping_extra_fee' => $configuredExtra,
             'free_delivery_applied' => $qualifiesForFreeDelivery,
+            'distance_based' => $this->usesDistanceBasedShipping(),
+            'shipping_price_per_km' => $this->shippingPricePerKm(),
+            'distance_km' => $distanceKm,
+            'branch_id' => $branch->id,
             'options' => [
                 [
                     'type' => 'standard',
@@ -121,17 +219,26 @@ class CheckoutSettingsService
     }
 
     /**
-     * @return array{total_shipping: float, fast_shipping_fee: float, is_fast_shipping: bool}
+     * @return array{total_shipping: float, fast_shipping_fee: float, is_fast_shipping: bool, distance_km: float|null, branch_id: int}
      */
-    public function computeShipping(bool $isFastShipping, bool $freeDelivery = false): array
-    {
-        $base = $freeDelivery ? 0.0 : $this->baseShippingFee();
+    public function computeShipping(
+        bool $isFastShipping,
+        bool $freeDelivery = false,
+        mixed $addressLatitude = null,
+        mixed $addressLongitude = null,
+        ?int $branchId = null,
+    ): array {
+        $branch = $this->resolveCheckoutBranch($branchId);
+        $distanceKm = $this->distanceKmToAddress($branch, $addressLatitude, $addressLongitude);
+        $base = $freeDelivery ? 0.0 : $this->baseShippingFee($addressLatitude, $addressLongitude, $branch->id);
         $extra = ($isFastShipping && ! $freeDelivery) ? $this->fastShippingExtraFee() : 0.0;
 
         return [
             'total_shipping' => round($base + $extra, 2),
             'fast_shipping_fee' => $extra,
             'is_fast_shipping' => $isFastShipping,
+            'distance_km' => $distanceKm,
+            'branch_id' => $branch->id,
         ];
     }
 

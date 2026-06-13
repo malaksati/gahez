@@ -1,4 +1,4 @@
-# Gahez Akeed E-Commerce
+# Gahez Akid E-Commerce
 
 Laravel 13 e-commerce platform with an **admin panel** and **customer REST API**.
 
@@ -86,7 +86,7 @@ Password for all: `12345678` (after `php artisan db:seed`)
 
 | Variable | Purpose |
 |----------|---------|
-| `APP_NAME` | Default app name (`Gahez Akeed`); overridden by `settings.app_name` when seeded |
+| `APP_NAME` | Default app name (`Gahez Akid`); overridden by `settings.app_name` when seeded |
 | `QUEUE_CONNECTION` | `database` by default; run `php artisan queue:work` in production |
 | `DATA_TRANSFER_SYNC` | `true` = synchronous Excel import/export |
 | `FILESYSTEM_DISK` | `local`; public uploads use `storage/app/public` |

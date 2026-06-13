@@ -15,6 +15,7 @@ class SettingService
      *     currency: string,
      *     cashback_percentage?: float|int|string,
      *     point_to_value?: float|int|string,
+     *     standard_shipping_fee?: float|int|string|null,
      *     shipping_price_per_km?: float|int|string,
      *     cart_min_line_count?: int|string,
      *     cart_min_subtotal?: float|int|string,
@@ -38,6 +39,15 @@ class SettingService
         if (array_key_exists('point_to_value', $data)) {
             $this->persist('point_to_value', max(0, (float) $data['point_to_value']), 'number');
             setting_forget('point_to_value');
+        }
+
+        if (array_key_exists('standard_shipping_fee', $data)) {
+            $standardFee = $data['standard_shipping_fee'];
+            $value = ($standardFee === null || $standardFee === '')
+                ? ''
+                : max(0, (float) $standardFee);
+            $this->persist('standard_shipping_fee', (string) $value, 'number');
+            setting_forget('standard_shipping_fee');
         }
 
         if (array_key_exists('shipping_price_per_km', $data)) {

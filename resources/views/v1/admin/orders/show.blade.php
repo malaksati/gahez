@@ -101,6 +101,18 @@
                             </dd>
                         @endif
 
+                        <dt class="col-sm-4 mt-3">{{ __('messages.Cashback') }}</dt>
+                        <dd class="col-sm-8 mt-3">
+                            @if ($order->cashback_awarded_at)
+                                <span class="badge bg-success">{{ __('messages.Awarded at') }}</span>
+                                <span class="text-muted small ms-1">{{ $order->cashback_awarded_at->format('M d, Y H:i') }}</span>
+                            @elseif ($order->status === 'delivered')
+                                <span class="text-muted">{{ __('messages.Cashback not eligible') }}</span>
+                            @else
+                                <span class="text-muted">{{ __('messages.Cashback on delivery') }}</span>
+                            @endif
+                        </dd>
+
                         <dt class="col-sm-4 mt-3">{{ __('messages.Total') }}</dt>
                         <dd class="col-sm-8 mt-3"><strong class="fs-5">{{ format_local_number((float) $order->total, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></dd>
 
@@ -173,6 +185,7 @@
                                         <th class="text-center">{{ __('messages.Qty') }}</th>
                                         <th>{{ __('messages.Note') }}</th>
                                         <th class="text-end">{{ __('messages.Price') }}</th>
+                                        <th class="text-end">{{ __('messages.Discount') }}</th>
                                         <th class="text-end">{{ __('messages.Sub total') }}</th>
                                     </tr>
                                 </thead>
@@ -209,6 +222,13 @@
                                             <td class="text-center">@num($item->quantity)</td>
                                             <td><span class="text-muted small">{{ $item->note ?: '—' }}</span></td>
                                             <td class="text-end">{{ format_local_number((float) $item->unit_price, 2) }}{{ $currency ? ' '.$currency : '' }}</td>
+                                            <td class="text-end text-danger">
+                                                @if ((float) $item->line_discount > 0)
+                                                    -{{ format_local_number((float) $item->line_discount, 2) }}{{ $currency ? ' '.$currency : '' }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </td>
                                             <td class="text-end"><strong>{{ format_local_number($lineTotal, 2) }}{{ $currency ? ' '.$currency : '' }}</strong></td>
                                         </tr>
                                     @endforeach

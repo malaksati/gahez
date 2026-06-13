@@ -1,6 +1,6 @@
 # Project progress
 
-Gahez Akeed is a Laravel 13 e-commerce platform with an **admin panel** and **customer API**.
+Gahez Akid is a Laravel 13 e-commerce platform with an **admin panel** and **customer API**.
 
 **Stack:** PHP 8.3, Sanctum, Spatie Permission, Spatie Translatable, Maatwebsite Excel, Redis-ready queues.
 
@@ -239,7 +239,7 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 
 | Area | Delivered |
 |------|-----------|
-| **App branding** | Default name **Gahez Akeed** (`config`, settings, seeders) |
+| **App branding** | Default name **Gahez Akid** (`config`, settings, seeders) |
 | **Weekday shipping** | `shipping_day`, `is_fast_shipping`, checkout preview shipping options |
 | **Free delivery** | Only from active `free_delivery` offers (no hardcoded threshold) |
 | **Cart limits** | Min line count / subtotal in settings + preview `meta` |

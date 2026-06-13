@@ -1,6 +1,6 @@
 # Running tests guide
 
-Gahez Akeed uses **PHPUnit 12** with Laravel’s `php artisan test` runner. Tests use an **in-memory SQLite** database — no MySQL setup required.
+Gahez Akid uses **PHPUnit 12** with Laravel’s `php artisan test` runner. Tests use an **in-memory SQLite** database — no MySQL setup required.
 
 ---
 

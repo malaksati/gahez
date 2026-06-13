@@ -16,6 +16,7 @@ class UpdateSettingsRequest extends AdminFormRequest
             'currency' => ['required', 'string', 'max:10'],
             'cashback_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'point_to_value' => ['nullable', 'numeric', 'min:0'],
+            'standard_shipping_fee' => ['nullable', 'numeric', 'min:0'],
             'shipping_price_per_km' => ['nullable', 'numeric', 'min:0'],
             'cart_min_line_count' => ['nullable', 'integer', 'min:0'],
             'cart_min_subtotal' => ['nullable', 'numeric', 'min:0'],

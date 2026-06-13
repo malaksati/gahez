@@ -2,6 +2,7 @@
 
 namespace App\V1\Services;
 
+use App\Models\Address;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\Product;
@@ -144,9 +145,20 @@ class CartItemService
         $qualifiesForFreeDelivery = (bool) ($preview['qualifies_for_free_delivery'] ?? false)
             || ($appliedCoupon && $appliedCoupon->grantsFreeDelivery());
 
+        $defaultAddress = Address::query()
+            ->where('user_id', $userId)
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->first();
+
         return array_merge($preview, [
             'cart_limits' => $this->checkoutSettings->cartLimits($subtotal, $lineCount),
-            'shipping' => $this->checkoutSettings->shippingPayload($qualifiesForFreeDelivery),
+            'shipping' => $this->checkoutSettings->shippingPayload(
+                $qualifiesForFreeDelivery,
+                $defaultAddress?->latitude,
+                $defaultAddress?->longitude,
+            ),
         ]);
     }
 

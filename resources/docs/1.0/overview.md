@@ -1,4 +1,4 @@
-# Gahez Akeed E-Commerce API
+# Gahez Akid E-Commerce API
 
 REST API for the customer mobile/web app.
 

@@ -25,7 +25,7 @@ GET /store/config
 {
   "success": true,
   "data": {
-    "app_name": "Gahez Akeed",
+    "app_name": "Gahez Akid",
     "currency": "EGP",
     "logo_url": "https://gahez.test/dashboard/assets/images/gahez-logo.png"
   }

@@ -1,4 +1,4 @@
-- ## Gahez Akeed API
+- ## Gahez Akid API
     - [Overview](/{{route}}/{{version}}/overview)
     - [Authentication](/{{route}}/{{version}}/authentication)
     - [Public endpoints](/{{route}}/{{version}}/public-endpoints)

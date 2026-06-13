@@ -68,7 +68,7 @@ POST /notifications/mark-all-read
     {
       "id": "uuid",
       "type": "offer_promotion",
-      "title": "New offer at Gahez Akeed",
+      "title": "New offer at Gahez Akid",
       "message": "New offer: 15% off Apples",
       "data": {
         "offer_id": 1,

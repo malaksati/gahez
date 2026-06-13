@@ -151,8 +151,27 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label for="shipping_price_per_km" class="form-label">{{ __('messages.Standard shipping fee') }}</label>
+                            <div class="col-md-4">
+                                <label for="standard_shipping_fee" class="form-label">{{ __('messages.Standard shipping fee') }}</label>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control @error('standard_shipping_fee') is-invalid @enderror"
+                                        id="standard_shipping_fee"
+                                        name="standard_shipping_fee"
+                                        value="{{ old('standard_shipping_fee', setting('standard_shipping_fee')) }}"
+                                    >
+                                    <span class="input-group-text">{{ display_currency() }}</span>
+                                </div>
+                                <small class="text-muted">{{ __('messages.Standard shipping fee hint') }}</small>
+                                @error('standard_shipping_fee')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label for="shipping_price_per_km" class="form-label">{{ __('messages.Shipping price per km') }}</label>
                                 <div class="input-group">
                                     <input
                                         type="number"
@@ -165,11 +184,12 @@
                                     >
                                     <span class="input-group-text">{{ display_currency() }}</span>
                                 </div>
+                                <small class="text-muted">{{ __('messages.Shipping price per km hint') }}</small>
                                 @error('shipping_price_per_km')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="fast_shipping_fee" class="form-label">{{ __('messages.Fast shipping extra fee') }}</label>
                                 <div class="input-group">
                                     <input

@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: Gahez Akeed E-Commerce API
-  description: REST API v1 for Gahez Akeed customer mobile/web app. Sanctum bearer auth. Payment methods cash_on_delivery and wallet only.
+  title: Gahez Akid E-Commerce API
+  description: REST API v1 for Gahez Akid customer mobile/web app. Sanctum bearer auth. Payment methods cash_on_delivery and wallet only.
   version: 1.0.0
   contact:
-    name: Gahez Akeed
+    name: Gahez Akid
 
 servers:
   - url: http://gahez.test/api/v1

@@ -1,6 +1,6 @@
 # Apidog import guide
 
-Import the Gahez Akeed API into [Apidog](https://www.apidog.com/) using either file below.
+Import the Gahez Akid API into [Apidog](https://www.apidog.com/) using either file below.
 
 ## Files
 

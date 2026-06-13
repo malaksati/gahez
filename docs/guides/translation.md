@@ -1,6 +1,6 @@
 # Translation guide
 
-Gahez Akeed supports **English (`en`)** and **Arabic (`ar`)** in three layers:
+Gahez Akid supports **English (`en`)** and **Arabic (`ar`)** in three layers:
 
 1. **UI / API messages** — Laravel `lang/` files
 2. **Database content** — Spatie Laravel Translatable on models

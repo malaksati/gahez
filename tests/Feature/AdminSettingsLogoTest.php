@@ -26,7 +26,7 @@ class AdminSettingsLogoTest extends TestCase
         $file = UploadedFile::fake()->image('logo.png', 200, 200);
 
         $response = $this->actingAs($admin)->post(route('v1.admin.settings.update'), [
-            'app_name' => 'Gahez Akeed',
+            'app_name' => 'Gahez Akid',
             'currency' => 'EGP',
             'app_logo' => $file,
         ]);

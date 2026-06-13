@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Models\Branch;
 use App\Models\Setting;
 use App\V1\Services\CheckoutSettingsService;
+use App\V1\Support\GeoDistance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -13,13 +15,26 @@ class CheckoutSettingsServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Branch::query()->create([
+            'name' => ['en' => 'Main', 'ar' => 'رئيسي'],
+            'address' => 'Branch',
+            'latitude' => '30.0444',
+            'longitude' => '31.2357',
+            'is_active' => true,
+        ]);
+    }
+
     public function test_shipping_payload_returns_configured_fees_even_when_free_delivery_applies(): void
     {
         Setting::query()->updateOrCreate(
-            ['key' => 'shipping_price_per_km'],
+            ['key' => 'standard_shipping_fee'],
             ['value' => '5', 'type' => 'number'],
         );
-        setting_forget('shipping_price_per_km');
+        setting_forget('standard_shipping_fee');
 
         Setting::query()->updateOrCreate(
             ['key' => 'fast_shipping_fee'],
@@ -32,8 +47,43 @@ class CheckoutSettingsServiceTest extends TestCase
         $this->assertSame(5.0, $payload['base_fee']);
         $this->assertSame(10.0, $payload['fast_shipping_extra_fee']);
         $this->assertTrue($payload['free_delivery_applied']);
+        $this->assertFalse($payload['distance_based']);
         $this->assertSame(0.0, $payload['options'][0]['total_fee']);
         $this->assertSame(0.0, $payload['options'][1]['total_fee']);
+    }
+
+    public function test_distance_based_shipping_uses_branch_and_address_coordinates(): void
+    {
+        Setting::query()->updateOrCreate(
+            ['key' => 'standard_shipping_fee'],
+            ['value' => '', 'type' => 'number'],
+        );
+        setting_forget('standard_shipping_fee');
+
+        Setting::query()->updateOrCreate(
+            ['key' => 'shipping_price_per_km'],
+            ['value' => '2', 'type' => 'number'],
+        );
+        setting_forget('shipping_price_per_km');
+
+        $branch = Branch::query()->create([
+            'name' => ['en' => 'Branch', 'ar' => 'فرع'],
+            'address' => 'Branch address',
+            'latitude' => '30.0444',
+            'longitude' => '31.2357',
+            'is_active' => true,
+        ]);
+
+        $service = app(CheckoutSettingsService::class);
+        $distanceKm = GeoDistance::kilometers(30.0444, 31.2357, 30.0561, 31.3300);
+
+        $this->assertNotNull($distanceKm);
+
+        $breakdown = $service->computeShipping(false, false, '30.0561', '31.3300', $branch->id);
+
+        $this->assertSame($branch->id, $breakdown['branch_id']);
+        $this->assertSame($distanceKm, $breakdown['distance_km']);
+        $this->assertSame(round($distanceKm * 2, 2), $breakdown['total_shipping']);
     }
 
     public function test_standard_weekdays_exclude_today_and_fast_only_includes_today(): void

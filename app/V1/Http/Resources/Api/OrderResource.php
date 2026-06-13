@@ -33,6 +33,7 @@ class OrderResource extends JsonResource
             'fast_shipping_fee' => (float) $this->fast_shipping_fee,
             'wallet_used' => (float) $this->wallet_used,
             'cancellation_reason' => $this->cancellation_reason,
+            'cashback_awarded_at' => $this->cashback_awarded_at?->toIso8601String(),
             'address_id' => $this->address_id,
             'shipping_address_snapshot' => $this->shipping_address_snapshot,
             'address' => $this->address

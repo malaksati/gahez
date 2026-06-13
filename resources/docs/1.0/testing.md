@@ -31,7 +31,7 @@ After `php artisan db:seed`:
 
 | Feature | Notes |
 |---------|-------|
-| App branding | Default name **Gahez Akeed** |
+| App branding | Default name **Gahez Akid** |
 | Weekday shipping | `shipping_day`, `is_fast_shipping`, checkout preview |
 | Free delivery | Active `free_delivery` offers only |
 | Ticket types | `complaint`, `recommendation` |
