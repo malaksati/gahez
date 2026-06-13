@@ -69,7 +69,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 return response()->json([
                     'success' => false,
-                    'message' => $model.' not found.',
+                    'message' => $model === 'Order'
+                        ? __('messages.Order not found in your account.')
+                        : $model.' not found.',
                 ], 404);
             }
 

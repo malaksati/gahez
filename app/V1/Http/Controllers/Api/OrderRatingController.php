@@ -3,45 +3,54 @@
 namespace App\V1\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
 use App\Models\OrderRating;
 use App\V1\Http\Requests\Api\StoreOrderRatingRequest;
+use App\V1\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 
 class OrderRatingController extends Controller
 {
-    public function store(StoreOrderRatingRequest $request, Order $order): JsonResponse
+    public function __construct(
+        protected OrderService $orderService,
+    ) {}
+
+    public function store(StoreOrderRatingRequest $request, int $order): JsonResponse
     {
-        if ($order->user_id !== auth()->id()) {
-            return response()->json([
-                'message' => 'Unauthorized.',
-            ], 403);
+        $order = $this->orderService->getOrderByIdForUser($order, $request->user()->id);
+
+        if ($order === null) {
+            return $this->errorResponse(__('messages.Order not found in your account.'), 404);
         }
 
         if ($order->status !== 'delivered') {
-            return response()->json([
-                'message' => 'You can only rate delivered orders.',
-            ], 400);
+            return $this->errorResponse(__('messages.You can only rate an order after it is delivered.'), 422);
         }
 
-        if ($order->rating) {
-            return response()->json([
-                'message' => 'You have already rated this order.',
-            ], 400);
+        if ($order->orderRating()->exists()) {
+            return $this->errorResponse(__('messages.You have already rated this order.'), 422);
         }
 
-        $rating = OrderRating::create([
+        $rating = OrderRating::query()->create([
             'order_id' => $order->id,
-            'user_id' => auth()->id(),
+            'user_id' => $request->user()->id,
             'rating' => $request->validated('rating'),
             'comment' => $request->validated('comment'),
         ]);
 
         return response()->json([
-            'message' => 'Order rated successfully.',
+            'success' => true,
+            'message' => __('messages.Order rated successfully.'),
             'data' => [
                 'rating' => $rating,
             ],
         ], 201);
+    }
+
+    private function errorResponse(string $message, int $status): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
     }
 }

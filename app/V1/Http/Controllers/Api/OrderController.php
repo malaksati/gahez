@@ -64,13 +64,18 @@ class OrderController extends Controller
         );
     }
 
-    public function show(Request $request, int $id)
+    public function show(Request $request, int $order)
     {
-        $order = $this->orderService->getOrderByIdForUser($id, $request->user()->id);
+        $orderModel = $this->orderService->getOrderByIdForUser($order, $request->user()->id);
 
-        abort_if($order === null, 404);
+        if ($orderModel === null) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.Order not found in your account.'),
+            ], 404);
+        }
 
-        return new OrderResource($order);
+        return new OrderResource($orderModel);
     }
 
     public function cancel(Request $request, int $order): JsonResponse

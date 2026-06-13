@@ -102,6 +102,11 @@ class Order extends Model
         return $this->hasOne(OrderRating::class);
     }
 
+    public function rating()
+    {
+        return $this->orderRating();
+    }
+
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
