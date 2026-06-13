@@ -254,7 +254,7 @@ API accepts `attachments[0]` or `attachment[0]` field names.
 | **Admin live notifications** | Feed polling + toast popups |
 | **Support chats** | Customer API + admin inbox; multipart attachments |
 | **Admin UX** | Theme/locale pill toggles; warm `gahez-50` light surfaces; dark orange/brown palette |
-| **Arabic numerals** | `format_local_number`, `@num`, Arabic-Indic digits in admin + `trans()` |
+| **Arabic numerals** | `format_local_number`, `@@num`, Arabic-Indic digits in admin + `trans()` |
 | **Product list sort** | Name A–Z / Z–A filter in admin |
 
 ---

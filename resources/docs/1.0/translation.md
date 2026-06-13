@@ -60,8 +60,8 @@ When locale is Arabic (`ar`), numeric displays in the admin panel use **Arabic-I
 |----------------|-------|
 | `format_local_number($n)` | Format number with locale separators + digits |
 | `localize_digits($string)` | Convert Western digits in a string |
-| `@num($value)` | Blade directive for formatted numbers |
-| `@digits($value)` | Blade directive for digit conversion only |
+| `@@num($value)` | Blade directive for formatted numbers |
+| `@@digits($value)` | Blade directive for digit conversion only |
 
 API `trans()` / `__()` messages also localize digits via `LocalizingTranslator`.  
 API JSON numeric fields remain Western digits for client parsing unless you format on the client with `Accept-Language: ar`.
