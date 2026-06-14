@@ -4,6 +4,7 @@ import {
     Collapse,
     Dropdown,
     Modal,
+    Offcanvas,
     Popover,
     Tab,
     Toast,
@@ -53,13 +54,32 @@ document.addEventListener('alpine:init', () => {
             });
 
             document.addEventListener('click', (event) => {
-                if (!this.$el.contains(event.target)) {
+                if (this.$el.closest('#adminMobileSearch') && ! this.$el.contains(event.target)) {
+                    return;
+                }
+
+                if (! this.$el.contains(event.target)) {
                     this.close();
                 }
             });
         },
 
         focusInput() {
+            const isMobile = window.matchMedia('(max-width: 767.98px)').matches;
+            const isMobileSearch = this.$el.closest('#adminMobileSearch') !== null;
+
+            if (isMobile && ! isMobileSearch) {
+                return;
+            }
+
+            if (isMobile && isMobileSearch) {
+                const mobileSearch = document.getElementById('adminMobileSearch');
+
+                if (mobileSearch) {
+                    Collapse.getOrCreateInstance(mobileSearch).show();
+                }
+            }
+
             const input = this.$el.querySelector('[data-search-input]');
 
             if (input) {
@@ -397,6 +417,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initSliderForm();
+
+    const adminNavOffcanvas = document.getElementById('adminNavOffcanvas');
+    if (adminNavOffcanvas) {
+        adminNavOffcanvas.querySelectorAll('.nav-link').forEach((link) => {
+            link.addEventListener('click', () => {
+                const instance = Offcanvas.getInstance(adminNavOffcanvas);
+
+                if (instance) {
+                    instance.hide();
+                }
+            });
+        });
+    }
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new Tooltip(el));
     document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new Popover(el));

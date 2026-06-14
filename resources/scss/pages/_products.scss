@@ -78,6 +78,37 @@
   }
 }
 
+@include media-breakpoint-down(md) {
+  .product-wizard {
+    .wizard-steps {
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .wizard-step {
+        flex: none;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: left;
+
+        .step-number {
+          margin: 0;
+          flex-shrink: 0;
+        }
+
+        .step-title {
+          font-size: 0.8125rem;
+        }
+
+        &:not(:last-child)::after {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
 // Product list inline search — match card surface (lighter than bg-light / gahez-100)
 .product-list-search-bar {
   background-color: var(--bs-body-bg);

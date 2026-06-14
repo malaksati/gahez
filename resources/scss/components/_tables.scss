@@ -5,11 +5,13 @@
 // Enhanced Table Styling
 .table {
   --bs-table-hover-bg: rgba(var(--bs-primary-rgb), 0.05);
-  
+
+  font-size: 0.8125rem;
+
   th {
     border-top: none;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--bs-secondary);
@@ -35,6 +37,7 @@
   td {
     vertical-align: middle;
     border-bottom: 1px solid var(--bs-border-color-translucent);
+    font-size: 0.8125rem;
     
     .fw-medium {
       color: var(--bs-heading-color);
@@ -250,8 +253,16 @@
 @media (max-width: 768px) {
   .table-responsive {
     .table {
-      font-size: 0.875rem;
-      
+      font-size: 0.75rem;
+
+      th {
+        font-size: 0.625rem;
+      }
+
+      td {
+        font-size: 0.75rem;
+      }
+
       th, td {
         padding: 0.5rem 0.25rem;
       }
@@ -349,7 +360,18 @@
 .table-cell-date {
   min-width: 120px;
   font-family: var(--bs-font-monospace);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+}
+
+.admin-main .table {
+  .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+  }
 }
 
 // Advanced Filtering

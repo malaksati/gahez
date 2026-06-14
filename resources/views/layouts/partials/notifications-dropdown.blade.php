@@ -4,7 +4,7 @@
     $recentNotifications = $user?->notifications()->latest()->limit(5)->get() ?? collect();
 @endphp
 
-<div class="dropdown notifications-dropdown me-2" data-live-notifications>
+<div class="dropdown notifications-dropdown" data-live-notifications>
     <button
         class="btn btn-outline-secondary position-relative"
         type="button"

@@ -62,7 +62,7 @@
         @include('layouts.partials.sidebar')
 
         <main class="admin-main">
-            <div class="container-fluid p-4 p-lg-5">
+            <div class="container-fluid admin-page-container p-3 p-md-4 p-lg-5">
                 @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -98,7 +98,7 @@
                                 <p class="text-muted mb-0">@yield('subtitle')</p>
                             @endif
                         </div>
-                        <div class="d-flex gap-2">@yield('page-actions')</div>
+                        <div class="d-flex gap-2 flex-wrap admin-page-actions">@yield('page-actions')</div>
                     </div>
                 @endif
 
@@ -111,23 +111,41 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const toggleButton = document.querySelector('[data-sidebar-toggle]');
+            const desktopToggle = document.querySelector('[data-sidebar-toggle]');
             const wrapper = document.getElementById('admin-wrapper');
+            const desktopMq = window.matchMedia('(min-width: 992px)');
 
-            if (! toggleButton || ! wrapper) {
-                return;
+            const applyDesktopSidebarState = () => {
+                if (! wrapper || ! desktopToggle) {
+                    return;
+                }
+
+                if (! desktopMq.matches) {
+                    wrapper.classList.remove('sidebar-collapsed');
+                    desktopToggle.classList.remove('is-active');
+
+                    return;
+                }
+
+                const collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                wrapper.classList.toggle('sidebar-collapsed', collapsed);
+                desktopToggle.classList.toggle('is-active', collapsed);
+            };
+
+            applyDesktopSidebarState();
+            desktopMq.addEventListener('change', applyDesktopSidebarState);
+
+            if (desktopToggle && wrapper) {
+                desktopToggle.addEventListener('click', () => {
+                    if (! desktopMq.matches) {
+                        return;
+                    }
+
+                    const collapsed = wrapper.classList.toggle('sidebar-collapsed');
+                    desktopToggle.classList.toggle('is-active', collapsed);
+                    localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
+                });
             }
-
-            if (localStorage.getItem('sidebar-collapsed') === 'true') {
-                wrapper.classList.add('sidebar-collapsed');
-                toggleButton.classList.add('is-active');
-            }
-
-            toggleButton.addEventListener('click', () => {
-                const collapsed = wrapper.classList.toggle('sidebar-collapsed');
-                toggleButton.classList.toggle('is-active', collapsed);
-                localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
-            });
         });
     </script>
 

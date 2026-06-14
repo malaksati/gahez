@@ -200,6 +200,11 @@
     margin-right: 0.5rem;
   }
 
+  &--offcanvas {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
   &--landing {
     margin-inline: 0.15rem;
   }
